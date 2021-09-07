@@ -1,0 +1,22 @@
+{
+  "files": {
+    "main.css": "/faekbook/static/css/main.28cf8577.chunk.css",
+    "main.js": "/faekbook/static/js/main.513614da.chunk.js",
+    "main.js.map": "/faekbook/static/js/main.513614da.chunk.js.map",
+    "runtime-main.js": "/faekbook/static/js/runtime-main.5c881d7b.js",
+    "runtime-main.js.map": "/faekbook/static/js/runtime-main.5c881d7b.js.map",
+    "static/js/2.0213ab41.chunk.js": "/faekbook/static/js/2.0213ab41.chunk.js",
+    "static/js/2.0213ab41.chunk.js.map": "/faekbook/static/js/2.0213ab41.chunk.js.map",
+    "index.html": "/faekbook/index.html",
+    "static/css/main.28cf8577.chunk.css.map": "/faekbook/static/css/main.28cf8577.chunk.css.map",
+    "static/js/2.0213ab41.chunk.js.LICENSE.txt": "/faekbook/static/js/2.0213ab41.chunk.js.LICENSE.txt",
+    "static/media/default_user.4255cca7.png": "/faekbook/static/media/default_user.4255cca7.png",
+    "static/media/picture_of_myself.ded9b47d.jpg": "/faekbook/static/media/picture_of_myself.ded9b47d.jpg"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.5c881d7b.js",
+    "static/js/2.0213ab41.chunk.js",
+    "static/css/main.28cf8577.chunk.css",
+    "static/js/main.513614da.chunk.js"
+  ]
+}
