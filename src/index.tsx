@@ -1,17 +1,34 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import App from './App'
+import './styles/reset.css'
 import { createGlobalStyle } from 'styled-components'
 
 const GlobalStyle = createGlobalStyle`
-    *, *::before, *::after {
-      box-sizing: border-box;
-      padding: 0;
-      margin: 0;
-      word-wrap: break-word;
+    * {
+       box-sizing: border-box;
     }
-    body{
-      background-color: aquamarine;
+
+    html {
+      font-size: 70%;
+      @media (min-width: 768px) {
+        font-size: 80%;
+      }
+      @media (min-width: 1024px) {
+        font-size: 90%;
+      }
+      @media (min-width: 1200px) {
+        font-size: 100%;
+      }
+      @media (min-width: 1350px) {
+        font-size: 110%;
+      }
+    }
+    
+    body {
+      font-size: 1em;
+      font-family: 'Roboto', sans-serif;
+      user-select: none;
     }
   `
 

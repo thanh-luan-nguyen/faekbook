@@ -1,0 +1,39 @@
+export const themes = {
+  light: {
+    type: 'light',
+    // navbar
+    navbar: '#fff',
+    nav_btm_brdr_clr: '#fff',
+    // fb_icon: '#000',
+    font: '#050505',
+    font_lighter: '#65676b',
+    // menu
+    divider_clr: '#ced0d4',
+    hover: '#d4d4d434',
+    icon_color: '#1d1f23',
+    theme_toggler_bgclr: '#e6e8ed',
+    theme_toggler_bgclr_active: '#E7F3FF',
+    theme_toggler_icon_active: '#0571ED',
+
+    // body
+    body: '#f0f2f5',
+  },
+  dark: {
+    type: 'dark',
+    // navbar
+    navbar: '#242526',
+    nav_btm_brdr_clr: '#393a3b',
+    // fb_icon: '#fff',
+    font: '#e4e6eb',
+    font_lighter: '#b0b3b8',
+    // menu
+    divider_clr: '#3e4042',
+    hover: '#ffffff45',
+    icon_color: '#e4e6ea',
+    theme_toggler_bgclr: '#4e5052',
+    theme_toggler_bgclr_active: '#263951',
+    theme_toggler_icon_active: '#2D86FF',
+    // body
+    body: '#18191a',
+  },
+}
