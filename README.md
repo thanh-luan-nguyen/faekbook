@@ -1,3 +1,3 @@
-# where's waldo
+# faekbook
 
-[demo](https://thanh-luan-nguyen.github.io/wheres-waldo/)
+[demo](https://thanh-luan-nguyen.github.io/faekbook/)
