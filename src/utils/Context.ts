@@ -2,14 +2,16 @@ import { createContext } from 'react'
 
 interface ContextProps {
   isDarkTheme: boolean
-  handleToggleTheme: any
-
+  handleToggleTheme: () => void
   menuVisibility: boolean
-  handleToggleMenuVisibility: any
-
+  handleToggleMenuVisibility: () => void
   isSignedIn: boolean
-  handleSignIn: any
-  handleSignOut: any
+  handleSignIn: () => void
+  handleSignOut: () => void
+  // logInOrSignUp: string
+  handleLogInModal: () => void
+  handleSignUpModal: () => void
+  handleNeitherModal: () => void
 }
 
 const Context = createContext({} as ContextProps)

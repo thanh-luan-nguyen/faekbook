@@ -1,36 +1,43 @@
-export const toggleThemeReducer = (
-  state = { isDarkTheme: false },
-  action: any
-) => {
+export const toggleThemeReducer = (state = { state: false }, action: any) => {
   switch (action.type) {
     case 'TOGGLE_THEME':
-      return { isDarkTheme: !state.isDarkTheme }
+      return { state: !state.state }
     default:
       return state
   }
 }
 
 export const toggleMenuVisibilityReducer = (
-  state = { menuVisibility: false },
+  state = { state: false },
   action: any
 ) => {
   switch (action.type) {
     case 'TOGGLE_MENU_VISIBILITY':
-      return { menuVisibility: !state.menuVisibility }
+      return { state: !state.state }
     default:
       return state
   }
 }
 
-export const signInOutReducer = (
-  state = { isSignedIn: false },
-  action: any
-) => {
+export const isSignedInReducer = (state = { state: false }, action: any) => {
   switch (action.type) {
     case 'SIGN_IN':
-      return { isSignedIn: true }
+      return { state: true }
     case 'SIGN_OUT':
-      return { isSignedIn: false }
+      return { state: false }
+    default:
+      return state
+  }
+}
+
+export const authenModalReducer = (state = { state: 'none' }, action: any) => {
+  switch (action.type) {
+    case 'LOG_IN':
+      return { state: 'logIn' }
+    case 'SIGN_UP':
+      return { state: 'signUp' }
+    case 'NONE':
+      return { state: 'none' }
     default:
       return state
   }

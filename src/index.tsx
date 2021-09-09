@@ -8,7 +8,6 @@ const GlobalStyle = createGlobalStyle`
     * {
        box-sizing: border-box;
     }
-
     html {
       font-size: 70%;
       @media (min-width: 768px) {
@@ -19,9 +18,6 @@ const GlobalStyle = createGlobalStyle`
       }
       @media (min-width: 1200px) {
         font-size: 100%;
-      }
-      @media (min-width: 1350px) {
-        font-size: 110%;
       }
     }
     

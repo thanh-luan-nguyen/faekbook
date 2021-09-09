@@ -4,7 +4,7 @@ import { FaFacebook } from 'react-icons/fa'
 import { MdArrowDropDown } from 'react-icons/md'
 import Context from '../utils/Context'
 import React, { useContext } from 'react'
-import DropDownMenu from './DropDownMenu'
+import DropDownMenu from './Modals/DropDownMenu'
 import { themes } from '../utils/themes'
 import { Link } from 'react-router-dom'
 import Authen from '../firebase'
@@ -23,6 +23,8 @@ const Navbar: React.FC<any> = () => {
   const handleSignIn = value.handleSignIn
   const handleSignOut = value.handleSignOut
 
+  const handleLogInModal = value.handleLogInModal
+
   useEffect(() => {
     Authen.handleAuthStateChange(handleSignIn, handleSignOut)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -37,10 +39,14 @@ const Navbar: React.FC<any> = () => {
     </Link>
   )
 
-  const logInButton = <div className='log-in-button'>Log In</div>
+  const logInButton = (
+    <div className='log-in-button' onClick={handleLogInModal}>
+      Log In
+    </div>
+  )
 
   return (
-    <Wrapper theme={theme} menuVisibility={menuVisibility ? 1 : 0}>
+    <StyledNav theme={theme} menuVisibility={menuVisibility ? 1 : 0}>
       <div className='left'>
         <Link to='/faekbook/'>
           <FaFacebook className='fb-icon' />
@@ -62,7 +68,7 @@ const Navbar: React.FC<any> = () => {
         </div>
       </div>
       {menuVisibility && <DropDownMenu />}
-    </Wrapper>
+    </StyledNav>
   )
 }
 
@@ -75,7 +81,7 @@ const rotation = keyframes`
   }
 `
 
-const Wrapper = styled('nav')<{ menuVisibility: number }>`
+const StyledNav = styled('nav')<{ menuVisibility: number }>`
   background: ${props => props.theme.navbar};
   height: ${globalValues.navbar_height};
   box-shadow: ${globalValues.bxShdw};

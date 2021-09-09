@@ -1,44 +1,46 @@
 import { useContext } from 'react'
-import Context from '../utils/Context'
+import Context from '../../utils/Context'
 import { FaMoon, FaSun } from 'react-icons/fa'
 import { GoSignOut, GoSignIn } from 'react-icons/go'
 import styled from 'styled-components'
-import globalValues from '../styles/globalValues'
+import globalValues from '../../styles/globalValues'
 import { Link } from 'react-router-dom'
-import { themes } from '../utils/themes'
-import defaultAvatar from '../utils/images/default_user.png'
-import myAvatar from '../utils/images/picture_of_myself.jpg'
-
+import { themes } from '../../utils/themes'
+import defaultAvatar from '../../utils/images/default_user.png'
+import myAvatar from '../../utils/images/picture_of_myself.jpg'
+import Authen from '../../firebase'
 const DropDownMenu: React.FC<any> = () => {
-  const value = useContext(Context)
-
-  const theme = value.isDarkTheme ? themes.dark : themes.light
-  const handleToggleTheme = value.handleToggleTheme
-
-  const handleToggleMenuVisibility = value.handleToggleMenuVisibility
-
-  const isSignedIn = value.isSignedIn
+  const {
+    isDarkTheme,
+    isSignedIn,
+    handleToggleTheme,
+    handleToggleMenuVisibility,
+    handleLogInModal,
+  } = useContext(Context)
 
   const avatar = (
     <img src={isSignedIn ? myAvatar : defaultAvatar} alt='avatar' />
   )
 
-  console.log(defaultAvatar)
   return (
-    <Wrapper theme={theme} isSignedIn={isSignedIn ? 1 : 0}>
+    <StyledDiv
+      theme={isDarkTheme ? themes.dark : themes.light}
+      isSignedIn={isSignedIn ? 1 : 0}
+      onClick={e => e.stopPropagation()}
+    >
       <Link
         to='/faekbook/profile'
-        style={{ textDecoration: 'none' }}
-        onClick={e => {
-          e.stopPropagation()
-          handleToggleMenuVisibility()
+        style={{
+          textDecoration: 'none',
+          pointerEvents: `${isDarkTheme ? 'auto' : 'none'}`,
         }}
+        onClick={() => isDarkTheme && handleToggleMenuVisibility()}
       >
         <div className='profile'>
           {avatar}
           <div className='name'>
-            <span>{isSignedIn ? 'Nguyen Thanh Luan' : 'User'}</span>
-            <span>{isSignedIn ? 'See your profile' : 'Please log in'}</span>
+            <span>{isDarkTheme ? 'Nguyen Thanh Luan' : 'User'}</span>
+            <span>{isDarkTheme ? 'See your profile' : 'Please log in'}</span>
           </div>
         </div>
       </Link>
@@ -49,23 +51,28 @@ const DropDownMenu: React.FC<any> = () => {
         className='theme-toggler'
         onClick={() => {
           handleToggleTheme()
+          handleToggleMenuVisibility()
         }}
       >
-        <div className='icon'>
-          {theme.type === 'dark' ? <FaSun /> : <FaMoon />}
-        </div>
-        Change to {theme.type === 'dark' ? 'Light' : 'Dark'} theme
+        <div className='icon'>{isDarkTheme ? <FaSun /> : <FaMoon />}</div>
+        Change to {isDarkTheme ? 'Light' : 'Dark'} theme
       </div>
 
-      <div className='log-in-out'>
-        <div className='icon'>{isSignedIn ? <GoSignOut /> : <GoSignIn />}</div>
-        Log {isSignedIn ? 'Out' : 'In'}
+      <div
+        className='log-in-out'
+        onClick={() => {
+          handleToggleMenuVisibility()
+          isDarkTheme ? Authen.signOut() : handleLogInModal()
+        }}
+      >
+        <div className='icon'>{isDarkTheme ? <GoSignOut /> : <GoSignIn />}</div>
+        Log {isDarkTheme ? 'Out' : 'In'}
       </div>
-    </Wrapper>
+    </StyledDiv>
   )
 }
 
-const Wrapper = styled('div')<{ isSignedIn: number }>`
+const StyledDiv = styled('div')<{ isSignedIn: number }>`
   background: ${props => props.theme.navbar};
   width: 30rem;
   position: absolute;
@@ -89,6 +96,7 @@ const Wrapper = styled('div')<{ isSignedIn: number }>`
   }
   /* profile */
   .profile {
+    opacity: ${props => (props.isSignedIn ? '100%' : '30%')};
     img {
       border-radius: 50%;
       height: 5rem;
