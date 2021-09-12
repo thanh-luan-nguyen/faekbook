@@ -1,22 +1,52 @@
-import { useContext } from 'react'
+import { useContext, useState } from 'react'
 import styled from 'styled-components'
+import Authen from '../../firebase'
 import globalValues from '../../styles/globalValues'
 import Context from '../../utils/Context'
+import { themes } from '../../utils/themes'
+import TurnOffModalButton from './TurnOffModalButton'
 
 export default function LogInModal() {
-  const { handleSignUpModal } = useContext(Context)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+
+  const { toggleState, dispatchSignInOut, dispatchDimBgModal } =
+    useContext(Context)
   return (
-    <StyledDiv>
+    <StyledDiv theme={toggleState.isDarkTheme ? themes.dark : themes.light}>
+      <TurnOffModalButton />
       <div id='top'>
         <div>Welcome Back!</div>
-        <input type='text' placeholder='Email or Phone Number' />
-        <input type='password' placeholder='Password' />
-        <button className='log-in-btn'>Log In</button>
+        <input
+          type='text'
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          placeholder='Email or Phone Number'
+        />
+        <input
+          type='password'
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+          placeholder='Password'
+        />
+        <button
+          className='log-in-btn'
+          onClick={() => {
+            Authen.signIn(email, password)
+            dispatchSignInOut({ type: 'SIGN_IN' })
+            dispatchDimBgModal({ type: 'NONE' })
+          }}
+        >
+          Log In
+        </button>
       </div>
       <div className='divider'></div>
       <div id='bottom'>
         <span>New to Faekbook?</span>
-        <button className='create-new-acc-btn' onClick={handleSignUpModal}>
+        <button
+          className='create-new-acc-btn'
+          onClick={dispatchDimBgModal({ type: 'SIGN_UP' })}
+        >
           Create New Account
         </button>
       </div>

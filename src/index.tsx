@@ -26,6 +26,10 @@ const GlobalStyle = createGlobalStyle`
       font-family: 'Roboto', sans-serif;
       user-select: none;
     }
+
+    img {
+      border-radius: 50%;
+    }
   `
 
 ReactDOM.render(

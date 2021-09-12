@@ -4,7 +4,7 @@ import { FaFacebook } from 'react-icons/fa'
 import { MdArrowDropDown } from 'react-icons/md'
 import Context from '../utils/Context'
 import React, { useContext } from 'react'
-import DropDownMenu from './Modals/DropDownMenu'
+// import DropDownMenu from './Modals/DropDownMenu'
 import { themes } from '../utils/themes'
 import { Link } from 'react-router-dom'
 import Authen from '../firebase'
@@ -12,21 +12,19 @@ import { useEffect } from 'react'
 import myAvatar from '../utils/images/picture_of_myself.jpg'
 
 const Navbar: React.FC<any> = () => {
-  const value = useContext(Context)
-
-  const theme = value.isDarkTheme ? themes.dark : themes.light
-
-  const menuVisibility = value.menuVisibility
-  const handleToggleMenuVisibility = value.handleToggleMenuVisibility
-
-  const isSignedIn = value.isSignedIn
-  const handleSignIn = value.handleSignIn
-  const handleSignOut = value.handleSignOut
-
-  const handleLogInModal = value.handleLogInModal
+  const {
+    toggleState,
+    isSignedIn,
+    dispatchToggle,
+    dispatchSignInOut,
+    dispatchDimBgModal,
+  } = useContext(Context)
 
   useEffect(() => {
-    Authen.handleAuthStateChange(handleSignIn, handleSignOut)
+    Authen.handleAuthStateChange(
+      () => dispatchSignInOut({ type: 'SIGN_IN' }),
+      () => dispatchSignInOut({ type: 'SIGN_OUT' })
+    )
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -40,13 +38,19 @@ const Navbar: React.FC<any> = () => {
   )
 
   const logInButton = (
-    <div className='log-in-button' onClick={handleLogInModal}>
+    <div
+      className='log-in-button'
+      onClick={() => dispatchDimBgModal({ type: 'LOG_IN' })}
+    >
       Log In
     </div>
   )
 
   return (
-    <StyledNav theme={theme} menuVisibility={menuVisibility ? 1 : 0}>
+    <StyledNav
+      theme={toggleState.isDarkTheme ? themes.dark : themes.light}
+      menuVisibility={toggleState.dropDownMenuIsVisible ? 1 : 0}
+    >
       <div className='left'>
         <Link to='/faekbook/'>
           <FaFacebook className='fb-icon' />
@@ -61,13 +65,13 @@ const Navbar: React.FC<any> = () => {
           className='toggle-dropdown-menu'
           onClick={e => {
             e.stopPropagation()
-            handleToggleMenuVisibility()
+            dispatchToggle({ type: 'TOGGLE_DROP_DOWN_MENU' })
           }}
         >
           <MdArrowDropDown />
         </div>
       </div>
-      {menuVisibility && <DropDownMenu />}
+      {/* {menuVisibility && <DropDownMenu />} */}
     </StyledNav>
   )
 }
@@ -82,14 +86,17 @@ const rotation = keyframes`
 `
 
 const StyledNav = styled('nav')<{ menuVisibility: number }>`
-  background: ${props => props.theme.navbar};
+  position: sticky;
+  top: 0;
+  background: ${p => p.theme.main_bgclr};
   height: ${globalValues.navbar_height};
-  box-shadow: ${globalValues.bxShdw};
-  border-bottom: 1px solid ${props => props.theme.nav_btm_brdr_clr};
+  box-shadow: ${p => p.theme.bxShadw};
+  border-bottom: 1px solid ${p => p.theme.nav_btm_brdr_clr};
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding-inline: 1rem;
+  z-index: 100;
   .left {
     display: flex;
     align-items: center;
@@ -100,7 +107,7 @@ const StyledNav = styled('nav')<{ menuVisibility: number }>`
       text-decoration: none;
       .fb-icon,
       .faekbook {
-        color: ${props => props.theme.font};
+        color: ${p => p.theme.font};
         &:hover {
           cursor: pointer;
         }
@@ -119,20 +126,18 @@ const StyledNav = styled('nav')<{ menuVisibility: number }>`
       height: ${globalValues.navbar_elements_height};
       width: ${globalValues.navbar_elements_height};
       border-radius: 50%;
-      background: ${props =>
-        props.menuVisibility
-          ? props.theme.theme_toggler_bgclr_active
-          : props.theme.theme_toggler_bgclr};
+      background: ${p =>
+        p.menuVisibility
+          ? p.theme.theme_toggler_bgclr_active
+          : p.theme.theme_toggler_bgclr};
       font-size: ${globalValues.navbar_elements_height};
-      color: ${props =>
-        props.menuVisibility
-          ? props.theme.theme_toggler_icon_active
-          : props.theme.icon_color};
+      color: ${p =>
+        p.menuVisibility
+          ? p.theme.theme_toggler_icon_active
+          : p.theme.icon_color};
       &:hover {
         cursor: pointer;
-        filter: brightness(
-          ${props => (props.theme.type === 'light' ? '0.9' : '1.3')}
-        );
+        filter: brightness(${p => (p.theme.type === 'light' ? '0.9' : '1.3')});
       }
     }
     a .user-profile-button,
@@ -141,16 +146,15 @@ const StyledNav = styled('nav')<{ menuVisibility: number }>`
       border-radius: 50px;
       display: flex;
       align-items: center;
-
       font-weight: 700;
       font-size: 1.25rem;
-      color: ${props => props.theme.font};
+      color: ${p => p.theme.font};
       &:hover {
         cursor: pointer;
-        background: ${props =>
-          props.menuVisibility
-            ? props.theme.theme_toggler_bgclr_active
-            : props.theme.theme_toggler_bgclr};
+        background: ${p =>
+          p.menuVisibility
+            ? p.theme.theme_toggler_bgclr_active
+            : p.theme.theme_toggler_bgclr};
       }
     }
     a {

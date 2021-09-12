@@ -1,8 +1,11 @@
 export const themes = {
   light: {
     type: 'light',
-    // navbar
-    navbar: '#fff',
+
+    bxShdw:
+      'rgba(50, 50, 93, 0.25) 0 0 5px -1px, rgba(0, 0, 0, 0.3) 0 0 3px -1px',
+
+    main_bgclr: '#fff',
     nav_btm_brdr_clr: '#fff',
     // fb_icon: '#000',
     font: '#050505',
@@ -17,11 +20,18 @@ export const themes = {
 
     // body
     body: '#f0f2f5',
+
+    avatar_pic_cam_icon_bgclr: '#e4e6eb',
+
+    whats_on_ur_mind_bgclr: '#F0F2F5',
   },
   dark: {
     type: 'dark',
-    // navbar
-    navbar: '#242526',
+
+    bxShdw:
+      'rgba(255, 255, 255) 0 0 5px -1px, rgba(255, 255, 255) 0 0 3px -1px',
+
+    main_bgclr: '#242526',
     nav_btm_brdr_clr: '#393a3b',
     // fb_icon: '#fff',
     font: '#e4e6eb',
@@ -35,5 +45,9 @@ export const themes = {
     theme_toggler_icon_active: '#2D86FF',
     // body
     body: '#18191a',
+
+    avatar_pic_cam_icon_bgclr: '#3a3b3c',
+
+    whats_on_ur_mind_bgclr: '#3A3B3C',
   },
 }

@@ -1,19 +1,15 @@
 import { createContext } from 'react'
 
-interface ContextProps {
-  isDarkTheme: boolean
-  handleToggleTheme: () => void
-  menuVisibility: boolean
-  handleToggleMenuVisibility: () => void
-  isSignedIn: boolean
-  handleSignIn: () => void
-  handleSignOut: () => void
-  // logInOrSignUp: string
-  handleLogInModal: () => void
-  handleSignUpModal: () => void
-  handleNeitherModal: () => void
+interface ContextInterface {
+  toggleState: any
+  dispatchToggle: any
+  isSignedIn: any
+  dispatchSignInOut: any
+  dimBgModal: any
+  dispatchDimBgModal: any
+  // create post
 }
 
-const Context = createContext({} as ContextProps)
+const Context = createContext({} as ContextInterface)
 
 export default Context

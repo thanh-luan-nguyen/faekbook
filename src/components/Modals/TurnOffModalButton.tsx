@@ -1,11 +1,16 @@
 import { useContext } from 'react'
 import styled from 'styled-components'
 import Context from '../../utils/Context'
+import { themes } from '../../utils/themes'
 
 export default function TurnOffModalButton() {
-  const { handleNeitherModal } = useContext(Context)
+  const { toggleState, dispatchDimBgModal } = useContext(Context)
   return (
-    <StyledSpan id='turn-off-modal' onClick={handleTurnOffModal}>
+    <StyledSpan
+      id='turn-off-modal'
+      theme={toggleState.isDarkTheme ? themes.dark : themes.light}
+      onClick={() => dispatchDimBgModal({ type: 'NONE' })}
+    >
       +
     </StyledSpan>
   )
@@ -14,9 +19,10 @@ export default function TurnOffModalButton() {
 const StyledSpan = styled.span`
   position: absolute;
   top: 1rem;
-  right: 1.5rem;
-  font-size: 3rem;
+  right: 1.75rem;
+  font-size: 3.5rem;
   transform: rotate(45deg);
+  color: ${p => p.theme.font};
   &:hover {
     cursor: pointer;
   }

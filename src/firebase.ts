@@ -7,7 +7,7 @@ import {
   onAuthStateChanged,
   signOut,
 } from 'firebase/auth'
-import { User } from './interface'
+import { User } from './types/interface'
 
 initializeApp({
   apiKey: 'AIzaSyD5ADlnZW_bL1r3q3w2ckoqqhl4cjLU7B8',
@@ -32,7 +32,7 @@ export default class Authen {
   static signUp(email: string, password: string) {
     createUserWithEmailAndPassword(auth, email, password)
       .then(userCredential => {
-        const newUser: User = {
+        const newUser = {
           auth: {
             email: email,
             password: password,

@@ -2,11 +2,14 @@ import { useContext } from 'react'
 import styled from 'styled-components'
 import globalValues from '../../styles/globalValues'
 import Context from '../../utils/Context'
+import { themes } from '../../utils/themes'
+import TurnOffModalButton from './TurnOffModalButton'
 
 export default function SignUpModal() {
-  const { handleLogInModal } = useContext(Context)
+  const { toggleState, dispatchDimBgModal } = useContext(Context)
   return (
-    <StyledDiv>
+    <StyledDiv theme={toggleState.isDarkTheme ? themes.dark : themes.light}>
+      <TurnOffModalButton />
       <div id='top'>
         <div>Sign Up</div>
         <div>It's quick and easy</div>
@@ -24,7 +27,7 @@ export default function SignUpModal() {
       <div className='divider'></div>
       <div id='bottom'>
         <span>Already have an account?</span>
-        <button onClick={handleLogInModal}>Log In</button>
+        <button onClick={dispatchDimBgModal({ type: 'LOG_IN' })}>Log In</button>
       </div>
     </StyledDiv>
   )

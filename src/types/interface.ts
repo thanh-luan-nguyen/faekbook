@@ -1,3 +1,5 @@
+import myAvatar from '../utils/images/default_user.png'
+
 export interface Comment {
   commenter: string
   content: string
@@ -20,10 +22,10 @@ export interface Auth {
 
 export interface User {
   auth: Auth
-  first_name?: string
-  last_name?: string
-  avatarURL?: string
-  posts?: Array<Post>
+  first_name: string
+  last_name: string
+  avatar: string
+  posts: Array<Post>
   theme?: string
 }
 
@@ -35,14 +37,14 @@ export interface LoginState {
   user: User
 }
 
-const Luan: User = {
+export const Luan: User = {
   auth: {
     email: 'luan@gmail.com',
     password: 'luanluanluan',
   },
   first_name: 'Thanh Luan',
   last_name: 'Nguyen',
-  avatarURL: 'luanAvatar',
+  avatar: myAvatar,
   posts: [
     {
       date: new Date(2021, 5, 10),
@@ -78,7 +80,7 @@ const Hiep: User = {
   },
   first_name: 'Dinh Hiep',
   last_name: 'Ngo',
-  avatarURL: 'hiepAvatar',
+  avatar: 'hiepAvatar',
   posts: [],
   theme: 'light',
 }
@@ -89,7 +91,7 @@ const Long: User = {
   },
   first_name: 'Thanh Long',
   last_name: 'Pham',
-  avatarURL: 'longAvatar',
+  avatar: 'longAvatar',
   posts: [],
   theme: 'dark',
 }
@@ -104,7 +106,7 @@ const Long: User = {
 //       },
 //       first_name: 'Thanh Luan',
 //       last_name: 'Nguyen',
-//       avatarURL: 'avatar123',
+//       avatar: 'avatar123',
 //       posts: [
 //         {
 //           content: 'nice day',

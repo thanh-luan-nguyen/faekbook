@@ -9,14 +9,16 @@ import { themes } from '../../utils/themes'
 import defaultAvatar from '../../utils/images/default_user.png'
 import myAvatar from '../../utils/images/picture_of_myself.jpg'
 import Authen from '../../firebase'
+import { useHistory } from 'react-router'
+
 const DropDownMenu: React.FC<any> = () => {
-  const {
-    isDarkTheme,
-    isSignedIn,
-    handleToggleTheme,
-    handleToggleMenuVisibility,
-    handleLogInModal,
-  } = useContext(Context)
+  const { toggleState, isSignedIn, dispatchToggle, dispatchDimBgModal } =
+    useContext(Context)
+  const history = useHistory()
+
+  const returnToHomepage = () => {
+    history.push('/faekbook/')
+  }
 
   const avatar = (
     <img src={isSignedIn ? myAvatar : defaultAvatar} alt='avatar' />
@@ -24,23 +26,21 @@ const DropDownMenu: React.FC<any> = () => {
 
   return (
     <StyledDiv
-      theme={isDarkTheme ? themes.dark : themes.light}
+      theme={toggleState.isDarkTheme ? themes.dark : themes.light}
       isSignedIn={isSignedIn ? 1 : 0}
       onClick={e => e.stopPropagation()}
     >
       <Link
         to='/faekbook/profile'
-        style={{
-          textDecoration: 'none',
-          pointerEvents: `${isDarkTheme ? 'auto' : 'none'}`,
-        }}
-        onClick={() => isDarkTheme && handleToggleMenuVisibility()}
+        onClick={() =>
+          isSignedIn && dispatchToggle({ type: 'TOGGLE_DROP_DOWN_MENU' })
+        }
       >
         <div className='profile'>
           {avatar}
           <div className='name'>
-            <span>{isDarkTheme ? 'Nguyen Thanh Luan' : 'User'}</span>
-            <span>{isDarkTheme ? 'See your profile' : 'Please log in'}</span>
+            <span>{isSignedIn ? 'Nguyen Thanh Luan' : 'User'}</span>
+            <span>{isSignedIn ? 'See your profile' : 'Please log in'}</span>
           </div>
         </div>
       </Link>
@@ -50,39 +50,47 @@ const DropDownMenu: React.FC<any> = () => {
       <div
         className='theme-toggler'
         onClick={() => {
-          handleToggleTheme()
-          handleToggleMenuVisibility()
+          dispatchToggle({ type: 'TOGGLE_DARK_THEME' })
+          dispatchToggle({ type: 'TOGGLE_DROP_DOWN_MENU' })
         }}
       >
-        <div className='icon'>{isDarkTheme ? <FaSun /> : <FaMoon />}</div>
-        Change to {isDarkTheme ? 'Light' : 'Dark'} theme
+        <div className='icon'>
+          {toggleState.isDarkTheme ? <FaSun /> : <FaMoon />}
+        </div>
+        Change to {toggleState.isDarkTheme ? 'Light' : 'Dark'} theme
       </div>
 
       <div
         className='log-in-out'
         onClick={() => {
-          handleToggleMenuVisibility()
-          isDarkTheme ? Authen.signOut() : handleLogInModal()
+          dispatchToggle({ type: 'TOGGLE_DROP_DOWN_MENU' })
+          isSignedIn
+            ? (() => {
+                Authen.signOut()
+                returnToHomepage()
+              })()
+            : dispatchDimBgModal({ type: 'LOG_IN' })
         }}
       >
-        <div className='icon'>{isDarkTheme ? <GoSignOut /> : <GoSignIn />}</div>
-        Log {isDarkTheme ? 'Out' : 'In'}
+        <div className='icon'>{isSignedIn ? <GoSignOut /> : <GoSignIn />}</div>
+        Log {isSignedIn ? 'Out' : 'In'}
       </div>
     </StyledDiv>
   )
 }
 
 const StyledDiv = styled('div')<{ isSignedIn: number }>`
-  background: ${props => props.theme.navbar};
+  background: ${p => p.theme.main_bgclr};
   width: 30rem;
   position: absolute;
   border-radius: ${globalValues.dropdown_menu_bdr_rds};
   right: 1rem;
   top: 5rem;
-  box-shadow: ${globalValues.bxShdw};
+  box-shadow: ${p => p.theme.bxShdw};
   padding: 1rem;
+  z-index: 100;
   /* profile, theme-toggler and log-in-out */
-  .profile,
+  a > .profile,
   .theme-toggler,
   .log-in-out {
     display: flex;
@@ -91,29 +99,33 @@ const StyledDiv = styled('div')<{ isSignedIn: number }>`
     padding: 0.5rem;
     column-gap: 1rem;
     &:hover {
-      background-color: ${props => props.theme.hover};
+      background-color: ${p => p.theme.hover};
     }
   }
   /* profile */
-  .profile {
-    opacity: ${props => (props.isSignedIn ? '100%' : '30%')};
-    img {
-      border-radius: 50%;
-      height: 5rem;
-      background: ${props => props.theme.theme_toggler_bgclr};
-    }
-    .name {
-      display: flex;
-      flex-flow: column;
-      justify-content: space-evenly;
-      span:first-of-type {
-        font-size: 1.3rem;
-        font-weight: 600;
-        color: ${props => props.theme.font};
+  a {
+    text-decoration: none;
+    pointer-events: ${p => (p.isSignedIn ? 'auto' : 'none')};
+    .profile {
+      opacity: ${p => (p.isSignedIn ? '100%' : '30%')};
+      img {
+        border-radius: 50%;
+        height: 5rem;
+        background: ${p => p.theme.theme_toggler_bgclr};
       }
-      span:last-of-type {
-        font-size: 1.1375rem;
-        color: ${props => props.theme.font_lighter};
+      .name {
+        display: flex;
+        flex-flow: column;
+        justify-content: space-evenly;
+        span:first-of-type {
+          font-size: 1.3rem;
+          font-weight: 600;
+          color: ${p => p.theme.font};
+        }
+        span:last-of-type {
+          font-size: 1.1375rem;
+          color: ${p => p.theme.font_lighter};
+        }
       }
     }
   }
@@ -121,21 +133,21 @@ const StyledDiv = styled('div')<{ isSignedIn: number }>`
     margin-block: 0.5rem;
     height: 2px;
     width: 100%;
-    background: ${props => props.theme.divider_clr};
+    background: ${p => p.theme.divider_clr};
   }
   /* theme-toggler and log-in-out */
   .theme-toggler,
   .log-in-out {
     align-items: center;
-    color: ${props => props.theme.font};
+    color: ${p => p.theme.font};
     font-weight: 700;
     .icon {
       height: ${globalValues.navbar_elements_height};
       width: ${globalValues.navbar_elements_height};
       border-radius: 50%;
       font-size: 2rem;
-      background: ${props => props.theme.theme_toggler_bgclr};
-      fill: ${props => props.theme.icon_color};
+      background: ${p => p.theme.theme_toggler_bgclr};
+      fill: ${p => p.theme.icon_color};
     }
   }
   .theme-toggler {
@@ -150,7 +162,7 @@ const StyledDiv = styled('div')<{ isSignedIn: number }>`
       svg {
         position: absolute;
         top: 0.7rem;
-        left: ${props => (props.isSignedIn ? '0.7rem' : '0.5rem')};
+        left: ${p => (p.isSignedIn ? '0.7rem' : '0.5rem')};
       }
     }
   }

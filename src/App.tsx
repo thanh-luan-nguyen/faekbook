@@ -3,10 +3,9 @@ import styled, { css } from 'styled-components'
 import Navbar from './components/Navbar'
 import { useEffect, useReducer } from 'react'
 import {
-  toggleThemeReducer,
-  toggleMenuVisibilityReducer,
-  authenModalReducer,
+  toggleReducer,
   isSignedInReducer,
+  authenModalReducer,
 } from './reducers/reducers'
 import Context from './utils/Context'
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
@@ -16,43 +15,31 @@ import { themes } from './utils/themes'
 import MainPage from './components/Body/MainPage'
 import ProfilePage from './components/Body/ProfilePage'
 import Authen from './firebase'
-import globalValues from './styles/globalValues'
-import TurnOffModalButton from './components/Modals/TurnOffModalButton'
+import DropDownMenu from './components/Modals/DropDownMenu'
+import CreatePost from './components/Modals/CreatePost'
 
 const App: React.FC<any> = () => {
-  const [isDarkTheme, dispatchTheme] = useReducer(toggleThemeReducer, {
-    state: false,
+  const [toggleState, dispatchToggle] = useReducer(toggleReducer, {
+    isDarkTheme: false,
+    dropDownMenuIsVisible: false,
   })
-
-  const [menuVisibility, dispatchMenuVisibility] = useReducer(
-    toggleMenuVisibilityReducer,
-    { state: false }
-  )
 
   const [isSignedIn, dispatchSignInOut] = useReducer(isSignedInReducer, {
     state: false,
   })
 
-  const [authenModal, dispatchAuthenModal] = useReducer(authenModalReducer, {
+  const [dimBgModal, dispatchDimBgModal] = useReducer(authenModalReducer, {
     state: 'none',
   })
 
   const renderModal = (param: string) => {
     switch (param) {
       case 'logIn':
-        return (
-          <>
-            <TurnOffModalButton />
-            <LogInModal />
-          </>
-        )
+        return <LogInModal />
       case 'signUp':
-        return (
-          <>
-            <TurnOffModalButton />
-            <SignUpModal />
-          </>
-        )
+        return <SignUpModal />
+      case 'createPost':
+        return <CreatePost />
       case 'none':
         return
     }
@@ -70,35 +57,42 @@ const App: React.FC<any> = () => {
   return (
     <Context.Provider
       value={{
-        isDarkTheme: isDarkTheme.state,
-        handleToggleTheme: () => dispatchTheme({ type: 'TOGGLE_THEME' }),
-        menuVisibility: menuVisibility.state,
-        handleToggleMenuVisibility: () =>
-          dispatchMenuVisibility({ type: 'TOGGLE_MENU_VISIBILITY' }),
+        toggleState: toggleState,
+        dispatchToggle: dispatchToggle,
         isSignedIn: isSignedIn.state,
-        handleSignIn: () => dispatchSignInOut({ type: 'SIGN_IN' }),
-        handleSignOut: () => dispatchSignInOut({ type: 'SIGN_OUT' }),
-        // authentication Modals
-        handleLogInModal: () => dispatchAuthenModal({ type: 'LOG_IN' }),
-        handleSignUpModal: () => dispatchAuthenModal({ type: 'SIGN_UP' }),
-        handleTurnOffModal: () => dispatchAuthenModal({ type: 'NONE' }),
+        dispatchSignInOut: dispatchSignInOut,
+        dimBgModal: dimBgModal,
+        dispatchDimBgModal: dispatchDimBgModal,
+        // menuVisibility: toggleState.dropDownMenuIsVisible,
+        // handleToggleMenuVisibility: () =>
+        // dispatchToggle({ type: 'TOGGLE_DROP_DOWN_MENU' }),
+        // handleIsSignedIn: () => dispatchSignInOut({ type: 'SIGN_IN' }),
+        // handleIsSignedOut: () => dispatchSignInOut({ type: 'SIGN_OUT' }),
+        // handleLogInModal: () => dispatchDimBgModal({ type: 'LOG_IN' }),
+        // handleSignUpModal: () => dispatchDimBgModal({ type: 'SIGN_UP' }),
+        // handleCreatePostModal: () =>
+        //   dispatchDimBgModal({ type: 'CREATE_POST' }),
+        // handleTurnOffModal: () => dispatchDimBgModal({ type: 'NONE' }),
       }}
     >
       <Router>
         <StyledDiv
-          theme={isDarkTheme.state === true ? themes.dark : themes.light}
-          authenType={authenModal.state}
-          onClick={() => {
-            menuVisibility.state === true &&
-              dispatchMenuVisibility({ type: 'TOGGLE_MENU_VISIBILITY' })
-          }}
+          theme={toggleState.isDarkTheme === true ? themes.dark : themes.light}
+          authenType={dimBgModal.state}
+          toggleState={toggleState}
+          onClick={() =>
+            toggleState.dropDownMenuIsVisible &&
+            dispatchToggle({ type: 'TOGGLE_DROP_DOWN_MENU' })
+          }
         >
           <Navbar />
           <Switch>
             <Route exact path='/faekbook/' component={MainPage} />
             <Route exact path='/faekbook/profile' component={ProfilePage} />
           </Switch>
-          <div className='authen-modal'>{renderModal(authenModal.state)}</div>
+          {/* modals */}
+          <div className='dim-bg-modal'>{renderModal(dimBgModal.state)}</div>
+          {toggleState.dropDownMenuIsVisible && <DropDownMenu />}
         </StyledDiv>
       </Router>
     </Context.Provider>
@@ -110,30 +104,31 @@ const Screen = css`
   position: fixed;
   top: 0;
   left: 0;
-  /* min-height: inherit; */
-  height: inherit;
+  height: 100vh;
   width: 100%;
   z-index: 100;
 `
 
-const StyledDiv = styled('div')<{ authenType: string }>`
+const StyledDiv = styled('div')<{ authenType: string; toggleState: any }>`
   position: relative;
-  background: ${props => props.theme.body};
-  height: 100vh;
-  &::before {
-    ${props => props.authenType !== 'none' && Screen}
-    background-color: ${props =>
-      props.theme.type === 'light' ? '#ffffff00' : '#ffffffb9'};
+  background: ${p => p.theme.body};
+  min-height: 100vh;
+  &::after {
+    ${p =>
+      (p.authenType !== 'none' || p.toggleState.createPostIsVisible) && Screen}
+    background-color: ${p =>
+      p.theme.type === 'dark' ? '#00000063' : '#ffffff92'};
   }
-  .authen-modal {
-    position: absolute;
+  .dim-bg-modal {
+    position: fixed;
     background: white;
-    box-shadow: ${globalValues.bxShdw};
     border-radius: 10px;
-    top: 10rem;
+    top: 15rem;
     left: 50%;
     transform: translateX(-50%);
     z-index: 200;
+    border-radius: 10px;
+    box-shadow: ${p => p.theme.bxShdw};
   }
 `
 
