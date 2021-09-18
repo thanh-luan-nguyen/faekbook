@@ -1,23 +1,22 @@
 {
   "files": {
     "main.css": "/faekbook/static/css/main.28cf8577.chunk.css",
-    "main.js": "/faekbook/static/js/main.413da2dd.chunk.js",
-    "main.js.map": "/faekbook/static/js/main.413da2dd.chunk.js.map",
+    "main.js": "/faekbook/static/js/main.e2215060.chunk.js",
+    "main.js.map": "/faekbook/static/js/main.e2215060.chunk.js.map",
     "runtime-main.js": "/faekbook/static/js/runtime-main.5c881d7b.js",
     "runtime-main.js.map": "/faekbook/static/js/runtime-main.5c881d7b.js.map",
-    "static/js/2.6be7bee7.chunk.js": "/faekbook/static/js/2.6be7bee7.chunk.js",
-    "static/js/2.6be7bee7.chunk.js.map": "/faekbook/static/js/2.6be7bee7.chunk.js.map",
+    "static/js/2.9364cde4.chunk.js": "/faekbook/static/js/2.9364cde4.chunk.js",
+    "static/js/2.9364cde4.chunk.js.map": "/faekbook/static/js/2.9364cde4.chunk.js.map",
     "index.html": "/faekbook/index.html",
     "static/css/main.28cf8577.chunk.css.map": "/faekbook/static/css/main.28cf8577.chunk.css.map",
-    "static/js/2.6be7bee7.chunk.js.LICENSE.txt": "/faekbook/static/js/2.6be7bee7.chunk.js.LICENSE.txt",
-    "static/media/cover_photo.d46f5c33.jpg": "/faekbook/static/media/cover_photo.d46f5c33.jpg",
-    "static/media/default_user.4255cca7.png": "/faekbook/static/media/default_user.4255cca7.png",
-    "static/media/picture_of_myself.ded9b47d.jpg": "/faekbook/static/media/picture_of_myself.ded9b47d.jpg"
+    "static/js/2.9364cde4.chunk.js.LICENSE.txt": "/faekbook/static/js/2.9364cde4.chunk.js.LICENSE.txt",
+    "static/media/default_cover_photo.cfb7a6a2.gif": "/faekbook/static/media/default_cover_photo.cfb7a6a2.gif",
+    "static/media/default_user.4255cca7.png": "/faekbook/static/media/default_user.4255cca7.png"
   },
   "entrypoints": [
     "static/js/runtime-main.5c881d7b.js",
-    "static/js/2.6be7bee7.chunk.js",
+    "static/js/2.9364cde4.chunk.js",
     "static/css/main.28cf8577.chunk.css",
-    "static/js/main.413da2dd.chunk.js"
+    "static/js/main.e2215060.chunk.js"
   ]
 }
