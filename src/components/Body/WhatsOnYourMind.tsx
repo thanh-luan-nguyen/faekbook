@@ -3,12 +3,17 @@ import styled from 'styled-components'
 import myAvatar from '../../utils/images/picture_of_myself.jpg'
 import Context from '../../utils/Context'
 import { themes } from '../../utils/themes'
+import defaultAvatar from '../../utils/images/default_user.png'
 
 export default function WhatsOnYourMind() {
-  const { toggleState, dispatchDimBgModal } = useContext(Context)
+  const { currentUserInfoState, toggleState, dispatchDimBgModal } =
+    useContext(Context)
   return (
     <StyledSection theme={toggleState.isDarkTheme ? themes.dark : themes.light}>
-      <img src={myAvatar} alt='avatar' />
+      <img
+        src={currentUserInfoState ? currentUserInfoState.avatar : defaultAvatar}
+        alt='avatar'
+      />
       <div onClick={() => dispatchDimBgModal({ type: 'CREATE_POST' })}>
         What's on your mind?
       </div>
@@ -30,6 +35,7 @@ const StyledSection = styled.section`
   img {
     height: 4rem;
     width: 4rem;
+    background: ${p => p.theme.theme_toggler_bgclr};
   }
   div {
     color: ${p => p.theme.font_lighter};

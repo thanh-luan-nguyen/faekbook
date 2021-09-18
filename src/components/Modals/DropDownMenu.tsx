@@ -7,13 +7,18 @@ import globalValues from '../../styles/globalValues'
 import { Link } from 'react-router-dom'
 import { themes } from '../../utils/themes'
 import defaultAvatar from '../../utils/images/default_user.png'
-import myAvatar from '../../utils/images/picture_of_myself.jpg'
-import Authen from '../../firebase'
+import { Authen } from '../../firebase'
 import { useHistory } from 'react-router'
 
 const DropDownMenu: React.FC<any> = () => {
-  const { toggleState, isSignedIn, dispatchToggle, dispatchDimBgModal } =
-    useContext(Context)
+  const {
+    currentUserInfoState,
+    toggleState,
+    isSignedIn,
+    dispatchToggle,
+    dispatchDimBgModal,
+    handleSignOut,
+  } = useContext(Context)
   const history = useHistory()
 
   const returnToHomepage = () => {
@@ -21,7 +26,14 @@ const DropDownMenu: React.FC<any> = () => {
   }
 
   const avatar = (
-    <img src={isSignedIn ? myAvatar : defaultAvatar} alt='avatar' />
+    <img
+      src={
+        isSignedIn && currentUserInfoState
+          ? currentUserInfoState.avatar
+          : defaultAvatar
+      }
+      alt='avatar'
+    />
   )
 
   return (
@@ -39,7 +51,11 @@ const DropDownMenu: React.FC<any> = () => {
         <div className='profile'>
           {avatar}
           <div className='name'>
-            <span>{isSignedIn ? 'Nguyen Thanh Luan' : 'User'}</span>
+            <span>
+              {isSignedIn && currentUserInfoState
+                ? `${currentUserInfoState.first_name} ${currentUserInfoState.last_name}`
+                : 'User'}
+            </span>
             <span>{isSignedIn ? 'See your profile' : 'Please log in'}</span>
           </div>
         </div>
@@ -66,7 +82,7 @@ const DropDownMenu: React.FC<any> = () => {
           dispatchToggle({ type: 'TOGGLE_DROP_DOWN_MENU' })
           isSignedIn
             ? (() => {
-                Authen.signOut()
+                handleSignOut()
                 returnToHomepage()
               })()
             : dispatchDimBgModal({ type: 'LOG_IN' })
@@ -80,15 +96,15 @@ const DropDownMenu: React.FC<any> = () => {
 }
 
 const StyledDiv = styled('div')<{ isSignedIn: number }>`
-  background: ${p => p.theme.main_bgclr};
-  width: 30rem;
-  position: absolute;
-  border-radius: ${globalValues.dropdown_menu_bdr_rds};
+  position: fixed;
   right: 1rem;
   top: 5rem;
-  box-shadow: ${p => p.theme.bxShdw};
+  width: 30rem;
   padding: 1rem;
   z-index: 100;
+  border-radius: ${globalValues.dropdown_menu_bdr_rds};
+  background: ${p => p.theme.main_bgclr};
+  box-shadow: ${p => p.theme.bxShdw};
   /* profile, theme-toggler and log-in-out */
   a > .profile,
   .theme-toggler,

@@ -1,7 +1,7 @@
 import styled, { css } from 'styled-components'
 // import Body from './components/Body/Body'
 import Navbar from './components/Navbar'
-import { useEffect, useReducer } from 'react'
+import { useEffect, useReducer, useState } from 'react'
 import {
   toggleReducer,
   isSignedInReducer,
@@ -14,9 +14,11 @@ import SignUpModal from './components/Modals/SignUpModal'
 import { themes } from './utils/themes'
 import MainPage from './components/Body/MainPage'
 import ProfilePage from './components/Body/ProfilePage'
-import Authen from './firebase'
 import DropDownMenu from './components/Modals/DropDownMenu'
 import CreatePost from './components/Modals/CreatePost'
+import { Hiep, Luan, Long, posts } from './types/interface'
+import { Authen, DB } from './firebase'
+import { getUnixTime } from 'date-fns'
 
 const App: React.FC<any> = () => {
   const [toggleState, dispatchToggle] = useReducer(toggleReducer, {
@@ -24,28 +26,63 @@ const App: React.FC<any> = () => {
     dropDownMenuIsVisible: false,
   })
 
-  const [isSignedIn, dispatchSignInOut] = useReducer(isSignedInReducer, {
-    state: false,
-  })
+  const [isSignedIn, dispatchSignInOut] = useReducer(isSignedInReducer, false)
 
   const [dimBgModal, dispatchDimBgModal] = useReducer(authenModalReducer, {
-    state: 'none',
+    action: 'close modals',
   })
 
-  const renderModal = (param: string) => {
-    switch (param) {
-      case 'logIn':
+  const renderModal = (action: string) => {
+    switch (action) {
+      case 'show login modal':
         return <LogInModal />
-      case 'signUp':
+      case 'show signup modal':
         return <SignUpModal />
-      case 'createPost':
+      case 'show create-post modal':
         return <CreatePost />
-      case 'none':
+      case 'close modals':
         return
     }
   }
 
+  const [currentEmail, setCurrentEmail] = useState<any>()
   useEffect(() => {
+    const email = Authen.getUserEmail()
+    if (email) {
+      setCurrentEmail(email)
+    }
+  })
+  const [currentUserInfoState, setCurrentUserInfoState] = useState<any>()
+  useEffect(() => {
+    if (currentEmail) {
+      DB.getUser(currentEmail).then(currentUser =>
+        setCurrentUserInfoState(currentUser)
+      )
+    } else setCurrentUserInfoState(null)
+  }, [currentEmail])
+
+  const handleSignIn = (email: string, password: string) => {
+    Authen.signIn(email, password)
+    setCurrentEmail(email)
+    dispatchSignInOut({ type: 'SIGN_IN' })
+    dispatchDimBgModal({ type: 'NONE' })
+  }
+
+  const handleSignOut = () => {
+    Authen.signOut()
+    Authen.setCurrentUserStateInfoToNull(() => {
+      setCurrentUserInfoState(null)
+    })
+  }
+
+  useEffect(() => {
+    // for (let post of posts) {
+    //   DB.setPost(getUnixTime(post.date).toString(), post)
+    // }
+    // DB.getPosts(true, currentUser)
+    // DB.getPosts()
+    // DB.setUser('long@gmail.com', Long)
+    // DB.setUser('hiep@gmail.com', Hiep)
     // Authen.signUp('consutoraku@gmail.com', 'thanhLuan123')
     // Authen.signUp('thanhluannguyenxyz@gmail.com', 'iwiwlkiwljoo')
     // Authen.getUserData('HuICL90OPLUfmvXJHE6L6bwSyFi2')
@@ -57,28 +94,24 @@ const App: React.FC<any> = () => {
   return (
     <Context.Provider
       value={{
-        toggleState: toggleState,
-        dispatchToggle: dispatchToggle,
-        isSignedIn: isSignedIn.state,
-        dispatchSignInOut: dispatchSignInOut,
-        dimBgModal: dimBgModal,
-        dispatchDimBgModal: dispatchDimBgModal,
-        // menuVisibility: toggleState.dropDownMenuIsVisible,
-        // handleToggleMenuVisibility: () =>
-        // dispatchToggle({ type: 'TOGGLE_DROP_DOWN_MENU' }),
-        // handleIsSignedIn: () => dispatchSignInOut({ type: 'SIGN_IN' }),
-        // handleIsSignedOut: () => dispatchSignInOut({ type: 'SIGN_OUT' }),
-        // handleLogInModal: () => dispatchDimBgModal({ type: 'LOG_IN' }),
-        // handleSignUpModal: () => dispatchDimBgModal({ type: 'SIGN_UP' }),
-        // handleCreatePostModal: () =>
-        //   dispatchDimBgModal({ type: 'CREATE_POST' }),
-        // handleTurnOffModal: () => dispatchDimBgModal({ type: 'NONE' }),
+        currentEmail,
+        setCurrentEmail,
+        currentUserInfoState,
+        setCurrentUserInfoState,
+        handleSignIn,
+        toggleState,
+        dispatchToggle,
+        isSignedIn,
+        dispatchSignInOut,
+        dimBgModal,
+        dispatchDimBgModal,
+        handleSignOut,
       }}
     >
       <Router>
         <StyledDiv
           theme={toggleState.isDarkTheme === true ? themes.dark : themes.light}
-          authenType={dimBgModal.state}
+          authenType={dimBgModal.action}
           toggleState={toggleState}
           onClick={() =>
             toggleState.dropDownMenuIsVisible &&
@@ -91,7 +124,7 @@ const App: React.FC<any> = () => {
             <Route exact path='/faekbook/profile' component={ProfilePage} />
           </Switch>
           {/* modals */}
-          <div className='dim-bg-modal'>{renderModal(dimBgModal.state)}</div>
+          <div className='dim-bg-modal'>{renderModal(dimBgModal.action)}</div>
           {toggleState.dropDownMenuIsVisible && <DropDownMenu />}
         </StyledDiv>
       </Router>
@@ -115,7 +148,8 @@ const StyledDiv = styled('div')<{ authenType: string; toggleState: any }>`
   min-height: 100vh;
   &::after {
     ${p =>
-      (p.authenType !== 'none' || p.toggleState.createPostIsVisible) && Screen}
+      (p.authenType !== 'close modals' || p.toggleState.createPostIsVisible) &&
+      Screen}
     background-color: ${p =>
       p.theme.type === 'dark' ? '#00000063' : '#ffffff92'};
   }

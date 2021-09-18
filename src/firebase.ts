@@ -1,5 +1,13 @@
 import { initializeApp } from 'firebase/app'
-import { doc, getFirestore, setDoc } from 'firebase/firestore'
+import {
+  collection,
+  doc,
+  DocumentData,
+  getDoc,
+  getDocs,
+  getFirestore,
+  setDoc,
+} from 'firebase/firestore'
 import {
   getAuth,
   createUserWithEmailAndPassword,
@@ -7,7 +15,9 @@ import {
   onAuthStateChanged,
   signOut,
 } from 'firebase/auth'
-import { User } from './types/interface'
+import defaultAvatar from './utils/images/default_user.png'
+import defaultCoverPhoto from './utils/images/default_cover_photo.png'
+import { Post } from './types/interface'
 
 initializeApp({
   apiKey: 'AIzaSyD5ADlnZW_bL1r3q3w2ckoqqhl4cjLU7B8',
@@ -23,49 +33,46 @@ initializeApp({
 
 export const auth = getAuth()
 
-const db = getFirestore()
+export const db = getFirestore()
 
-// Initialize Firebase
-// const app = initializeApp(firebaseConfig)
-
-export default class Authen {
-  static signUp(email: string, password: string) {
-    createUserWithEmailAndPassword(auth, email, password)
+export class Authen {
+  static signUp(
+    email: string,
+    password: string,
+    firstName: string,
+    lastName: string
+  ) {
+    return createUserWithEmailAndPassword(auth, email, password)
       .then(userCredential => {
+        console.log('signUp', userCredential)
         const newUser = {
           auth: {
             email: email,
             password: password,
           },
+          first_name: firstName,
+          last_name: lastName,
+          short_bio: '',
+          avatar: defaultAvatar,
+          theme: 'light',
+          cover_photo: '',
         }
-        setDoc(doc(db, 'users', email), newUser)
+        DB.setUser(email, newUser)
       })
       .catch(err => {
-        const errorCode = err.code
-        const errorMessage = err.message
-        alert(`Error: ${errorCode}. ${errorMessage}`)
+        alert(`Sign up Error: ${err.code}. ${err.message}`)
       })
   }
   static signIn(email: string, password: string) {
-    signInWithEmailAndPassword(auth, email, password)
+    return signInWithEmailAndPassword(auth, email, password)
       .then(userCredential => {
-        console.log(`User with email ${email} has logged in successfully`)
+        console.log(
+          `User with email ${userCredential.user.email} has logged in successfully`
+        )
       })
       .catch(err => {
-        const errorCode = err.code
-        const errorMessage = err.message
-        alert(`Error: ${errorCode}. ${errorMessage}`)
+        alert(`Sign in Error: ${err.code}. ${err.message}`)
       })
-  }
-  static getUserData(user: string) {
-    onAuthStateChanged(auth, user => {
-      if (user) {
-        // user is signed in
-        // const uid = user.uid
-      } else {
-        // user is signed out
-      }
-    })
   }
   static signOut() {
     signOut(auth)
@@ -73,10 +80,17 @@ export default class Authen {
         console.log('signed out successfully')
       })
       .catch(e => {
-        console.log(e, 'sign-out failed')
+        alert('Signout failed: ' + e)
       })
   }
-  static handleAuthStateChange(callback1: any, callback2: any) {
+  static getUserEmail() {
+    const user = auth.currentUser
+    if (user !== null) {
+      const email = user.email
+      return email
+    }
+  }
+  static handleSignInOutState(callback1: any, callback2 = () => {}) {
     onAuthStateChanged(auth, user => {
       if (user) {
         callback1()
@@ -84,5 +98,35 @@ export default class Authen {
         callback2()
       }
     })
+  }
+  static setCurrentUserStateInfoToNull(callback: any) {
+    onAuthStateChanged(auth, user => {
+      if (!user) {
+        callback()
+      }
+    })
+  }
+}
+
+export class DB {
+  static setUser(email: string, data: any) {
+    setDoc(doc(db, 'users', email), data, {
+      merge: true,
+    })
+  }
+  static async getUser(email: string) {
+    const userSnap = await getDoc(doc(db, 'users', email))
+    return userSnap.data()
+  }
+  static setPost(unixSecond: string, post: Post) {
+    setDoc(doc(db, 'posts', unixSecond), post, { merge: false })
+  }
+  static async getPosts(email = '') {
+    const postsCol = await getDocs(collection(db, 'posts'))
+    const allPosts: DocumentData[] = []
+    postsCol.forEach(post => allPosts.push(post.data()))
+    return email === ''
+      ? allPosts
+      : allPosts.filter(post => post.publisher === email)
   }
 }

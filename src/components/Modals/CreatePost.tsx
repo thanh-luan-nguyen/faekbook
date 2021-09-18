@@ -5,10 +5,11 @@ import Context from '../../utils/Context'
 import TurnOffModalButton from './TurnOffModalButton'
 import myAvatar from '../../utils/images/picture_of_myself.jpg'
 import { themes } from '../../utils/themes'
+import defaultAvatar from '../../utils/images/default_user.png'
 
 export default function CreatePost() {
   const [textLength, setTextLength] = useState<number>(0)
-  const { toggleState } = useContext(Context)
+  const { currentUserInfoState, toggleState } = useContext(Context)
 
   return (
     <StyledDiv
@@ -23,8 +24,16 @@ export default function CreatePost() {
       </div>
       <div className='divider'></div>
       <div id='middle'>
-        <img src={myAvatar} alt='my_avatar' />
-        <div className='name'>Jone Leto</div>
+        <img
+          src={
+            currentUserInfoState ? currentUserInfoState.avatar : defaultAvatar
+          }
+          alt='my_avatar'
+        />
+        <div className='name'>
+          {currentUserInfoState &&
+            `${currentUserInfoState.first_name} ${currentUserInfoState.last_name}`}
+        </div>
       </div>
       <textarea
         placeholder="What's on your mind?"

@@ -1,12 +1,42 @@
+import { useState } from 'react'
 import { useContext } from 'react'
+import { useHistory } from 'react-router'
 import styled from 'styled-components'
+import { Authen } from '../../firebase'
 import globalValues from '../../styles/globalValues'
 import Context from '../../utils/Context'
 import { themes } from '../../utils/themes'
 import TurnOffModalButton from './TurnOffModalButton'
 
 export default function SignUpModal() {
-  const { toggleState, dispatchDimBgModal } = useContext(Context)
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+
+  const history = useHistory()
+  const returnToHomepage = () => {
+    history.push('/faekbook/')
+  }
+  const {
+    handleSignIn,
+    toggleState,
+    dispatchDimBgModal,
+    setCurrentUserInfoState,
+  } = useContext(Context)
+  const handleSignUp = () => {
+    Authen.signUp(email, password, firstName, lastName)
+    Authen.handleSignInOutState(
+      () => handleSignIn(email, password),
+      () => {
+        Authen.signOut()
+        Authen.setCurrentUserStateInfoToNull(() => {
+          setCurrentUserInfoState(null)
+        })
+        returnToHomepage()
+      }
+    )
+  }
   return (
     <StyledDiv theme={toggleState.isDarkTheme ? themes.dark : themes.light}>
       <TurnOffModalButton />
@@ -17,17 +47,41 @@ export default function SignUpModal() {
       <div className='divider'></div>
       <div id='middle'>
         <div className='full-name'>
-          <input type='text' placeholder='First name' />
-          <input type='text' placeholder='Last name' />
+          <input
+            type='text'
+            placeholder='First name'
+            value={firstName}
+            onChange={e => setFirstName(e.target.value)}
+          />
+          <input
+            type='text'
+            placeholder='Last name'
+            value={lastName}
+            onChange={e => setLastName(e.target.value)}
+          />
         </div>
-        <input type='email' placeholder='Email'></input>
-        <input type='password' placeholder='New password' />
-        <button className='sign-up'>Sign Up</button>
+        <input
+          type='email'
+          placeholder='Email'
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+        ></input>
+        <input
+          type='password'
+          placeholder='New password'
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+        />
+        <button className='sign-up' onClick={handleSignUp}>
+          Sign Up
+        </button>
       </div>
       <div className='divider'></div>
       <div id='bottom'>
         <span>Already have an account?</span>
-        <button onClick={dispatchDimBgModal({ type: 'LOG_IN' })}>Log In</button>
+        <button onClick={() => dispatchDimBgModal({ type: 'LOG_IN' })}>
+          Log In
+        </button>
       </div>
     </StyledDiv>
   )

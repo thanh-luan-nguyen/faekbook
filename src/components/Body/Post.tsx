@@ -1,42 +1,60 @@
-import React, { useContext } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import myAvatar from '../../utils/images/picture_of_myself.jpg'
+import { BsThreeDots } from 'react-icons/bs'
+import defaultPhoto from '../../utils/images/default_user.png'
 import Context from '../../utils/Context'
 import { themes } from '../../utils/themes'
 import { AiFillLike } from 'react-icons/ai'
 import { GoComment } from 'react-icons/go'
 import globalValues from '../../styles/globalValues'
 import { format } from 'date-fns'
+import BlueBgLikeIcon from '../../utils/BlueBgLikeIcon'
+import Comment from './Comment'
+import defaultAvatar from '../../utils/images/default_user.png'
 
 const Post: React.FC<{
-  first_name: string
-  last_name: string
+  full_name: string
   avatar: string
-  date_created: Date
+  date: string
   content: string
-  likes: number
-}> = ({ first_name, last_name, avatar, date_created, content, likes }) => {
-  const { toggleState } = useContext(Context)
+  likes: Array<string>
+}> = ({ full_name, avatar, date, content, likes }) => {
+  const { currentUserInfoState, toggleState } = useContext(Context)
+  const [isLikedByCurrentUser, setIsLiked] = useState<boolean>()
+  const [hasAtLeastOneLike, setHasAtLeastOneLike] = useState<boolean>()
+  // const [isShowingComments, setIsShowingComments] = useState(false)
+  useEffect(() => {
+    if (currentUserInfoState) {
+      likes.includes(currentUserInfoState.auth.email)
+        ? setIsLiked(true)
+        : setIsLiked(false)
+    } else setIsLiked(false)
+    likes.length >= 1 ? setHasAtLeastOneLike(true) : setHasAtLeastOneLike(false)
+  })
   return (
     <StyledSection
       theme={toggleState.isDarkTheme ? themes.dark : themes.light}
       isDarkTheme={toggleState.isDarkTheme ? 1 : 0}
+      isLikedByCurrentUser={isLikedByCurrentUser ? 1 : 0}
     >
       <div id='user-info'>
-        <img src={myAvatar} alt='avatar' />
+        <img src={avatar} alt='avatar' />
         <div className='info'>
-          <div className='name'>{first_name + ' ' + last_name}</div>
-          <div className='time'>{format(date_created, 'MMM d')}</div>
+          <div className='name'>{full_name}</div>
+          <div className='time'>
+            {/* {format(date, 'MMM d')} */}
+            {date}
+          </div>
         </div>
       </div>
       <main id='content'>{content}</main>
-      {likes > 0 && (
+      {hasAtLeastOneLike && (
         <div id='likes'>
-          <img
-            src="data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' viewBox='0 0 16 16'%3e%3cdefs%3e%3clinearGradient id='a' x1='50%25' x2='50%25' y1='0%25' y2='100%25'%3e%3cstop offset='0%25' stop-color='%2318AFFF'/%3e%3cstop offset='100%25' stop-color='%230062DF'/%3e%3c/linearGradient%3e%3cfilter id='c' width='118.8%25' height='118.8%25' x='-9.4%25' y='-9.4%25' filterUnits='objectBoundingBox'%3e%3cfeGaussianBlur in='SourceAlpha' result='shadowBlurInner1' stdDeviation='1'/%3e%3cfeOffset dy='-1' in='shadowBlurInner1' result='shadowOffsetInner1'/%3e%3cfeComposite in='shadowOffsetInner1' in2='SourceAlpha' k2='-1' k3='1' operator='arithmetic' result='shadowInnerInner1'/%3e%3cfeColorMatrix in='shadowInnerInner1' values='0 0 0 0 0 0 0 0 0 0.299356041 0 0 0 0 0.681187726 0 0 0 0.3495684 0'/%3e%3c/filter%3e%3cpath id='b' d='M8 0a8 8 0 00-8 8 8 8 0 1016 0 8 8 0 00-8-8z'/%3e%3c/defs%3e%3cg fill='none'%3e%3cuse fill='url(%23a)' xlink:href='%23b'/%3e%3cuse fill='black' filter='url(%23c)' xlink:href='%23b'/%3e%3cpath fill='white' d='M12.162 7.338c.176.123.338.245.338.674 0 .43-.229.604-.474.725a.73.73 0 01.089.546c-.077.344-.392.611-.672.69.121.194.159.385.015.62-.185.295-.346.407-1.058.407H7.5c-.988 0-1.5-.546-1.5-1V7.665c0-1.23 1.467-2.275 1.467-3.13L7.361 3.47c-.005-.065.008-.224.058-.27.08-.079.301-.2.635-.2.218 0 .363.041.534.123.581.277.732.978.732 1.542 0 .271-.414 1.083-.47 1.364 0 0 .867-.192 1.879-.199 1.061-.006 1.749.19 1.749.842 0 .261-.219.523-.316.666zM3.6 7h.8a.6.6 0 01.6.6v3.8a.6.6 0 01-.6.6h-.8a.6.6 0 01-.6-.6V7.6a.6.6 0 01.6-.6z'/%3e%3c/g%3e%3c/svg%3e"
-            alt=''
-          />
-          <span>{likes}</span>
+          <BlueBgLikeIcon />
+          <span>
+            {likes.length} {likes}
+          </span>
         </div>
       )}
 
@@ -50,15 +68,31 @@ const Post: React.FC<{
           <span>View Comments</span>
         </div>
       </div>
+      {/* <div id='comments'>
+        <Comment
+          username='Thanh Luan Nguyen'
+          content='Lo rem ip sum dol or sit am et cons ect etur adi pis icing elit. Eaque, ten etur rei cie ndis! Vero ut co nsequ untur totam culpa num quam cupi d itate, qui bu sdam delen iti vel eos dolor emque assu me nda dolorum ad sint per fer endis! Eaque, repudia ndae?'
+          likes={2}
+        />
+        <Comment username='Thanh Luan Nguyen' content='lorem ipsun' likes={2} />
+      </div> */}
       <div id='comment-input'>
-        <img src={myAvatar} alt='avatar' />
+        <img
+          src={
+            currentUserInfoState ? currentUserInfoState.avatar : defaultAvatar
+          }
+          alt='avatar'
+        />
         <input placeholder='Write a comment...'></input>
       </div>
     </StyledSection>
   )
 }
 
-const StyledSection = styled('section')<{ isDarkTheme: number }>`
+const StyledSection = styled('section')<{
+  isDarkTheme: number
+  isLikedByCurrentUser: number
+}>`
   background-color: ${p => p.theme.main_bgclr};
   color: ${p => p.theme.font_lighter};
   width: 50rem;
@@ -137,8 +171,15 @@ const StyledSection = styled('section')<{ isDarkTheme: number }>`
       }
     }
     .like {
-      color: #036ee2;
+      color: ${p => p.isLikedByCurrentUser && '#036ee2'};
     }
+  }
+  #comments {
+    padding: 1.5rem 1.5rem 0;
+    margin-bottom: -0.75rem;
+    display: flex;
+    flex-flow: column;
+    row-gap: 0.75rem;
   }
   #comment-input {
     background-color: ${p => p.theme.main_bgclr};
@@ -149,6 +190,7 @@ const StyledSection = styled('section')<{ isDarkTheme: number }>`
     img {
       height: 3.5rem;
       width: 3.5rem;
+      background: ${p => p.theme.theme_toggler_bgclr};
     }
     input {
       height: 3.5rem;

@@ -1,22 +1,25 @@
-import { useContext, useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import Context from '../../utils/Context'
 import { themes } from '../../utils/themes'
 import { AiOutlineCamera, AiFillCamera } from 'react-icons/ai'
-import myAvatar from '../../utils/images/picture_of_myself.jpg'
-import coverPhoto from '../../utils/images/cover_photo.jpg'
+import defaultCoverPhoto from '../../utils/images/default_cover_photo.gif'
+import defaultAvatar from '../../utils/images/default_user.png'
 import ColorThief from 'colorthief'
 import useWindowSize, { Size } from '../../hooks/useWindowSize'
 import WhatsOnYourMind from './WhatsOnYourMind'
+import { Authen, DB } from '../../firebase'
 import Post from './Post'
-import { Luan } from '../../types/interface'
+import { fromUnixTime } from 'date-fns'
 
-export default function ProfilePage() {
-  const { toggleState } = useContext(Context)
-  const [bgGradient, setBgGradient] = useState('')
+const ProfilePage: React.FC<any> = () => {
+  const { currentEmail, setCurrentEmail, currentUserInfoState, toggleState } =
+    useContext(Context)
+  const [bgGradient, setBgGradient] = useState<string>('')
   const [editCoverPhotoHidden, setEditCoverPhotoHidden] = useState(false)
   const size: Size = useWindowSize()
 
+  /* get dorminant color of cover photo */
   useEffect(() => {
     const colorThief = new ColorThief()
     const img: any = document.querySelector('#get-dominant-clr')
@@ -26,6 +29,7 @@ export default function ProfilePage() {
     }
   }, [])
 
+  /* width size query for the edit cover photo button */
   useEffect(() => {
     const { width } = size
     if (width !== undefined && width <= 900) {
@@ -33,30 +37,55 @@ export default function ProfilePage() {
     } else setEditCoverPhotoHidden(false)
   }, [size])
 
+  useEffect(() => {
+    const email = Authen.getUserEmail()
+    setCurrentEmail(email)
+  }, [])
+
+  /* get current user posts */
+  const [posts, setPosts] = useState<any>()
+  useEffect(() => {
+    DB.getPosts(currentEmail).then(posts => {
+      if (posts) {
+        posts.reverse()
+        const currentUserPosts = posts.map(p => (
+          <Post
+            key={p.date.seconds}
+            full_name={p.full_name}
+            avatar={p.avatar}
+            date={fromUnixTime(p.date.seconds).toString()}
+            content={p.content}
+            likes={p.likes}
+          />
+        ))
+        setPosts(currentUserPosts)
+      }
+    })
+  }, [])
+
+  /* get current user info */
+
   const renderBgGradientColor = (
     <img
-      src={coverPhoto}
+      src={
+        currentUserInfoState
+          ? currentUserInfoState.cover_photo
+          : defaultCoverPhoto
+      }
       alt='colorthief'
       id='get-dominant-clr'
       style={{ display: 'none' }}
     />
   )
 
-  const renderLuansPosts = Luan.posts.map(p => (
-    <Post
-      first_name={Luan.first_name}
-      last_name={Luan.last_name}
-      avatar={Luan.avatar}
-      date_created={p.date}
-      content={p.content}
-      likes={p.likes.length}
-    />
-  ))
-
   return (
     <StyledDiv
       theme={toggleState.isDarkTheme ? themes.dark : themes.light}
-      coverPhoto={coverPhoto}
+      coverPhoto={
+        currentUserInfoState
+          ? currentUserInfoState.cover_photo
+          : defaultCoverPhoto
+      }
       bgGradient={bgGradient}
       editCoverPhotoHidden={editCoverPhotoHidden}
     >
@@ -64,7 +93,14 @@ export default function ProfilePage() {
         <div id='cover-picture'>
           {renderBgGradientColor}
           <div className='avatar-picture'>
-            <img src={myAvatar} alt='avatar' />
+            <img
+              src={
+                currentUserInfoState
+                  ? currentUserInfoState.avatar
+                  : defaultAvatar
+              }
+              alt='avatar'
+            />
             <div className='update-avatar'>
               {toggleState.isDarkTheme ? (
                 <AiFillCamera className='icon' style={{ fill: 'white' }} />
@@ -79,15 +115,19 @@ export default function ProfilePage() {
         </div>
 
         <div id='intro'>
-          <div className='name'>Thanh Luan Nguyen</div>
+          <div className='name'>
+            {currentUserInfoState
+              ? `${currentUserInfoState.first_name} ${currentUserInfoState.last_name}`
+              : 'default name'}
+          </div>
           <div className='short-description'>
-            Why did you change? Why did you bend and break?
+            {currentUserInfoState && currentUserInfoState.short_bio}
           </div>
         </div>
       </header>
       <main>
         <WhatsOnYourMind />
-        {renderLuansPosts}
+        {posts}
       </main>
       {/* <div className='dummyText'></div> */}
     </StyledDiv>
@@ -113,7 +153,7 @@ const StyledDiv = styled('div')<{
       background-image: url(${p => p.coverPhoto});
       background-size: cover;
       background-position: 50% 40%;
-      width: 70rem;
+      width: 90rem;
       max-width: 100%;
       aspect-ratio: 7/3;
       margin-inline: auto;
@@ -191,3 +231,5 @@ const StyledDiv = styled('div')<{
   main {
   }
 `
+
+export default ProfilePage

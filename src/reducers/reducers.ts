@@ -1,3 +1,6 @@
+import { DB } from '../firebase'
+import { Post } from '../types/interface'
+
 const toggleInitialStates = {
   isDarkTheme: false,
   dropDownMenuIsVisible: false,
@@ -14,28 +17,57 @@ export const toggleReducer = (state = toggleInitialStates, action: any) => {
   }
 }
 
-export const isSignedInReducer = (state = { state: false }, action: any) => {
+export const isSignedInReducer = (state = false, action: any) => {
   switch (action.type) {
     case 'SIGN_IN':
-      return { state: true }
+      return true
     case 'SIGN_OUT':
-      return { state: false }
+      return false
     default:
       return state
   }
 }
 
-export const authenModalReducer = (state = { state: 'none' }, action: any) => {
+export const authenModalReducer = (
+  state = { action: 'close modals' },
+  action: any
+) => {
   switch (action.type) {
     case 'LOG_IN':
-      return { state: 'logIn' }
+      return { action: 'show login modal' }
     case 'SIGN_UP':
-      return { state: 'signUp' }
+      return { action: 'show signup modal' }
     case 'CREATE_POST':
-      return { state: 'createPost' }
+      return { action: 'show create-post modal' }
     case 'NONE':
-      return { state: 'none' }
+      return { action: 'close modals' }
     default:
       return state
   }
 }
+
+// export const currentUserEmailReducer = (state: string | null, action: any) => {
+//   switch (action.type) {
+//     case 'SET_CURRENT_USER_EMAIL':
+//       return action.payload
+//     case 'LOG_OUT':
+//       return null
+//     default:
+//       return state
+//   }
+// }
+
+// export const userReducer = (state: any, action: any) => {
+//   switch (action.type) {
+//     case 'ADD_POST':
+//       const newPost: Post = {
+//         date: new Date(),
+//         content: action.payload,
+//         likes: 0,
+//         comments: [],
+//       }
+//       const updatedPosts = { ...state.posts, newPost }
+//       DB.setUser('thanhluannguyenxyz@gmail.com', updatedPosts)
+//       return { ...state, posts: updatedPosts }
+//   }
+// }

@@ -1,6 +1,6 @@
 import { useContext, useState } from 'react'
 import styled from 'styled-components'
-import Authen from '../../firebase'
+import { Authen } from '../../firebase'
 import globalValues from '../../styles/globalValues'
 import Context from '../../utils/Context'
 import { themes } from '../../utils/themes'
@@ -10,8 +10,11 @@ export default function LogInModal() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
-  const { toggleState, dispatchSignInOut, dispatchDimBgModal } =
-    useContext(Context)
+  const { handleSignIn, toggleState, dispatchDimBgModal } = useContext(Context)
+
+  const handleLogIn = () => {
+    handleSignIn(email, password)
+  }
   return (
     <StyledDiv theme={toggleState.isDarkTheme ? themes.dark : themes.light}>
       <TurnOffModalButton />
@@ -29,14 +32,7 @@ export default function LogInModal() {
           onChange={e => setPassword(e.target.value)}
           placeholder='Password'
         />
-        <button
-          className='log-in-btn'
-          onClick={() => {
-            Authen.signIn(email, password)
-            dispatchSignInOut({ type: 'SIGN_IN' })
-            dispatchDimBgModal({ type: 'NONE' })
-          }}
-        >
+        <button className='log-in-btn' onClick={handleLogIn}>
           Log In
         </button>
       </div>
@@ -45,7 +41,7 @@ export default function LogInModal() {
         <span>New to Faekbook?</span>
         <button
           className='create-new-acc-btn'
-          onClick={dispatchDimBgModal({ type: 'SIGN_UP' })}
+          onClick={() => dispatchDimBgModal({ type: 'SIGN_UP' })}
         >
           Create New Account
         </button>
