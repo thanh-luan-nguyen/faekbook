@@ -1,14 +1,13 @@
 import { DB } from '../firebase'
 import { Post } from '../types/interface'
 
-const toggleInitialStates = {
-  isDarkTheme: false,
-  dropDownMenuIsVisible: false,
-}
-
-export const toggleReducer = (state = toggleInitialStates, action: any) => {
+export const toggleReducer = (state: any, action: any) => {
   switch (action.type) {
-    case 'TOGGLE_DARK_THEME':
+    case 'DARK_THEME':
+      return { ...state, isDarkTheme: true }
+    case 'LIGHT_THEME':
+      return { ...state, isDarkTheme: false }
+    case 'TOGGLE_THEME':
       return { ...state, isDarkTheme: !state.isDarkTheme }
     case 'TOGGLE_DROP_DOWN_MENU':
       return { ...state, dropDownMenuIsVisible: !state.dropDownMenuIsVisible }

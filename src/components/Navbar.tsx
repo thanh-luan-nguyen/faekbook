@@ -13,32 +13,30 @@ import defaultAvatar from '../utils/images/default_user.png'
 
 const Navbar: React.FC<any> = () => {
   const {
-    currentUserInfoState,
+    currentUserInfo,
     toggleState,
-    isSignedIn,
+    isUserSignedIn,
     dispatchToggle,
-    dispatchSignInOut,
+    // dispatchSignInOut,
     dispatchDimBgModal,
   } = useContext(Context)
 
-  useEffect(() => {
-    Authen.handleSignInOutState(
-      () => dispatchSignInOut({ type: 'SIGN_IN' }),
-      () => dispatchSignInOut({ type: 'SIGN_OUT' })
-    )
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  // useEffect(() => {
+  //   Authen.handleSignInOutState(
+  //     () => dispatchSignInOut({ type: 'SIGN_IN' }),
+  //     () => dispatchSignInOut({ type: 'SIGN_OUT' })
+  //   )
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [])
 
   const userProfileButton = (
     <Link to='/faekbook/profile'>
       <div className='user-profile-button'>
         <img
-          src={
-            currentUserInfoState ? currentUserInfoState.avatar : defaultAvatar
-          }
+          src={currentUserInfo ? currentUserInfo.avatar : defaultAvatar}
           alt='avatar'
         />
-        {currentUserInfoState && currentUserInfoState.first_name}
+        {currentUserInfo && currentUserInfo.first_name}
       </div>
     </Link>
   )
@@ -66,7 +64,7 @@ const Navbar: React.FC<any> = () => {
         </Link>
       </div>
       <div className='right'>
-        {isSignedIn ? userProfileButton : logInButton}
+        {isUserSignedIn ? userProfileButton : logInButton}
         <div
           className='toggle-dropdown-menu'
           onClick={e => {

@@ -10,13 +10,12 @@ import useWindowSize, { Size } from '../../hooks/useWindowSize'
 import WhatsOnYourMind from './WhatsOnYourMind'
 import { Authen, DB } from '../../firebase'
 import Post from './Post'
-import { fromUnixTime } from 'date-fns'
 
 const ProfilePage: React.FC<any> = () => {
-  const { currentEmail, setCurrentEmail, currentUserInfoState, toggleState } =
-    useContext(Context)
+  const { currentUserInfo, toggleState, allPosts } = useContext(Context)
   const [bgGradient, setBgGradient] = useState<string>('')
   const [editCoverPhotoHidden, setEditCoverPhotoHidden] = useState(false)
+  // const [currentUserPosts, setCUPosts] = useState<any>(null)
   const size: Size = useWindowSize()
 
   /* get dorminant color of cover photo */
@@ -37,41 +36,25 @@ const ProfilePage: React.FC<any> = () => {
     } else setEditCoverPhotoHidden(false)
   }, [size])
 
-  useEffect(() => {
-    const email = Authen.getUserEmail()
-    setCurrentEmail(email)
-  }, [])
-
-  /* get current user posts */
-  const [posts, setPosts] = useState<any>()
-  useEffect(() => {
-    DB.getPosts(currentEmail).then(posts => {
-      if (posts) {
-        posts.reverse()
-        const currentUserPosts = posts.map(p => (
-          <Post
-            key={p.date.seconds}
-            full_name={p.full_name}
-            avatar={p.avatar}
-            date={fromUnixTime(p.date.seconds).toString()}
-            content={p.content}
-            likes={p.likes}
-          />
-        ))
-        setPosts(currentUserPosts)
-      }
-    })
-  }, [])
-
-  /* get current user info */
+  const renderPosts =
+    currentUserInfo &&
+    allPosts
+      ?.filter((p: any) => p.uid === currentUserInfo.uid)
+      .map((p: any) => (
+        <Post
+          key={p.date}
+          // id={p.date}
+          full_name={p.fullname}
+          avatar={p.avatar}
+          date={p.date}
+          content={p.content}
+          likes={p.likes}
+        />
+      ))
 
   const renderBgGradientColor = (
     <img
-      src={
-        currentUserInfoState
-          ? currentUserInfoState.cover_photo
-          : defaultCoverPhoto
-      }
+      src={currentUserInfo ? currentUserInfo.cover_photo : defaultCoverPhoto}
       alt='colorthief'
       id='get-dominant-clr'
       style={{ display: 'none' }}
@@ -82,9 +65,7 @@ const ProfilePage: React.FC<any> = () => {
     <StyledDiv
       theme={toggleState.isDarkTheme ? themes.dark : themes.light}
       coverPhoto={
-        currentUserInfoState
-          ? currentUserInfoState.cover_photo
-          : defaultCoverPhoto
+        currentUserInfo ? currentUserInfo.cover_photo : defaultCoverPhoto
       }
       bgGradient={bgGradient}
       editCoverPhotoHidden={editCoverPhotoHidden}
@@ -94,11 +75,7 @@ const ProfilePage: React.FC<any> = () => {
           {renderBgGradientColor}
           <div className='avatar-picture'>
             <img
-              src={
-                currentUserInfoState
-                  ? currentUserInfoState.avatar
-                  : defaultAvatar
-              }
+              src={currentUserInfo ? currentUserInfo.avatar : defaultAvatar}
               alt='avatar'
             />
             <div className='update-avatar'>
@@ -116,18 +93,18 @@ const ProfilePage: React.FC<any> = () => {
 
         <div id='intro'>
           <div className='name'>
-            {currentUserInfoState
-              ? `${currentUserInfoState.first_name} ${currentUserInfoState.last_name}`
+            {currentUserInfo
+              ? `${currentUserInfo.first_name} ${currentUserInfo.last_name}`
               : 'default name'}
           </div>
           <div className='short-description'>
-            {currentUserInfoState && currentUserInfoState.short_bio}
+            {currentUserInfo && currentUserInfo.short_bio}
           </div>
         </div>
       </header>
       <main>
         <WhatsOnYourMind />
-        {posts}
+        {renderPosts}
       </main>
       {/* <div className='dummyText'></div> */}
     </StyledDiv>

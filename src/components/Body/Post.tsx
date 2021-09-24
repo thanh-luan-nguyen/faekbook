@@ -8,30 +8,33 @@ import { themes } from '../../utils/themes'
 import { AiFillLike } from 'react-icons/ai'
 import { GoComment } from 'react-icons/go'
 import globalValues from '../../styles/globalValues'
-import { format } from 'date-fns'
+import { format, fromUnixTime } from 'date-fns'
 import BlueBgLikeIcon from '../../utils/BlueBgLikeIcon'
 import Comment from './Comment'
 import defaultAvatar from '../../utils/images/default_user.png'
 
 const Post: React.FC<{
+  // id: string
   full_name: string
   avatar: string
-  date: string
+  date: number
   content: string
   likes: Array<string>
 }> = ({ full_name, avatar, date, content, likes }) => {
-  const { currentUserInfoState, toggleState } = useContext(Context)
-  const [isLikedByCurrentUser, setIsLiked] = useState<boolean>()
-  const [hasAtLeastOneLike, setHasAtLeastOneLike] = useState<boolean>()
+  const { currentUserInfo, toggleState, isUserSignedIn } = useContext(Context)
+  const [isLikedByCurrentUser, setIsLiked] = useState<boolean>(false)
+  const [hasAtLeastOneLike, setHasAtLeastOneLike] = useState<boolean>(false)
   // const [isShowingComments, setIsShowingComments] = useState(false)
+
   useEffect(() => {
-    if (currentUserInfoState) {
-      likes.includes(currentUserInfoState.auth.email)
+    if (isUserSignedIn) {
+      likes.includes(currentUserInfo?.uid)
         ? setIsLiked(true)
         : setIsLiked(false)
     } else setIsLiked(false)
     likes.length >= 1 ? setHasAtLeastOneLike(true) : setHasAtLeastOneLike(false)
-  })
+  }, [])
+
   return (
     <StyledSection
       theme={toggleState.isDarkTheme ? themes.dark : themes.light}
@@ -44,7 +47,7 @@ const Post: React.FC<{
           <div className='name'>{full_name}</div>
           <div className='time'>
             {/* {format(date, 'MMM d')} */}
-            {date}
+            {fromUnixTime(date).toString()}
           </div>
         </div>
       </div>
@@ -78,9 +81,7 @@ const Post: React.FC<{
       </div> */}
       <div id='comment-input'>
         <img
-          src={
-            currentUserInfoState ? currentUserInfoState.avatar : defaultAvatar
-          }
+          src={currentUserInfo ? currentUserInfo.avatar : defaultAvatar}
           alt='avatar'
         />
         <input placeholder='Write a comment...'></input>
@@ -129,6 +130,7 @@ const StyledSection = styled('section')<{
   #content {
     font-size: 1.5rem;
     padding: 1.5rem 1.5rem 0;
+    word-wrap: break-word;
   }
   #likes {
     padding: 1.5rem 1.5rem 0;

@@ -16,19 +16,48 @@ import {
   signOut,
 } from 'firebase/auth'
 import defaultAvatar from './utils/images/default_user.png'
-import defaultCoverPhoto from './utils/images/default_cover_photo.png'
-import { Post } from './types/interface'
+import defaultCoverPhoto from './utils/images/default_cover_photo.gif'
+import { Post, User } from './types/interface'
+
+//  import { initializeApp } from 'firebase/app'
+//  import {
+//    getAuth,
+//    onAuthStateChanged,
+//    GoogleAuthProvider,
+//    signInWithPopup,
+//    signOut,
+//  } from 'firebase/auth'
+//  import {
+//    getFirestore,
+//    collection,
+//    addDoc,
+//    query,
+//    orderBy,
+//    limit,
+//    onSnapshot,
+//    setDoc,
+//    updateDoc,
+//    doc,
+//    serverTimestamp,
+//  } from 'firebase/firestore'
+//  import {
+//    getStorage,
+//    ref,
+//    uploadBytesResumable,
+//    getDownloadURL,
+//  } from 'firebase/storage'
+//  import { getMessaging, getToken, onMessage } from 'firebase/messaging'
+//  import { getPerformance } from 'firebase/performance'
+
+//  import { getFirebaseConfig } from './firebase-config.js'
 
 initializeApp({
-  apiKey: 'AIzaSyD5ADlnZW_bL1r3q3w2ckoqqhl4cjLU7B8',
-  authDomain: 'faekbook-35cc8.firebaseapp.com',
-  databaseURL:
-    'https://faekbook-35cc8-default-rtdb.asia-southeast1.firebasedatabase.app',
-  projectId: 'faekbook-35cc8',
-  storageBucket: 'faekbook-35cc8.appspot.com',
-  messagingSenderId: '692722345820',
-  appId: '1:692722345820:web:964baa89b10843e20c8399',
-  measurementId: 'G-E0CJXD28RC',
+  apiKey: 'AIzaSyAowcCuiyILtMdMP96n-RzUh2QVKvrN4OQ',
+  authDomain: 'faekbook1-aa0f8.firebaseapp.com',
+  projectId: 'faekbook1-aa0f8',
+  storageBucket: 'faekbook1-aa0f8.appspot.com',
+  messagingSenderId: '989041805197',
+  appId: '1:989041805197:web:7661cc2571e3fb3317dfc4',
 })
 
 export const auth = getAuth()
@@ -44,18 +73,15 @@ export class Authen {
   ) {
     return createUserWithEmailAndPassword(auth, email, password)
       .then(userCredential => {
-        console.log('signUp', userCredential)
-        const newUser = {
-          auth: {
-            email: email,
-            password: password,
-          },
+        console.log('SignUp: ', userCredential)
+        const newUser: User = {
+          uid: userCredential.user.uid,
           first_name: firstName,
           last_name: lastName,
-          short_bio: '',
+          short_bio: 'my bio',
           avatar: defaultAvatar,
-          theme: 'light',
-          cover_photo: '',
+          is_dark_theme: false,
+          cover_photo: defaultCoverPhoto,
         }
         DB.setUser(email, newUser)
       })
@@ -64,7 +90,7 @@ export class Authen {
       })
   }
   static signIn(email: string, password: string) {
-    return signInWithEmailAndPassword(auth, email, password)
+    signInWithEmailAndPassword(auth, email, password)
       .then(userCredential => {
         console.log(
           `User with email ${userCredential.user.email} has logged in successfully`
@@ -99,34 +125,26 @@ export class Authen {
       }
     })
   }
-  static setCurrentUserStateInfoToNull(callback: any) {
-    onAuthStateChanged(auth, user => {
-      if (!user) {
-        callback()
-      }
-    })
-  }
 }
 
 export class DB {
-  static setUser(email: string, data: any) {
-    setDoc(doc(db, 'users', email), data, {
-      merge: true,
-    })
+  static setUser(uid: string, payload: any) {
+    setDoc(doc(db, 'users', uid), payload)
   }
-  static async getUser(email: string) {
-    const userSnap = await getDoc(doc(db, 'users', email))
+  static updateUserInfo(uid: string, payload: any) {
+    setDoc(doc(db, 'users', uid), payload, { merge: true })
+  }
+  static async getUser(uid: string) {
+    const userSnap = await getDoc(doc(db, 'users', uid))
     return userSnap.data()
   }
-  static setPost(unixSecond: string, post: Post) {
-    setDoc(doc(db, 'posts', unixSecond), post, { merge: false })
+  static setPost(unixSecond: number, post: Post) {
+    setDoc(doc(db, 'posts', unixSecond.toString()), post, { merge: false })
   }
-  static async getPosts(email = '') {
+  static async getPosts(uid = '') {
     const postsCol = await getDocs(collection(db, 'posts'))
     const allPosts: DocumentData[] = []
     postsCol.forEach(post => allPosts.push(post.data()))
-    return email === ''
-      ? allPosts
-      : allPosts.filter(post => post.publisher === email)
+    return uid === '' ? allPosts : allPosts.filter(post => post.uid === uid)
   }
 }

@@ -24,7 +24,7 @@ const GlobalStyle = createGlobalStyle`
     body {
       font-size: 1em;
       font-family: 'Roboto', sans-serif;
-      user-select: none;
+      /* user-select: none; */
     }
 
     img {

@@ -7,29 +7,37 @@ import globalValues from '../../styles/globalValues'
 import { Link } from 'react-router-dom'
 import { themes } from '../../utils/themes'
 import defaultAvatar from '../../utils/images/default_user.png'
-import { Authen } from '../../firebase'
+import { Authen, DB } from '../../firebase'
 import { useHistory } from 'react-router'
 
 const DropDownMenu: React.FC<any> = () => {
   const {
-    currentUserInfoState,
+    currentUserInfo,
+    isUserSignedIn,
     toggleState,
-    isSignedIn,
     dispatchToggle,
     dispatchDimBgModal,
-    handleSignOut,
   } = useContext(Context)
-  const history = useHistory()
+  // const isSignedIn = Authen.isUserSignedIn()
 
+  const history = useHistory()
   const returnToHomepage = () => {
     history.push('/faekbook/')
   }
 
-  const avatar = (
+  const handleToggleTheme = () => {
+    dispatchToggle({ type: 'TOGGLE_THEME' })
+    DB.updateUserInfo(currentUserInfo.uid, {
+      is_dark_theme: !toggleState.isDarkTheme,
+    })
+    dispatchToggle({ type: 'TOGGLE_DROP_DOWN_MENU' })
+  }
+
+  const renderAvatar = (
     <img
       src={
-        isSignedIn && currentUserInfoState
-          ? currentUserInfoState.avatar
+        isUserSignedIn && currentUserInfo
+          ? currentUserInfo.avatar
           : defaultAvatar
       }
       alt='avatar'
@@ -39,37 +47,31 @@ const DropDownMenu: React.FC<any> = () => {
   return (
     <StyledDiv
       theme={toggleState.isDarkTheme ? themes.dark : themes.light}
-      isSignedIn={isSignedIn ? 1 : 0}
+      isUserSignedIn={isUserSignedIn ? 1 : 0}
       onClick={e => e.stopPropagation()}
     >
       <Link
         to='/faekbook/profile'
         onClick={() =>
-          isSignedIn && dispatchToggle({ type: 'TOGGLE_DROP_DOWN_MENU' })
+          isUserSignedIn && dispatchToggle({ type: 'TOGGLE_DROP_DOWN_MENU' })
         }
       >
         <div className='profile'>
-          {avatar}
+          {renderAvatar}
           <div className='name'>
             <span>
-              {isSignedIn && currentUserInfoState
-                ? `${currentUserInfoState.first_name} ${currentUserInfoState.last_name}`
+              {isUserSignedIn && currentUserInfo
+                ? `${currentUserInfo.first_name} ${currentUserInfo.last_name}`
                 : 'User'}
             </span>
-            <span>{isSignedIn ? 'See your profile' : 'Please log in'}</span>
+            <span>{isUserSignedIn ? 'See your profile' : 'Please log in'}</span>
           </div>
         </div>
       </Link>
 
       <div className='divider' />
 
-      <div
-        className='theme-toggler'
-        onClick={() => {
-          dispatchToggle({ type: 'TOGGLE_DARK_THEME' })
-          dispatchToggle({ type: 'TOGGLE_DROP_DOWN_MENU' })
-        }}
-      >
+      <div className='theme-toggler' onClick={handleToggleTheme}>
         <div className='icon'>
           {toggleState.isDarkTheme ? <FaSun /> : <FaMoon />}
         </div>
@@ -80,22 +82,24 @@ const DropDownMenu: React.FC<any> = () => {
         className='log-in-out'
         onClick={() => {
           dispatchToggle({ type: 'TOGGLE_DROP_DOWN_MENU' })
-          isSignedIn
+          isUserSignedIn
             ? (() => {
-                handleSignOut()
+                Authen.signOut()
                 returnToHomepage()
               })()
             : dispatchDimBgModal({ type: 'LOG_IN' })
         }}
       >
-        <div className='icon'>{isSignedIn ? <GoSignOut /> : <GoSignIn />}</div>
-        Log {isSignedIn ? 'Out' : 'In'}
+        <div className='icon'>
+          {isUserSignedIn ? <GoSignOut /> : <GoSignIn />}
+        </div>
+        Log {isUserSignedIn ? 'Out' : 'In'}
       </div>
     </StyledDiv>
   )
 }
 
-const StyledDiv = styled('div')<{ isSignedIn: number }>`
+const StyledDiv = styled('div')<{ isUserSignedIn: number }>`
   position: fixed;
   right: 1rem;
   top: 5rem;
@@ -121,9 +125,9 @@ const StyledDiv = styled('div')<{ isSignedIn: number }>`
   /* profile */
   a {
     text-decoration: none;
-    pointer-events: ${p => (p.isSignedIn ? 'auto' : 'none')};
+    pointer-events: ${p => (p.isUserSignedIn ? 'auto' : 'none')};
     .profile {
-      opacity: ${p => (p.isSignedIn ? '100%' : '30%')};
+      opacity: ${p => (p.isUserSignedIn ? '100%' : '30%')};
       img {
         border-radius: 50%;
         height: 5rem;
@@ -178,7 +182,7 @@ const StyledDiv = styled('div')<{ isSignedIn: number }>`
       svg {
         position: absolute;
         top: 0.7rem;
-        left: ${p => (p.isSignedIn ? '0.7rem' : '0.5rem')};
+        left: ${p => (p.isUserSignedIn ? '0.7rem' : '0.5rem')};
       }
     }
   }

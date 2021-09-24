@@ -14,28 +14,28 @@ export default function SignUpModal() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
-  const history = useHistory()
-  const returnToHomepage = () => {
-    history.push('/faekbook/')
-  }
+  // const history = useHistory()
+  // const returnToHomepage = () => {
+  //   history.push('/faekbook/')
+  // }
   const {
     handleSignIn,
     toggleState,
     dispatchDimBgModal,
-    setCurrentUserInfoState,
+    // setCurrentUserInfoState,
   } = useContext(Context)
   const handleSignUp = () => {
     Authen.signUp(email, password, firstName, lastName)
-    Authen.handleSignInOutState(
-      () => handleSignIn(email, password),
-      () => {
-        Authen.signOut()
-        Authen.setCurrentUserStateInfoToNull(() => {
-          setCurrentUserInfoState(null)
-        })
-        returnToHomepage()
-      }
-    )
+    handleSignIn(email, password)
+    // Authen.handleSignInOutState(
+    //   () => handleSignIn(email, password),
+    //   () => {
+    //     Authen.signOut(() => {
+    //       setCurrentUserInfoState(null)
+    //     })
+    //     returnToHomepage()
+    //   }
+    // )
   }
   return (
     <StyledDiv theme={toggleState.isDarkTheme ? themes.dark : themes.light}>

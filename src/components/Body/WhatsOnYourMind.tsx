@@ -6,12 +6,12 @@ import { themes } from '../../utils/themes'
 import defaultAvatar from '../../utils/images/default_user.png'
 
 export default function WhatsOnYourMind() {
-  const { currentUserInfoState, toggleState, dispatchDimBgModal } =
+  const { currentUserInfo, toggleState, dispatchDimBgModal } =
     useContext(Context)
   return (
     <StyledSection theme={toggleState.isDarkTheme ? themes.dark : themes.light}>
       <img
-        src={currentUserInfoState ? currentUserInfoState.avatar : defaultAvatar}
+        src={currentUserInfo ? currentUserInfo.avatar : defaultAvatar}
         alt='avatar'
       />
       <div onClick={() => dispatchDimBgModal({ type: 'CREATE_POST' })}>

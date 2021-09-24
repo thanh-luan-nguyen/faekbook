@@ -16,17 +16,51 @@ import MainPage from './components/Body/MainPage'
 import ProfilePage from './components/Body/ProfilePage'
 import DropDownMenu from './components/Modals/DropDownMenu'
 import CreatePost from './components/Modals/CreatePost'
-import { Hiep, Luan, Long, posts } from './types/interface'
-import { Authen, DB } from './firebase'
+import { Hiep, Luan, Long } from './types/interface'
+import { auth, Authen, db, DB } from './firebase'
 import { getUnixTime } from 'date-fns'
+import { onAuthStateChanged } from '@firebase/auth'
+import { collection, doc, getDoc, getDocs } from '@firebase/firestore'
 
 const App: React.FC<any> = () => {
+  const [isUserSignedIn, setIsUserSignedIn] = useState<boolean>(false)
+  const [currentUserInfo, setCurrentUserInfo] = useState<any>(null)
   const [toggleState, dispatchToggle] = useReducer(toggleReducer, {
     isDarkTheme: false,
     dropDownMenuIsVisible: false,
   })
 
-  const [isSignedIn, dispatchSignInOut] = useReducer(isSignedInReducer, false)
+  const [allPosts, setPosts] = useState<any>(null)
+
+  useEffect(() => {
+    ;(async () => {})()
+    onAuthStateChanged(auth, async user => {
+      if (user) {
+        // console.log(`onSignIn. UID: ${user.uid}, email: ${user.email}`)
+        // set sign-in state
+        setIsUserSignedIn(true)
+        getDoc(doc(db, 'users', user.uid)).then(userSnap => {
+          // get current user specific info
+          const currentUserInfo = userSnap.data()
+          setCurrentUserInfo(currentUserInfo)
+
+          DB.getPosts().then(allPosts => {
+            allPosts.reverse()
+            setPosts(allPosts)
+          })
+
+          // set theme
+          currentUserInfo?.is_dark_theme
+            ? dispatchToggle({ type: 'DARK_THEME' })
+            : dispatchToggle({ type: 'LIGHT_THEME' })
+        })
+      } else {
+        setIsUserSignedIn(false)
+        setCurrentUserInfo(null)
+        dispatchToggle({ type: 'LIGHT_THEME' })
+      }
+    })
+  }, [])
 
   const [dimBgModal, dispatchDimBgModal] = useReducer(authenModalReducer, {
     action: 'close modals',
@@ -45,67 +79,81 @@ const App: React.FC<any> = () => {
     }
   }
 
-  const [currentEmail, setCurrentEmail] = useState<any>()
-  useEffect(() => {
-    const email = Authen.getUserEmail()
-    if (email) {
-      setCurrentEmail(email)
-    }
-  })
-  const [currentUserInfoState, setCurrentUserInfoState] = useState<any>()
-  useEffect(() => {
-    if (currentEmail) {
-      DB.getUser(currentEmail).then(currentUser =>
-        setCurrentUserInfoState(currentUser)
-      )
-    } else setCurrentUserInfoState(null)
-  }, [currentEmail])
+  // const [currentUserEmail, setCurrentEmail] = useState<any>()
+  // useEffect(() => {
+  //   const email = Authen.getUserEmail()
+  //   if (email) {
+  //     setCurrentEmail(email)
+  //   }
+  // }, [])
+  // const [currentUserInfoState, setCurrentUserInfoState] = useState<any>(null)
+  // useEffect(() => {
+  //   if (currentUserEmail) {
+  //     DB.getUser(currentUserEmail).then(currentUser => {
+  //       setCurrentUserInfoState(currentUser)
+  //     })
+  //   } else setCurrentUserInfoState(null)
+  // }, [])
+  // useEffect(() => {
+  //   currentUserInfoState?.is_dark_theme
+  //     ? dispatchToggle({ type: 'SET_TO_DARK_THEME' })
+  //     : dispatchToggle({ type: 'SET_TO_LIGHT_THEME' })
+  // }, [])
 
-  const handleSignIn = (email: string, password: string) => {
-    Authen.signIn(email, password)
-    setCurrentEmail(email)
-    dispatchSignInOut({ type: 'SIGN_IN' })
-    dispatchDimBgModal({ type: 'NONE' })
-  }
+  // useEffect(() => {
+  //   currentUserEmail &&
+  //     isSignedIn &&
+  //     DB.updateUserInfo(currentUserEmail, {
+  //       is_dark_theme: toggleState.isDarkTheme,
+  //     })
+  // }, [toggleState])
 
-  const handleSignOut = () => {
-    Authen.signOut()
-    Authen.setCurrentUserStateInfoToNull(() => {
-      setCurrentUserInfoState(null)
-    })
-  }
+  // const handleSignIn = (email: string, password: string) => {
+  //   Authen.signIn({ email, password }, () => {
+  //     setCurrentEmail(email)
+  //     currentUserInfoState?.is_dark_theme
+  //       ? dispatchToggle({ type: 'SET_TO_DARK_THEME' })
+  //       : dispatchToggle({ type: 'SET_TO_LIGHT_THEME' })
+  //     // dispatchSignInOut({ type: 'SIGN_IN' })
+  //     dispatchDimBgModal({ type: 'NONE' })
+  //   })
+  // }
+
+  // const handleSignOut = () => {
+  //   Authen.signOut(() => setCurrentUserInfoState(null))
+  //   // dispatchSignInOut({ type: 'SIGN_OUT' })
+  //   // dispatchToggle({ type: 'SET_TO_LIGHT_THEME' })
+  // }
 
   useEffect(() => {
-    // for (let post of posts) {
-    //   DB.setPost(getUnixTime(post.date).toString(), post)
-    // }
+    // DB.updateUserInfo(currentUserEmail, { theme: 'light' })
     // DB.getPosts(true, currentUser)
     // DB.getPosts()
-    // DB.setUser('long@gmail.com', Long)
-    // DB.setUser('hiep@gmail.com', Hiep)
+    // for (let p of posts) {
+    //   DB.setPost(getUnixTime(p.date).toString(), p)
+    // }
+    // DB.setUser('KyZEVL64zbZqU3H4CG7zzx0tcHk2', Luan)
+    // DB.setUser('9szNArJnruN0LzqeT2iuzL8qgHl1', Long)
+    // DB.setUser('jOChZLcqLSh05KiOFjPku0LSXBp1', Hiep)
     // Authen.signUp('consutoraku@gmail.com', 'thanhLuan123')
-    // Authen.signUp('thanhluannguyenxyz@gmail.com', 'iwiwlkiwljoo')
+    // Authen.signUp('thanhluannguyenxyz@gmail.com', 'iwiwlkiwljnpm startoo')
     // Authen.getUserData('HuICL90OPLUfmvXJHE6L6bwSyFi2')
     // Authen.getUserData('thanhluannguyenxyz@gmail.com')
-    // Authen.signIn('thanhluannguyenxyz@gmail.com', 'iwiwlkiwljoo')
+    // Authen.signIn('hiep@gmail.com', 'hiephiep')
     // Authen.signOut()
   }, [])
 
   return (
     <Context.Provider
       value={{
-        currentEmail,
-        setCurrentEmail,
-        currentUserInfoState,
-        setCurrentUserInfoState,
-        handleSignIn,
+        allPosts,
+        setPosts,
+        isUserSignedIn,
+        currentUserInfo,
         toggleState,
         dispatchToggle,
-        isSignedIn,
-        dispatchSignInOut,
         dimBgModal,
         dispatchDimBgModal,
-        handleSignOut,
       }}
     >
       <Router>

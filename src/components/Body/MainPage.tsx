@@ -1,3 +1,4 @@
+import { async } from '@firebase/util'
 import { fromUnixTime } from 'date-fns'
 import { useContext, useEffect, useState } from 'react'
 import styled from 'styled-components'
@@ -8,32 +9,23 @@ import Post from './Post'
 import WhatsOnYourMind from './WhatsOnYourMind'
 
 const MainPage: React.FC<any> = () => {
-  const { toggleState, isSignedIn } = useContext(Context)
+  const { toggleState, isUserSignedIn, allPosts } = useContext(Context)
 
-  const [posts, setPosts] = useState<any>()
-  useEffect(() => {
-    DB.getPosts().then(posts => {
-      if (posts) {
-        posts.reverse()
-        const allPosts = posts.map(p => (
-          <Post
-            key={p.date.seconds}
-            full_name={p.full_name}
-            avatar={p.avatar}
-            date={fromUnixTime(p.date.seconds).toString()}
-            content={p.content}
-            likes={p.likes}
-          />
-        ))
-        setPosts(allPosts)
-      }
-    })
-  }, [])
-
+  const renderPosts = allPosts?.map((p: any) => (
+    <Post
+      key={p.date}
+      // id={p.date}
+      full_name={p.fullname}
+      avatar={p.avatar}
+      date={p.date}
+      content={p.content}
+      likes={p.likes}
+    />
+  ))
   return (
     <StyledDiv theme={toggleState.isDarkTheme ? themes.dark : themes.light}>
-      {isSignedIn && <WhatsOnYourMind />}
-      {posts}
+      {isUserSignedIn && <WhatsOnYourMind />}
+      {renderPosts}
     </StyledDiv>
   )
 }

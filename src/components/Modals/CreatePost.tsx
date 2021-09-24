@@ -6,17 +6,47 @@ import TurnOffModalButton from './TurnOffModalButton'
 import myAvatar from '../../utils/images/picture_of_myself.jpg'
 import { themes } from '../../utils/themes'
 import defaultAvatar from '../../utils/images/default_user.png'
+import { format, getUnixTime } from 'date-fns'
+import { Post } from '../../types/interface'
+import { DB } from '../../firebase'
 
 export default function CreatePost() {
-  const [textLength, setTextLength] = useState<number>(0)
-  const { currentUserInfoState, toggleState } = useContext(Context)
+  const [content, setContent] = useState<string>('')
+  const {
+    currentUserInfo,
+    toggleState,
+    dispatchDimBgModal,
+    allPosts,
+    setPosts,
+  } = useContext(Context)
+
+  const addPost = () => {
+    const timePosted = new Date()
+    const unixSecond = getUnixTime(timePosted)
+    const post: Post = {
+      uid: currentUserInfo.uid,
+      fullname: currentUserInfo.first_name + ' ' + currentUserInfo.last_name,
+      avatar: currentUserInfo.avatar,
+      date: unixSecond,
+      content,
+      likes: [],
+      comments: [],
+    }
+
+    const updatedPosts = allPosts
+    updatedPosts.unshift(post)
+    setPosts(updatedPosts)
+    DB.setPost(unixSecond, post)
+
+    dispatchDimBgModal({ type: 'NONE' })
+  }
 
   return (
     <StyledDiv
       theme={toggleState.isDarkTheme ? themes.dark : themes.light}
       isDarkTheme={toggleState.isDarkTheme ? 1 : 0}
-      textSmallSize={textLength > 40 ? 1 : 0}
-      postButtonActivated={textLength > 0 ? 1 : 0}
+      textSmallSize={content.length > 40 ? 1 : 0}
+      postButtonActivated={content.length > 0 ? 1 : 0}
     >
       <TurnOffModalButton />
       <div id='top'>
@@ -25,22 +55,23 @@ export default function CreatePost() {
       <div className='divider'></div>
       <div id='middle'>
         <img
-          src={
-            currentUserInfoState ? currentUserInfoState.avatar : defaultAvatar
-          }
+          src={currentUserInfo ? currentUserInfo.avatar : defaultAvatar}
           alt='my_avatar'
         />
         <div className='name'>
-          {currentUserInfoState &&
-            `${currentUserInfoState.first_name} ${currentUserInfoState.last_name}`}
+          {currentUserInfo &&
+            `${currentUserInfo.first_name} ${currentUserInfo.last_name}`}
         </div>
       </div>
       <textarea
         placeholder="What's on your mind?"
-        onChange={e => setTextLength(e.target.value.length)}
+        onChange={e => setContent(e.target.value)}
+        autoFocus
       />
       <div className='post-button'>
-        <button>Post</button>
+        <button disabled={content.length === 0} onClick={addPost}>
+          Post
+        </button>
       </div>
     </StyledDiv>
   )

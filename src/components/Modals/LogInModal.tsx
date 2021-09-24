@@ -10,10 +10,11 @@ export default function LogInModal() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
-  const { handleSignIn, toggleState, dispatchDimBgModal } = useContext(Context)
+  const { toggleState, dispatchDimBgModal } = useContext(Context)
 
   const handleLogIn = () => {
-    handleSignIn(email, password)
+    Authen.signIn(email, password)
+    dispatchDimBgModal({ type: 'NONE' })
   }
   return (
     <StyledDiv theme={toggleState.isDarkTheme ? themes.dark : themes.light}>
