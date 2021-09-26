@@ -1,8 +1,8 @@
 {
   "files": {
     "main.css": "/faekbook/static/css/main.28cf8577.chunk.css",
-    "main.js": "/faekbook/static/js/main.86d01220.chunk.js",
-    "main.js.map": "/faekbook/static/js/main.86d01220.chunk.js.map",
+    "main.js": "/faekbook/static/js/main.782963b8.chunk.js",
+    "main.js.map": "/faekbook/static/js/main.782963b8.chunk.js.map",
     "runtime-main.js": "/faekbook/static/js/runtime-main.5c881d7b.js",
     "runtime-main.js.map": "/faekbook/static/js/runtime-main.5c881d7b.js.map",
     "static/js/2.1814300d.chunk.js": "/faekbook/static/js/2.1814300d.chunk.js",
@@ -15,6 +15,6 @@
     "static/js/runtime-main.5c881d7b.js",
     "static/js/2.1814300d.chunk.js",
     "static/css/main.28cf8577.chunk.css",
-    "static/js/main.86d01220.chunk.js"
+    "static/js/main.782963b8.chunk.js"
   ]
 }
