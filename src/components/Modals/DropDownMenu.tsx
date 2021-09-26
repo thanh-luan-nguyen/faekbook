@@ -5,14 +5,15 @@ import { GoSignOut, GoSignIn } from 'react-icons/go'
 import styled from 'styled-components'
 import globalValues from '../../styles/globalValues'
 import { Link } from 'react-router-dom'
-import { themes } from '../../utils/themes'
-import defaultAvatar from '../../utils/images/default_user.png'
-import { Authen, DB } from '../../firebase'
+import { imageObjectSettings, themes } from '../../utils/themes'
+import { Authen, DB } from '../../firebaseConfig'
 import { useHistory } from 'react-router'
+import { defaultAvatar } from '../../utils/defaults'
 
 const DropDownMenu: React.FC<any> = () => {
   const {
     currentUserInfo,
+    CUAvatarURL,
     isUserSignedIn,
     toggleState,
     dispatchToggle,
@@ -27,22 +28,14 @@ const DropDownMenu: React.FC<any> = () => {
 
   const handleToggleTheme = () => {
     dispatchToggle({ type: 'TOGGLE_THEME' })
-    DB.updateUserInfo(currentUserInfo.uid, {
-      is_dark_theme: !toggleState.isDarkTheme,
-    })
+    isUserSignedIn &&
+      DB.updateUserInfo(currentUserInfo.uid, {
+        is_dark_theme: !toggleState.isDarkTheme,
+      })
     dispatchToggle({ type: 'TOGGLE_DROP_DOWN_MENU' })
   }
 
-  const renderAvatar = (
-    <img
-      src={
-        isUserSignedIn && currentUserInfo
-          ? currentUserInfo.avatar
-          : defaultAvatar
-      }
-      alt='avatar'
-    />
-  )
+  const renderAvatar = <img src={CUAvatarURL || defaultAvatar} alt='avatar' />
 
   return (
     <StyledDiv
@@ -129,9 +122,9 @@ const StyledDiv = styled('div')<{ isUserSignedIn: number }>`
     .profile {
       opacity: ${p => (p.isUserSignedIn ? '100%' : '30%')};
       img {
-        border-radius: 50%;
         height: 5rem;
         background: ${p => p.theme.theme_toggler_bgclr};
+        ${imageObjectSettings}
       }
       .name {
         display: flex;

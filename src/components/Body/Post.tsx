@@ -1,39 +1,44 @@
 import React, { useContext, useEffect, useState } from 'react'
 import styled from 'styled-components'
-import myAvatar from '../../utils/images/picture_of_myself.jpg'
 import { BsThreeDots } from 'react-icons/bs'
-import defaultPhoto from '../../utils/images/default_user.png'
 import Context from '../../utils/Context'
-import { themes } from '../../utils/themes'
+import { imageObjectSettings, themes } from '../../utils/themes'
 import { AiFillLike } from 'react-icons/ai'
 import { GoComment } from 'react-icons/go'
 import globalValues from '../../styles/globalValues'
 import { format, fromUnixTime } from 'date-fns'
 import BlueBgLikeIcon from '../../utils/BlueBgLikeIcon'
 import Comment from './Comment'
-import defaultAvatar from '../../utils/images/default_user.png'
+import { defaultAvatar } from '../../utils/defaults'
+import { Timestamp } from '@firebase/firestore'
+import { Storage } from '../../firebaseConfig'
 
 const Post: React.FC<{
-  // id: string
+  uid: string
   full_name: string
-  avatar: string
-  date: number
+  date: Timestamp
   content: string
   likes: Array<string>
-}> = ({ full_name, avatar, date, content, likes }) => {
-  const { currentUserInfo, toggleState, isUserSignedIn } = useContext(Context)
+  is_profile_page?: boolean
+}> = ({ full_name, uid, date, content, likes, is_profile_page }) => {
+  const { currentUserInfo, toggleState, isUserSignedIn, CUAvatarURL } =
+    useContext(Context)
   const [isLikedByCurrentUser, setIsLiked] = useState<boolean>(false)
   const [hasAtLeastOneLike, setHasAtLeastOneLike] = useState<boolean>(false)
   // const [isShowingComments, setIsShowingComments] = useState(false)
 
+  const [postAvatar, setPostAvatar] = useState<any>(null)
   useEffect(() => {
+    //? set post avatar
+    Storage.setPhotosURL(uid, setPostAvatar)
+    //? set like effects
     if (isUserSignedIn) {
       likes.includes(currentUserInfo?.uid)
         ? setIsLiked(true)
         : setIsLiked(false)
     } else setIsLiked(false)
     likes.length >= 1 ? setHasAtLeastOneLike(true) : setHasAtLeastOneLike(false)
-  }, [])
+  }, [currentUserInfo])
 
   return (
     <StyledSection
@@ -42,12 +47,17 @@ const Post: React.FC<{
       isLikedByCurrentUser={isLikedByCurrentUser ? 1 : 0}
     >
       <div id='user-info'>
-        <img src={avatar} alt='avatar' />
+        <img
+          src={is_profile_page ? CUAvatarURL : postAvatar || defaultAvatar}
+          alt='avatar'
+        />
         <div className='info'>
           <div className='name'>{full_name}</div>
           <div className='time'>
-            {/* {format(date, 'MMM d')} */}
-            {fromUnixTime(date).toString()}
+            {`${format(fromUnixTime(date.seconds), 'yyyy, MMM d')} at ${format(
+              fromUnixTime(date.seconds),
+              'h:m a'
+            )}`}
           </div>
         </div>
       </div>
@@ -81,7 +91,7 @@ const Post: React.FC<{
       </div> */}
       <div id='comment-input'>
         <img
-          src={currentUserInfo ? currentUserInfo.avatar : defaultAvatar}
+          src={isUserSignedIn ? CUAvatarURL || defaultAvatar : defaultAvatar}
           alt='avatar'
         />
         <input placeholder='Write a comment...'></input>
@@ -111,6 +121,7 @@ const StyledSection = styled('section')<{
     img {
       height: 4rem;
       width: 4rem;
+      ${imageObjectSettings}
     }
     .info {
       flex-grow: 1;
@@ -193,6 +204,7 @@ const StyledSection = styled('section')<{
       height: 3.5rem;
       width: 3.5rem;
       background: ${p => p.theme.theme_toggler_bgclr};
+      ${imageObjectSettings}
     }
     input {
       height: 3.5rem;

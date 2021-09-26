@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useContext } from 'react'
 import { useHistory } from 'react-router'
 import styled from 'styled-components'
-import { Authen } from '../../firebase'
+import { Authen } from '../../firebaseConfig'
 import globalValues from '../../styles/globalValues'
 import Context from '../../utils/Context'
 import { themes } from '../../utils/themes'
@@ -19,23 +19,14 @@ export default function SignUpModal() {
   //   history.push('/faekbook/')
   // }
   const {
-    handleSignIn,
     toggleState,
     dispatchDimBgModal,
     // setCurrentUserInfoState,
   } = useContext(Context)
   const handleSignUp = () => {
-    Authen.signUp(email, password, firstName, lastName)
-    handleSignIn(email, password)
-    // Authen.handleSignInOutState(
-    //   () => handleSignIn(email, password),
-    //   () => {
-    //     Authen.signOut(() => {
-    //       setCurrentUserInfoState(null)
-    //     })
-    //     returnToHomepage()
-    //   }
-    // )
+    Authen.signUp(email, password, firstName, lastName, () =>
+      dispatchDimBgModal({ type: 'NONE' })
+    )
   }
   return (
     <StyledDiv theme={toggleState.isDarkTheme ? themes.dark : themes.light}>

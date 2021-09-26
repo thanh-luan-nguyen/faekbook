@@ -5,17 +5,18 @@ import { MdArrowDropDown } from 'react-icons/md'
 import Context from '../utils/Context'
 import React, { useContext } from 'react'
 // import DropDownMenu from './Modals/DropDownMenu'
-import { themes } from '../utils/themes'
+import { imageObjectSettings, themes } from '../utils/themes'
 import { Link } from 'react-router-dom'
-import { Authen } from '../firebase'
+import { Authen } from '../firebaseConfig'
 import { useEffect } from 'react'
-import defaultAvatar from '../utils/images/default_user.png'
+import { defaultAvatar } from '../utils/defaults'
 
 const Navbar: React.FC<any> = () => {
   const {
-    currentUserInfo,
     toggleState,
     isUserSignedIn,
+    CUAvatarURL,
+    currentUserInfo,
     dispatchToggle,
     // dispatchSignInOut,
     dispatchDimBgModal,
@@ -33,10 +34,10 @@ const Navbar: React.FC<any> = () => {
     <Link to='/faekbook/profile'>
       <div className='user-profile-button'>
         <img
-          src={currentUserInfo ? currentUserInfo.avatar : defaultAvatar}
+          src={isUserSignedIn ? CUAvatarURL || defaultAvatar : undefined}
           alt='avatar'
         />
-        {currentUserInfo && currentUserInfo.first_name}
+        {isUserSignedIn && currentUserInfo?.first_name}
       </div>
     </Link>
   )
@@ -168,9 +169,10 @@ const StyledNav = styled('nav')<{ menuVisibility: number }>`
         padding-left: 0.35rem;
         padding-right: 0.6rem;
         img {
-          height: calc(${globalValues.navbar_elements_height} - 0.7rem);
-          border-radius: 50%;
+          height: calc(${globalValues.navbar_elements_height} - 0.5rem);
+
           background: ${p => p.theme.theme_toggler_bgclr};
+          ${imageObjectSettings}
         }
       }
     }

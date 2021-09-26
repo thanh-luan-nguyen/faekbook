@@ -1,3 +1,5 @@
+import styled, { css } from 'styled-components'
+
 export const themes = {
   light: {
     type: 'light',
@@ -51,3 +53,9 @@ export const themes = {
     whats_on_ur_mind_bgclr: '#3A3B3C',
   },
 }
+
+export const imageObjectSettings = css`
+  aspect-ratio: 1/1;
+  object-fit: cover;
+  object-position: 50% 20%;
+`

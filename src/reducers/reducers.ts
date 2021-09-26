@@ -1,6 +1,3 @@
-import { DB } from '../firebase'
-import { Post } from '../types/interface'
-
 export const toggleReducer = (state: any, action: any) => {
   switch (action.type) {
     case 'DARK_THEME':

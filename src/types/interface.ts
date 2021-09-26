@@ -1,9 +1,9 @@
-import myAvatar from '../utils/images/picture_of_myself.jpg'
 import coverPhoto from '../utils/images/cover_photo.jpg'
 import LongAvatar from '../utils/images/Long.jpg'
 import LongCoverPhoto from '../utils/images/Long_cover_photo.jpg'
 import HiepAvatar from '../utils/images/Hiep.jpg'
 import HiepCoverPhoto from '../utils/images/Hiep_cover_photo.jpg'
+import { Timestamp } from '@firebase/firestore'
 
 export interface Comment {
   commenterUID: string
@@ -15,8 +15,7 @@ export interface Comment {
 export interface Post {
   uid: string
   fullname: string
-  avatar: string
-  date: number
+  date: Timestamp
   content: string
   likes: Array<string>
   comments: Array<Comment>
@@ -27,44 +26,13 @@ export interface User {
   first_name: string
   last_name: string
   short_bio: string
-  avatar: string
   is_dark_theme: boolean
-  cover_photo: string
 }
 
 export interface Users {
   list: Array<User>
 }
 
-// EXAMPLE
-
-export const Luan: User = {
-  uid: 'KyZEVL64zbZqU3H4CG7zzx0tcHk2',
-  first_name: 'Nguyen',
-  last_name: 'Thanh Luan',
-  short_bio: 'Why did you change? Why did you bend and break?',
-  avatar: myAvatar,
-  is_dark_theme: true,
-  cover_photo: coverPhoto,
-}
-export const Long: User = {
-  uid: '9szNArJnruN0LzqeT2iuzL8qgHl1',
-  first_name: 'Nguyen',
-  last_name: 'Thanh Long',
-  short_bio: 'Why did you bend and break?',
-  avatar: LongAvatar,
-  is_dark_theme: true,
-  cover_photo: LongCoverPhoto,
-}
-export const Hiep: User = {
-  uid: 'jOChZLcqLSh05KiOFjPku0LSXBp1',
-  first_name: 'Ngo',
-  last_name: 'Dinh Hiep',
-  short_bio: 'Why did you change?',
-  avatar: HiepAvatar,
-  is_dark_theme: false,
-  cover_photo: HiepCoverPhoto,
-}
 
 // export const posts: Array<Post> = [
 //   {

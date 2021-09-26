@@ -1,9 +1,9 @@
-import myAvatar from '../../utils/images/picture_of_myself.jpg'
 import { BsThreeDots } from 'react-icons/bs'
 import styled from 'styled-components'
 import { useContext } from 'react'
 import Context from '../../utils/Context'
 import { themes } from '../../utils/themes'
+import { defaultAvatar } from '../../utils/defaults'
 
 const Comment: React.FC<{ username: string; content: string; likes: number }> =
   ({ username, content, likes }) => {
@@ -13,7 +13,7 @@ const Comment: React.FC<{ username: string; content: string; likes: number }> =
         theme={toggleState.isDarkTheme ? themes.dark : themes.light}
         three_dots={BsThreeDots}
       >
-        <img src={myAvatar} alt='' />
+        <img src={defaultAvatar} alt='' />
 
         <div className='middle'>
           <div className='top'>

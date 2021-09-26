@@ -3,40 +3,35 @@ import styled from 'styled-components'
 import globalValues from '../../styles/globalValues'
 import Context from '../../utils/Context'
 import TurnOffModalButton from './TurnOffModalButton'
-import myAvatar from '../../utils/images/picture_of_myself.jpg'
-import { themes } from '../../utils/themes'
-import defaultAvatar from '../../utils/images/default_user.png'
+import { imageObjectSettings, themes } from '../../utils/themes'
 import { format, getUnixTime } from 'date-fns'
 import { Post } from '../../types/interface'
-import { DB } from '../../firebase'
+import { db, DB } from '../../firebaseConfig'
+import {
+  addDoc,
+  collection,
+  doc,
+  serverTimestamp,
+  Timestamp,
+} from '@firebase/firestore'
+import { defaultAvatar } from '../../utils/defaults'
 
 export default function CreatePost() {
   const [content, setContent] = useState<string>('')
-  const {
-    currentUserInfo,
-    toggleState,
-    dispatchDimBgModal,
-    allPosts,
-    setPosts,
-  } = useContext(Context)
+  const { currentUserInfo, toggleState, dispatchDimBgModal, CUAvatarURL } =
+    useContext(Context)
 
   const addPost = () => {
-    const timePosted = new Date()
-    const unixSecond = getUnixTime(timePosted)
     const post: Post = {
       uid: currentUserInfo.uid,
       fullname: currentUserInfo.first_name + ' ' + currentUserInfo.last_name,
-      avatar: currentUserInfo.avatar,
-      date: unixSecond,
+      date: Timestamp.fromDate(new Date()),
       content,
       likes: [],
       comments: [],
     }
 
-    const updatedPosts = allPosts
-    updatedPosts.unshift(post)
-    setPosts(updatedPosts)
-    DB.setPost(unixSecond, post)
+    addDoc(collection(db, 'posts'), post)
 
     dispatchDimBgModal({ type: 'NONE' })
   }
@@ -54,10 +49,7 @@ export default function CreatePost() {
       </div>
       <div className='divider'></div>
       <div id='middle'>
-        <img
-          src={currentUserInfo ? currentUserInfo.avatar : defaultAvatar}
-          alt='my_avatar'
-        />
+        <img src={CUAvatarURL || defaultAvatar} alt='my_avatar' />
         <div className='name'>
           {currentUserInfo &&
             `${currentUserInfo.first_name} ${currentUserInfo.last_name}`}
@@ -108,6 +100,7 @@ const StyledDiv = styled('div')<{
     img {
       height: 4rem;
       width: 4rem;
+      ${imageObjectSettings}
     }
     .name {
       font-size: 1.5rem;

@@ -1,22 +1,41 @@
 import React, { useContext, useEffect, useState } from 'react'
+import { defaultAvatar, defaultCoverImage } from '../../utils/defaults'
 import styled from 'styled-components'
 import Context from '../../utils/Context'
-import { themes } from '../../utils/themes'
+import { imageObjectSettings, themes } from '../../utils/themes'
 import { AiOutlineCamera, AiFillCamera } from 'react-icons/ai'
-import defaultCoverPhoto from '../../utils/images/default_cover_photo.gif'
-import defaultAvatar from '../../utils/images/default_user.png'
 import ColorThief from 'colorthief'
 import useWindowSize, { Size } from '../../hooks/useWindowSize'
 import WhatsOnYourMind from './WhatsOnYourMind'
-import { Authen, DB } from '../../firebase'
+import { Authen, db, DB, storage } from '../../firebaseConfig'
 import Post from './Post'
+import {
+  collection,
+  doc,
+  DocumentData,
+  onSnapshot,
+  orderBy,
+  query,
+  updateDoc,
+  where,
+} from '@firebase/firestore'
+import {
+  deleteObject,
+  getDownloadURL,
+  ref,
+  uploadBytes,
+} from '@firebase/storage'
 
 const ProfilePage: React.FC<any> = () => {
-  const { currentUserInfo, toggleState, allPosts } = useContext(Context)
+  const {
+    currentUserInfo,
+    toggleState,
+    updatePhoto,
+    CUAvatarURL,
+    CUCoverImgURL,
+  } = useContext(Context)
   const [bgGradient, setBgGradient] = useState<string>('')
   const [editCoverPhotoHidden, setEditCoverPhotoHidden] = useState(false)
-  // const [currentUserPosts, setCUPosts] = useState<any>(null)
-  const size: Size = useWindowSize()
 
   /* get dorminant color of cover photo */
   useEffect(() => {
@@ -29,6 +48,7 @@ const ProfilePage: React.FC<any> = () => {
   }, [])
 
   /* width size query for the edit cover photo button */
+  const size: Size = useWindowSize()
   useEffect(() => {
     const { width } = size
     if (width !== undefined && width <= 900) {
@@ -36,37 +56,55 @@ const ProfilePage: React.FC<any> = () => {
     } else setEditCoverPhotoHidden(false)
   }, [size])
 
-  const renderPosts =
-    currentUserInfo &&
-    allPosts
-      ?.filter((p: any) => p.uid === currentUserInfo.uid)
-      .map((p: any) => (
-        <Post
-          key={p.date}
-          // id={p.date}
-          full_name={p.fullname}
-          avatar={p.avatar}
-          date={p.date}
-          content={p.content}
-          likes={p.likes}
-        />
-      ))
+  const [CUPosts, setCUPosts] = useState<any>(null)
+
+  useEffect(() => {
+    const postsRef = collection(db, 'posts')
+    const q = query(
+      postsRef,
+      where('uid', '==', currentUserInfo && currentUserInfo.uid),
+      orderBy('date', 'desc')
+    )
+    const unsub = onSnapshot(q, (posts: any) => {
+      const postsSnapShot: DocumentData[] = []
+      posts.forEach((p: any) => postsSnapShot.push(p.data()))
+      setCUPosts(postsSnapShot)
+    })
+    return () => {
+      unsub()
+    }
+  }, [currentUserInfo])
+
+  const renderPosts = CUPosts?.map((p: any) => (
+    <Post
+      uid={p.uid}
+      key={p.date}
+      full_name={p.fullname}
+      date={p.date}
+      content={p.content}
+      likes={p.likes}
+      is_profile_page={true}
+    />
+  ))
 
   const renderBgGradientColor = (
     <img
-      src={currentUserInfo ? currentUserInfo.cover_photo : defaultCoverPhoto}
+      src='https://www.google.com/photos/static/2020/images/index/tablet.jpg'
+      crossOrigin='anonymous'
+      // src={currentUserInfo ? currentUserInfo.cover_photo : defaultCoverImageURL}
       alt='colorthief'
       id='get-dominant-clr'
-      style={{ display: 'none' }}
+      // style={{ display: 'none' }}
     />
   )
 
   return (
     <StyledDiv
       theme={toggleState.isDarkTheme ? themes.dark : themes.light}
-      coverPhoto={
-        currentUserInfo ? currentUserInfo.cover_photo : defaultCoverPhoto
-      }
+      coverPhoto={CUCoverImgURL ? CUCoverImgURL : defaultCoverImage}
+      // coverPhoto={
+      //   currentUserInfo ? currentUserInfo.cover_photo : defaultCoverImageURL
+      // }
       bgGradient={bgGradient}
       editCoverPhotoHidden={editCoverPhotoHidden}
     >
@@ -74,21 +112,34 @@ const ProfilePage: React.FC<any> = () => {
         <div id='cover-picture'>
           {renderBgGradientColor}
           <div className='avatar-picture'>
-            <img
-              src={currentUserInfo ? currentUserInfo.avatar : defaultAvatar}
-              alt='avatar'
-            />
-            <div className='update-avatar'>
+            <img src={CUAvatarURL ? CUAvatarURL : defaultAvatar} alt='avatar' />
+            <label className='update-avatar'>
+              <input
+                onChange={updatePhoto}
+                id='avatar'
+                type='file'
+                accept='image/*'
+                capture='camera'
+                style={{ display: 'none' }}
+              />
               {toggleState.isDarkTheme ? (
                 <AiFillCamera className='icon' style={{ fill: 'white' }} />
               ) : (
                 <AiOutlineCamera className='icon' />
               )}
-            </div>
+            </label>
           </div>
-          <div className='edit-cover-photo'>
+          <label className='edit-cover-photo'>
+            <input
+              onChange={updatePhoto}
+              id='cover'
+              type='file'
+              accept='image/*'
+              capture='camera'
+              style={{ display: 'none' }}
+            />
             <AiFillCamera className='icon' /> <span>Edit Cover Photo</span>
-          </div>
+          </label>
         </div>
 
         <div id='intro'>
@@ -106,7 +157,6 @@ const ProfilePage: React.FC<any> = () => {
         <WhatsOnYourMind />
         {renderPosts}
       </main>
-      {/* <div className='dummyText'></div> */}
     </StyledDiv>
   )
 }
@@ -129,7 +179,7 @@ const StyledDiv = styled('div')<{
       position: relative;
       background-image: url(${p => p.coverPhoto});
       background-size: cover;
-      background-position: 50% 40%;
+      background-position: 50% 50%;
       width: 90rem;
       max-width: 100%;
       aspect-ratio: 7/3;
@@ -148,6 +198,7 @@ const StyledDiv = styled('div')<{
         img {
           width: 100%;
           height: 100%;
+          ${imageObjectSettings};
         }
         .update-avatar {
           position: absolute;

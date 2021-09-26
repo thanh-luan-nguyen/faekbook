@@ -16,11 +16,26 @@ import MainPage from './components/Body/MainPage'
 import ProfilePage from './components/Body/ProfilePage'
 import DropDownMenu from './components/Modals/DropDownMenu'
 import CreatePost from './components/Modals/CreatePost'
-import { Hiep, Luan, Long } from './types/interface'
-import { auth, Authen, db, DB } from './firebase'
+import { auth, db, Storage, storage } from './firebaseConfig'
 import { getUnixTime } from 'date-fns'
 import { onAuthStateChanged } from '@firebase/auth'
-import { collection, doc, getDoc, getDocs } from '@firebase/firestore'
+import {
+  collection,
+  doc,
+  DocumentData,
+  getDoc,
+  getDocs,
+  onSnapshot,
+  orderBy,
+  query,
+  where,
+} from '@firebase/firestore'
+import {
+  deleteObject,
+  getDownloadURL,
+  ref,
+  uploadBytes,
+} from '@firebase/storage'
 
 const App: React.FC<any> = () => {
   const [isUserSignedIn, setIsUserSignedIn] = useState<boolean>(false)
@@ -30,24 +45,16 @@ const App: React.FC<any> = () => {
     dropDownMenuIsVisible: false,
   })
 
-  const [allPosts, setPosts] = useState<any>(null)
-
   useEffect(() => {
     ;(async () => {})()
     onAuthStateChanged(auth, async user => {
       if (user) {
-        // console.log(`onSignIn. UID: ${user.uid}, email: ${user.email}`)
         // set sign-in state
         setIsUserSignedIn(true)
         getDoc(doc(db, 'users', user.uid)).then(userSnap => {
           // get current user specific info
           const currentUserInfo = userSnap.data()
           setCurrentUserInfo(currentUserInfo)
-
-          DB.getPosts().then(allPosts => {
-            allPosts.reverse()
-            setPosts(allPosts)
-          })
 
           // set theme
           currentUserInfo?.is_dark_theme
@@ -61,6 +68,31 @@ const App: React.FC<any> = () => {
       }
     })
   }, [])
+
+  const [CUCoverImgURL, setCoverImageURL] = useState<any>(null)
+  const [CUAvatarURL, setAvatarURL] = useState<any>(null)
+
+  const updatePhoto = (e: any) => {
+    const isAvatar = e.target.id === 'avatar'
+    const file = e.target.files[0]
+    const uid = currentUserInfo.uid
+    const fileName = isAvatar ? 'avatar' : 'cover_image'
+    const fileRef = ref(storage, `users/${uid}/${fileName}`)
+    deleteObject(fileRef).catch(e => console.log(e))
+    uploadBytes(fileRef, file).then(() =>
+      getDownloadURL(fileRef).then(url =>
+        isAvatar ? setAvatarURL(url) : setCoverImageURL(url)
+      )
+    )
+  }
+  useEffect(() => {
+    if (currentUserInfo) {
+      ;(async () => {
+        const uid = currentUserInfo.uid
+        Storage.setPhotosURL(uid, setAvatarURL, setCoverImageURL)
+      })()
+    }
+  }, [currentUserInfo])
 
   const [dimBgModal, dispatchDimBgModal] = useReducer(authenModalReducer, {
     action: 'close modals',
@@ -79,81 +111,18 @@ const App: React.FC<any> = () => {
     }
   }
 
-  // const [currentUserEmail, setCurrentEmail] = useState<any>()
-  // useEffect(() => {
-  //   const email = Authen.getUserEmail()
-  //   if (email) {
-  //     setCurrentEmail(email)
-  //   }
-  // }, [])
-  // const [currentUserInfoState, setCurrentUserInfoState] = useState<any>(null)
-  // useEffect(() => {
-  //   if (currentUserEmail) {
-  //     DB.getUser(currentUserEmail).then(currentUser => {
-  //       setCurrentUserInfoState(currentUser)
-  //     })
-  //   } else setCurrentUserInfoState(null)
-  // }, [])
-  // useEffect(() => {
-  //   currentUserInfoState?.is_dark_theme
-  //     ? dispatchToggle({ type: 'SET_TO_DARK_THEME' })
-  //     : dispatchToggle({ type: 'SET_TO_LIGHT_THEME' })
-  // }, [])
-
-  // useEffect(() => {
-  //   currentUserEmail &&
-  //     isSignedIn &&
-  //     DB.updateUserInfo(currentUserEmail, {
-  //       is_dark_theme: toggleState.isDarkTheme,
-  //     })
-  // }, [toggleState])
-
-  // const handleSignIn = (email: string, password: string) => {
-  //   Authen.signIn({ email, password }, () => {
-  //     setCurrentEmail(email)
-  //     currentUserInfoState?.is_dark_theme
-  //       ? dispatchToggle({ type: 'SET_TO_DARK_THEME' })
-  //       : dispatchToggle({ type: 'SET_TO_LIGHT_THEME' })
-  //     // dispatchSignInOut({ type: 'SIGN_IN' })
-  //     dispatchDimBgModal({ type: 'NONE' })
-  //   })
-  // }
-
-  // const handleSignOut = () => {
-  //   Authen.signOut(() => setCurrentUserInfoState(null))
-  //   // dispatchSignInOut({ type: 'SIGN_OUT' })
-  //   // dispatchToggle({ type: 'SET_TO_LIGHT_THEME' })
-  // }
-
-  useEffect(() => {
-    // DB.updateUserInfo(currentUserEmail, { theme: 'light' })
-    // DB.getPosts(true, currentUser)
-    // DB.getPosts()
-    // for (let p of posts) {
-    //   DB.setPost(getUnixTime(p.date).toString(), p)
-    // }
-    // DB.setUser('KyZEVL64zbZqU3H4CG7zzx0tcHk2', Luan)
-    // DB.setUser('9szNArJnruN0LzqeT2iuzL8qgHl1', Long)
-    // DB.setUser('jOChZLcqLSh05KiOFjPku0LSXBp1', Hiep)
-    // Authen.signUp('consutoraku@gmail.com', 'thanhLuan123')
-    // Authen.signUp('thanhluannguyenxyz@gmail.com', 'iwiwlkiwljnpm startoo')
-    // Authen.getUserData('HuICL90OPLUfmvXJHE6L6bwSyFi2')
-    // Authen.getUserData('thanhluannguyenxyz@gmail.com')
-    // Authen.signIn('hiep@gmail.com', 'hiephiep')
-    // Authen.signOut()
-  }, [])
-
   return (
     <Context.Provider
       value={{
-        allPosts,
-        setPosts,
         isUserSignedIn,
         currentUserInfo,
         toggleState,
         dispatchToggle,
         dimBgModal,
         dispatchDimBgModal,
+        updatePhoto,
+        CUCoverImgURL,
+        CUAvatarURL,
       }}
     >
       <Router>

@@ -1,6 +1,6 @@
 import { useContext, useState } from 'react'
 import styled from 'styled-components'
-import { Authen } from '../../firebase'
+import { Authen } from '../../firebaseConfig'
 import globalValues from '../../styles/globalValues'
 import Context from '../../utils/Context'
 import { themes } from '../../utils/themes'
@@ -13,8 +13,8 @@ export default function LogInModal() {
   const { toggleState, dispatchDimBgModal } = useContext(Context)
 
   const handleLogIn = () => {
-    Authen.signIn(email, password)
-    dispatchDimBgModal({ type: 'NONE' })
+    Authen.signIn(email, password, () => dispatchDimBgModal({ type: 'NONE' }))
+    
   }
   return (
     <StyledDiv theme={toggleState.isDarkTheme ? themes.dark : themes.light}>
