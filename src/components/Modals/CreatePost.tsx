@@ -5,7 +5,7 @@ import Context from '../../utils/Context'
 import TurnOffModalButton from './TurnOffModalButton'
 import { imageObjectSettings, themes } from '../../utils/themes'
 import { format, getUnixTime } from 'date-fns'
-import { Post } from '../../types/interface'
+import { PostType } from '../../types/interface'
 import { db, DB } from '../../firebaseConfig'
 import {
   addDoc,
@@ -23,7 +23,7 @@ export default function CreatePost() {
     useContext(Context)
 
   const addPost = () => {
-    const post: Post = {
+    const post: PostType = {
       userID: currentUserInfo.uid,
       fullname: currentUserInfo.first_name + ' ' + currentUserInfo.last_name,
       date: Timestamp.fromDate(new Date()),
