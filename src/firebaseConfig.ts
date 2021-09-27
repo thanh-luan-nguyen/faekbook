@@ -1,3 +1,4 @@
+import { DocumentData, onSnapshot } from '@firebase/firestore'
 import { initializeApp } from 'firebase/app'
 import {
   doc,
@@ -20,7 +21,7 @@ import {
   getDownloadURL,
   uploadString,
 } from 'firebase/storage'
-import { Post, User } from './types/interface'
+import { PostType, User } from './types/interface'
 
 const app = initializeApp({
   apiKey: 'AIzaSyAowcCuiyILtMdMP96n-RzUh2QVKvrN4OQ',
@@ -56,11 +57,7 @@ export class Authen {
           short_bio: 'my bio',
           is_dark_theme: false,
         }
-        // const avatarRef = ref(storage, `users/${uid}/avatar`)
-        // const coverImgRef = ref(storage, `users/${uid}/cover_image`)
-        // const defaultCoverImageURL =
-        //   'https://firebasestorage.googleapis.com/v0/b/faekbook1-aa0f8.appspot.com/o/defaults%2FdefaultCoverImage.gif?alt=media&token=458194b5-739b-4fd8-ae77-13ba5fb5dc13'
-        // uploadString(coverImgRef, defaultCoverImageURL, 'data_url')
+
         DB.setUser(uid, newUser)
         Authen.signIn(email, password, callback)
       })
@@ -87,22 +84,22 @@ export class Authen {
         alert('Signout failed: ' + e)
       })
   }
-  static getUserEmail() {
-    const user = auth.currentUser
-    if (user !== null) {
-      const email = user.email
-      return email
-    }
-  }
-  static handleSignInOutState(callback1: any, callback2 = () => {}) {
-    onAuthStateChanged(auth, user => {
-      if (user) {
-        callback1()
-      } else {
-        callback2()
-      }
-    })
-  }
+  // static getUserEmail() {
+  //   const user = auth.currentUser
+  //   if (user !== null) {
+  //     const email = user.email
+  //     return email
+  //   }
+  // }
+  // static handleSignInOutState(callback1: any, callback2 = () => {}) {
+  //   onAuthStateChanged(auth, user => {
+  //     if (user) {
+  //       callback1()
+  //     } else {
+  //       callback2()
+  //     }
+  //   })
+  // }
 }
 
 export class DB {
@@ -112,13 +109,22 @@ export class DB {
   static updateUserInfo(uid: string, payload: any) {
     updateDoc(doc(db, 'users', uid), payload)
   }
-  static async getUser(uid: string) {
-    const userSnap = await getDoc(doc(db, 'users', uid))
-    return userSnap.data()
+  static setSnapshotListener(q: any, setCUPosts: any) {
+    return onSnapshot(q, (posts: any) => {
+      const postsSnapShot: DocumentData[] = []
+      posts.forEach((p: any) =>
+        postsSnapShot.push({ ...p.data(), postID: p.id })
+      )
+      setCUPosts(postsSnapShot)
+    })
   }
-  static setPost(unixSecond: number, post: Post) {
-    setDoc(doc(db, 'posts', unixSecond.toString()), post, { merge: false })
-  }
+  // static async getUser(uid: string) {
+  //   const userSnap = await getDoc(doc(db, 'users', uid))
+  //   return userSnap.data()
+  // }
+  // static setPost(unixSecond: number, post: Post) {
+  //   setDoc(doc(db, 'posts', unixSecond.toString()), post, { merge: false })
+  // }
 }
 
 export class Storage {

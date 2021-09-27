@@ -1,35 +1,53 @@
 import { BsThreeDots } from 'react-icons/bs'
 import styled from 'styled-components'
-import { useContext } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import Context from '../../utils/Context'
 import { themes } from '../../utils/themes'
 import { defaultAvatar } from '../../utils/defaults'
+import { Timestamp } from '@firebase/firestore'
+import { format } from 'date-fns'
+import fromUnixTime from 'date-fns/fromUnixTime'
+import { db, Storage } from '../../firebaseConfig'
 
-const Comment: React.FC<{ username: string; content: string; likes: number }> =
-  ({ username, content, likes }) => {
-    const { toggleState } = useContext(Context)
-    return (
-      <StyledDiv
-        theme={toggleState.isDarkTheme ? themes.dark : themes.light}
-        three_dots={BsThreeDots}
-      >
-        <img src={defaultAvatar} alt='' />
+const Comment: React.FC<{
+  commenterUID: string
+  content: string
+  likes: Array<string>
+  date: Timestamp
+}> = ({ commenterUID, content, date, likes }) => {
+  const { toggleState } = useContext(Context)
+  const [commentAvatar, setCommentAvatar] = useState<any>(null)
+  useEffect(() => {
+    Storage.setPhotosURL(commenterUID, setCommentAvatar)
+  }, [])
+  return (
+    <StyledDiv
+      theme={toggleState.isDarkTheme ? themes.dark : themes.light}
+      three_dots={BsThreeDots}
+    >
+      <img src={commentAvatar || defaultAvatar} alt='comment_avatar' />
 
-        <div className='middle'>
-          <div className='top'>
-            <div className='bubble'>
-              <div className='username'>{username}</div>
-              <div className='content'>{content}</div>
-            </div>
-            <div className='three-dots'>
-              <BsThreeDots className='icon' />
-            </div>
+      <div className='middle'>
+        <div className='top'>
+          <div className='bubble'>
+            <div className='username'>{commenterUID}</div>
+            <div className='content'>{content}</div>
           </div>
-          <div className='like'>Like</div>
+          <div className='three-dots'>
+            <BsThreeDots className='icon' />
+          </div>
         </div>
-      </StyledDiv>
-    )
-  }
+        <div className='like'>
+          Like{' '}
+          {`${format(fromUnixTime(date.seconds), 'yyyy, MMM d')} at ${format(
+            fromUnixTime(date.seconds),
+            'h:mm a'
+          )}`}
+        </div>
+      </div>
+    </StyledDiv>
+  )
+}
 
 const StyledDiv = styled('div')<{ three_dots: any }>`
   display: flex;

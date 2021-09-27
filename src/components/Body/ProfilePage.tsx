@@ -7,16 +7,14 @@ import { AiOutlineCamera, AiFillCamera } from 'react-icons/ai'
 import ColorThief from 'colorthief'
 import useWindowSize, { Size } from '../../hooks/useWindowSize'
 import WhatsOnYourMind from './WhatsOnYourMind'
-import { Authen, db, DB, storage } from '../../firebaseConfig'
+import { DB, db } from '../../firebaseConfig'
 import Post from './Post'
 import {
   collection,
-  doc,
   DocumentData,
   onSnapshot,
   orderBy,
   query,
-  updateDoc,
   where,
 } from '@firebase/firestore'
 import {
@@ -33,21 +31,12 @@ const ProfilePage: React.FC<any> = () => {
     updatePhoto,
     CUAvatarURL,
     CUCoverImgURL,
+    isUserSignedIn,
   } = useContext(Context)
-  const [bgGradient, setBgGradient] = useState<string>('')
+
   const [editCoverPhotoHidden, setEditCoverPhotoHidden] = useState(false)
 
-  /* get dorminant color of cover photo */
-  useEffect(() => {
-    const colorThief = new ColorThief()
-    const img: any = document.querySelector('#get-dominant-clr')
-    img.onload = () => {
-      const color = colorThief.getColor(img).toString()
-      setBgGradient(color)
-    }
-  }, [])
-
-  /* width size query for the edit cover photo button */
+  //* width size query for the edit cover photo button */
   const size: Size = useWindowSize()
   useEffect(() => {
     const { width } = size
@@ -56,62 +45,71 @@ const ProfilePage: React.FC<any> = () => {
     } else setEditCoverPhotoHidden(false)
   }, [size])
 
+  //* render posts */
   const [CUPosts, setCUPosts] = useState<any>(null)
-
   useEffect(() => {
     const postsRef = collection(db, 'posts')
     const q = query(
       postsRef,
-      where('uid', '==', currentUserInfo && currentUserInfo.uid),
+      where('userID', '==', currentUserInfo && currentUserInfo.uid),
       orderBy('date', 'desc')
     )
-    const unsub = onSnapshot(q, (posts: any) => {
-      const postsSnapShot: DocumentData[] = []
-      posts.forEach((p: any) => postsSnapShot.push(p.data()))
-      setCUPosts(postsSnapShot)
-    })
+    const unsub = DB.setSnapshotListener(q, setCUPosts)
+    console.log('profile renders')
     return () => {
       unsub()
     }
   }, [currentUserInfo])
-
   const renderPosts = CUPosts?.map((p: any) => (
     <Post
-      uid={p.uid}
-      key={p.date}
+      key={p.postID}
+      postID={p.postID}
+      userID={p.userID}
       full_name={p.fullname}
       date={p.date}
       content={p.content}
       likes={p.likes}
+      comments={p.comments}
       is_profile_page={true}
     />
   ))
 
-  const renderBgGradientColor = (
+  //* get dorminant color of cover photo */
+  const [bgGradient, setBgGradient] = useState<string>('')
+  useEffect(() => {
+    const colorThief = new ColorThief()
+    const img: any = document.querySelector('#get-dominant-clr')
+    img.onload = () => {
+      const color = colorThief.getColor(img).toString()
+      setBgGradient(color)
+    }
+  }, [isUserSignedIn])
+  //? proxy server produces a more liberal CORS policy */
+  const googleProxyURL =
+    'https://images1-focus-opensocial.googleusercontent.com/gadgets/proxy?container=focus&refresh=2592000&url='
+  const renderColorThief = (
     <img
-      src='https://www.google.com/photos/static/2020/images/index/tablet.jpg'
+      src={
+        googleProxyURL +
+        (encodeURIComponent(CUCoverImgURL) ||
+          encodeURIComponent(defaultCoverImage))
+      }
       crossOrigin='anonymous'
-      // src={currentUserInfo ? currentUserInfo.cover_photo : defaultCoverImageURL}
       alt='colorthief'
       id='get-dominant-clr'
-      // style={{ display: 'none' }}
     />
   )
 
   return (
     <StyledDiv
       theme={toggleState.isDarkTheme ? themes.dark : themes.light}
-      coverPhoto={CUCoverImgURL ? CUCoverImgURL : defaultCoverImage}
-      // coverPhoto={
-      //   currentUserInfo ? currentUserInfo.cover_photo : defaultCoverImageURL
-      // }
       bgGradient={bgGradient}
       editCoverPhotoHidden={editCoverPhotoHidden}
     >
       <header>
-        <div id='cover-picture'>
-          {renderBgGradientColor}
-          <div className='avatar-picture'>
+        <div id='cover-image'>
+          {renderColorThief}
+          <div className='avatar'>
             <img src={CUAvatarURL ? CUAvatarURL : defaultAvatar} alt='avatar' />
             <label className='update-avatar'>
               <input
@@ -119,7 +117,6 @@ const ProfilePage: React.FC<any> = () => {
                 id='avatar'
                 type='file'
                 accept='image/*'
-                capture='camera'
                 style={{ display: 'none' }}
               />
               {toggleState.isDarkTheme ? (
@@ -135,7 +132,6 @@ const ProfilePage: React.FC<any> = () => {
               id='cover'
               type='file'
               accept='image/*'
-              capture='camera'
               style={{ display: 'none' }}
             />
             <AiFillCamera className='icon' /> <span>Edit Cover Photo</span>
@@ -162,7 +158,6 @@ const ProfilePage: React.FC<any> = () => {
 }
 
 const StyledDiv = styled('div')<{
-  coverPhoto: any
   bgGradient: string
   editCoverPhotoHidden: boolean
 }>`
@@ -175,23 +170,26 @@ const StyledDiv = styled('div')<{
       rgba(${p => p.bgGradient}) 0%,
       ${p => p.theme.main_bgclr} 50%
     );
-    #cover-picture {
+    #cover-image {
       position: relative;
-      background-image: url(${p => p.coverPhoto});
-      background-size: cover;
-      background-position: 50% 50%;
-      width: 90rem;
+      width: 65rem;
       max-width: 100%;
-      aspect-ratio: 7/3;
+      aspect-ratio: 5/2;
       margin-inline: auto;
-      border-radius: 0 0 10px 10px;
-      .avatar-picture {
+      & > img {
+        border-radius: 0 0 10px 10px;
+        height: 100%;
+        width: 100%;
+        object-fit: cover;
+        object-position: 50% 50%;
+      }
+      .avatar {
         position: absolute;
         bottom: -2rem;
         left: 50%;
         transform: translateX(-50%);
-        width: 15rem;
-        height: 15rem;
+        width: 13rem;
+        height: 13rem;
         padding: 0.5rem;
         background-color: ${p => p.theme.main_bgclr};
         border-radius: 50%;
@@ -233,11 +231,11 @@ const StyledDiv = styled('div')<{
           filter: brightness(0.95);
         }
         .icon {
-          height: 2rem;
-          width: 2rem;
+          height: 1.5rem;
+          width: 1.5rem;
         }
         span {
-          font-size: 1.2rem;
+          font-size: 1rem;
           font-weight: 700;
           display: ${p => (p.editCoverPhotoHidden ? 'none' : 'block')};
         }
@@ -247,12 +245,12 @@ const StyledDiv = styled('div')<{
       padding: 3rem 2rem 2rem;
       text-align: center;
       .name {
-        font-size: 3.5rem;
+        font-size: 2.75rem;
         font-weight: 800;
       }
       .short-description {
         padding-top: 1rem;
-        font-size: 1.75rem;
+        font-size: 1.5rem;
       }
     }
   }

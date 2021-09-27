@@ -12,6 +12,7 @@ import {
   collection,
   doc,
   serverTimestamp,
+  setDoc,
   Timestamp,
 } from '@firebase/firestore'
 import { defaultAvatar } from '../../utils/defaults'
@@ -23,7 +24,7 @@ export default function CreatePost() {
 
   const addPost = () => {
     const post: Post = {
-      uid: currentUserInfo.uid,
+      userID: currentUserInfo.uid,
       fullname: currentUserInfo.first_name + ' ' + currentUserInfo.last_name,
       date: Timestamp.fromDate(new Date()),
       content,

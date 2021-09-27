@@ -73,22 +73,24 @@ const App: React.FC<any> = () => {
   const [CUAvatarURL, setAvatarURL] = useState<any>(null)
 
   const updatePhoto = (e: any) => {
-    const isAvatar = e.target.id === 'avatar'
     const file = e.target.files[0]
-    const uid = currentUserInfo.uid
-    const fileName = isAvatar ? 'avatar' : 'cover_image'
-    const fileRef = ref(storage, `users/${uid}/${fileName}`)
-    deleteObject(fileRef).catch(e => console.log(e))
-    uploadBytes(fileRef, file).then(() =>
-      getDownloadURL(fileRef).then(url =>
-        isAvatar ? setAvatarURL(url) : setCoverImageURL(url)
+    if (file) {
+      const isAvatar = e.target.id === 'avatar'
+      const uid = currentUserInfo?.uid
+      const fileName = isAvatar ? 'avatar' : 'cover_image'
+      const fileRef = ref(storage, `users/${uid}/${fileName}`)
+      deleteObject(fileRef).catch(e => console.log(e))
+      uploadBytes(fileRef, file).then(() =>
+        getDownloadURL(fileRef).then(url =>
+          isAvatar ? setAvatarURL(url) : setCoverImageURL(url)
+        )
       )
-    )
+    }
   }
   useEffect(() => {
     if (currentUserInfo) {
       ;(async () => {
-        const uid = currentUserInfo.uid
+        const uid = currentUserInfo?.uid
         Storage.setPhotosURL(uid, setAvatarURL, setCoverImageURL)
       })()
     }

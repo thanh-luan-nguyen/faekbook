@@ -5,20 +5,20 @@ import HiepAvatar from '../utils/images/Hiep.jpg'
 import HiepCoverPhoto from '../utils/images/Hiep_cover_photo.jpg'
 import { Timestamp } from '@firebase/firestore'
 
-export interface Comment {
+export interface CommentType {
   commenterUID: string
-  date: Date
+  date: Timestamp
   content: string
   likes: Array<string>
 }
 
-export interface Post {
-  uid: string
+export interface PostType {
+  userID: string
   fullname: string
   date: Timestamp
   content: string
   likes: Array<string>
-  comments: Array<Comment>
+  comments: Array<CommentType>
 }
 
 export interface User {
@@ -32,7 +32,6 @@ export interface User {
 export interface Users {
   list: Array<User>
 }
-
 
 // export const posts: Array<Post> = [
 //   {

@@ -23,25 +23,23 @@ const MainPage: React.FC<any> = () => {
   useEffect(() => {
     const postsRef = collection(db, 'posts')
     const q = query(postsRef, orderBy('date', 'desc'))
-    const unsub = onSnapshot(q, (posts: any) => {
-      const postsSnapshot: DocumentData[] = []
-      posts.forEach((p: any) => postsSnapshot.push(p.data()))
-      setAllPosts(postsSnapshot)
-    })
+    const unsub = DB.setSnapshotListener(q, setAllPosts)
+    console.log('main page renders')
     return () => {
       unsub()
     }
-  }, [])
+  }, [isUserSignedIn])
 
   const renderPosts = allPosts?.map((p: any) => (
     <Post
-      key={p.date}
+      key={p.postID}
+      postID={p.postID}
+      userID={p.userID}
       full_name={p.fullname}
-      uid={p.uid}
       date={p.date}
       content={p.content}
       likes={p.likes}
-      
+      comments={p.comments}
     />
   ))
   return (
@@ -54,6 +52,7 @@ const MainPage: React.FC<any> = () => {
 
 const StyledDiv = styled.div`
   color: ${p => p.theme.font};
+  padding-bottom: 2rem;
 `
 
 export default MainPage
