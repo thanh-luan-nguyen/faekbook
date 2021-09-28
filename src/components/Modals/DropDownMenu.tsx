@@ -19,7 +19,6 @@ const DropDownMenu: React.FC<any> = () => {
     dispatchToggle,
     dispatchDimBgModal,
   } = useContext(Context)
-  // const isSignedIn = Authen.isUserSignedIn()
 
   const history = useHistory()
   const returnToHomepage = () => {

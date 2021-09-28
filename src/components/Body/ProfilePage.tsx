@@ -7,12 +7,12 @@ import { AiOutlineCamera, AiFillCamera } from 'react-icons/ai'
 import ColorThief from 'colorthief'
 import useWindowSize, { Size } from '../../hooks/useWindowSize'
 import WhatsOnYourMind from './WhatsOnYourMind'
-import { DB, db } from '../../firebaseConfig'
+import { DB, db, Storage, storage } from '../../firebaseConfig'
 import Post from './Post'
 import {
   collection,
-  DocumentData,
-  onSnapshot,
+  doc,
+  getDoc,
   orderBy,
   query,
   where,
@@ -23,18 +23,53 @@ import {
   ref,
   uploadBytes,
 } from '@firebase/storage'
+import { useParams } from 'react-router'
 
 const ProfilePage: React.FC<any> = () => {
   const {
-    currentUserInfo,
     toggleState,
-    updatePhoto,
-    CUAvatarURL,
-    CUCoverImgURL,
     isUserSignedIn,
+    currentUserInfo,
+    CUAvatarURL,
+    setAvatarURL,
   } = useContext(Context)
+  const { userID }: { userID: string } = useParams()
 
   const [editCoverPhotoHidden, setEditCoverPhotoHidden] = useState(false)
+
+  const [userInfo, setUserInfo] = useState<any>(null)
+  useEffect(() => {
+    getDoc(doc(db, 'users', userID)).then(userSnap => {
+      const userInfo = userSnap.data()
+      setUserInfo(userInfo)
+    })
+  }, [])
+
+  const [userCoverImgURL, setCoverImageURL] = useState<any>(null)
+  const [userAvatarURL, setUserAvatarURL] = useState<any>(null)
+  const updatePhoto = (e: any) => {
+    const file = e.target.files[0]
+    if (file) {
+      const isAvatar = e.target.id === 'avatar'
+      const fileName = isAvatar ? 'avatar' : 'cover_image'
+      const fileRef = ref(storage, `users/${userID}/${fileName}`)
+      deleteObject(fileRef).catch(e => console.log(e))
+      uploadBytes(fileRef, file).then(() =>
+        getDownloadURL(fileRef).then(url =>
+          isAvatar
+            ? userID === currentUserInfo?.uid
+              ? setAvatarURL(url)
+              : setUserAvatarURL(url)
+            : setCoverImageURL(url)
+        )
+      )
+    }
+  }
+  useEffect(() => {
+    ;(async () => {
+      Storage.setPhotosURL(userID, setAvatarURL, setCoverImageURL)
+    })()
+  }, [userID])
 
   //* width size query for the edit cover photo button */
   const size: Size = useWindowSize()
@@ -46,21 +81,21 @@ const ProfilePage: React.FC<any> = () => {
   }, [size])
 
   //* render posts */
-  const [CUPosts, setCUPosts] = useState<any>(null)
+  const [userPosts, setUserPosts] = useState<any>(null)
   useEffect(() => {
     const postsRef = collection(db, 'posts')
     const q = query(
       postsRef,
-      where('userID', '==', currentUserInfo && currentUserInfo.uid),
+      where('userID', '==', userID),
       orderBy('date', 'desc')
     )
-    const unsub = DB.setSnapshotListener(q, setCUPosts)
+    const unsub = DB.setSnapshotListener(q, setUserPosts)
     console.log('profile renders')
     return () => {
       unsub()
     }
-  }, [currentUserInfo])
-  const renderPosts = CUPosts?.map((p: any) => (
+  }, [userID])
+  const renderPosts = userPosts?.map((p: any) => (
     <Post
       key={p.postID}
       postID={p.postID}
@@ -84,14 +119,14 @@ const ProfilePage: React.FC<any> = () => {
       setBgGradient(color)
     }
   }, [isUserSignedIn])
-  //? proxy server produces a more liberal CORS policy */
   const googleProxyURL =
     'https://images1-focus-opensocial.googleusercontent.com/gadgets/proxy?container=focus&refresh=2592000&url='
+  //? proxy server produces a more liberal CORS policy */
   const renderColorThief = (
     <img
       src={
         googleProxyURL +
-        (encodeURIComponent(CUCoverImgURL) ||
+        (encodeURIComponent(userCoverImgURL) ||
           encodeURIComponent(defaultCoverImage))
       }
       crossOrigin='anonymous'
@@ -110,47 +145,58 @@ const ProfilePage: React.FC<any> = () => {
         <div id='cover-image'>
           {renderColorThief}
           <div className='avatar'>
-            <img src={CUAvatarURL ? CUAvatarURL : defaultAvatar} alt='avatar' />
-            <label className='update-avatar'>
+            <img
+              src={
+                userID === currentUserInfo?.uid
+                  ? CUAvatarURL || defaultAvatar
+                  : userAvatarURL || defaultAvatar
+              }
+              alt='avatar'
+            />
+            {userID === currentUserInfo?.uid && (
+              <label className='update-avatar'>
+                <input
+                  onChange={updatePhoto}
+                  id='avatar'
+                  type='file'
+                  accept='image/*'
+                  style={{ display: 'none' }}
+                />
+                {toggleState.isDarkTheme ? (
+                  <AiFillCamera className='icon' style={{ fill: 'white' }} />
+                ) : (
+                  <AiOutlineCamera className='icon' />
+                )}
+              </label>
+            )}
+          </div>
+          {userID === currentUserInfo?.uid && (
+            <label className='edit-cover-photo'>
               <input
                 onChange={updatePhoto}
-                id='avatar'
+                id='cover'
                 type='file'
                 accept='image/*'
                 style={{ display: 'none' }}
               />
-              {toggleState.isDarkTheme ? (
-                <AiFillCamera className='icon' style={{ fill: 'white' }} />
-              ) : (
-                <AiOutlineCamera className='icon' />
-              )}
+              <AiFillCamera className='icon' /> <span>Edit Cover Photo</span>
             </label>
-          </div>
-          <label className='edit-cover-photo'>
-            <input
-              onChange={updatePhoto}
-              id='cover'
-              type='file'
-              accept='image/*'
-              style={{ display: 'none' }}
-            />
-            <AiFillCamera className='icon' /> <span>Edit Cover Photo</span>
-          </label>
+          )}
         </div>
 
         <div id='intro'>
           <div className='name'>
-            {currentUserInfo
-              ? `${currentUserInfo.first_name} ${currentUserInfo.last_name}`
+            {userInfo
+              ? `${userInfo.first_name} ${userInfo.last_name}`
               : 'default name'}
           </div>
           <div className='short-description'>
-            {currentUserInfo && currentUserInfo.short_bio}
+            {userInfo && userInfo.short_bio}
           </div>
         </div>
       </header>
       <main>
-        <WhatsOnYourMind />
+        {userID === currentUserInfo?.uid && <WhatsOnYourMind />}
         {renderPosts}
       </main>
     </StyledDiv>

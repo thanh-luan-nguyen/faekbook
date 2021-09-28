@@ -80,7 +80,6 @@ const StyledDiv = styled('div')<{
   background-color: ${p => p.theme.main_bgclr};
   color: ${p => p.theme.font};
   border-radius: 10px;
-
   #middle,
   textarea,
   .post-button {

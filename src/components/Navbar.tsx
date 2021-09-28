@@ -18,20 +18,11 @@ const Navbar: React.FC<any> = () => {
     CUAvatarURL,
     currentUserInfo,
     dispatchToggle,
-    // dispatchSignInOut,
     dispatchDimBgModal,
   } = useContext(Context)
 
-  // useEffect(() => {
-  //   Authen.handleSignInOutState(
-  //     () => dispatchSignInOut({ type: 'SIGN_IN' }),
-  //     () => dispatchSignInOut({ type: 'SIGN_OUT' })
-  //   )
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [])
-
   const userProfileButton = (
-    <Link to='/faekbook/profile'>
+    <Link to={`/faekbook/${currentUserInfo?.uid}`}>
       <div className='user-profile-button'>
         <img
           src={isUserSignedIn ? CUAvatarURL || defaultAvatar : undefined}

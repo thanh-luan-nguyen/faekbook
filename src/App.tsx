@@ -2,11 +2,7 @@ import styled, { css } from 'styled-components'
 // import Body from './components/Body/Body'
 import Navbar from './components/Navbar'
 import { useEffect, useReducer, useState } from 'react'
-import {
-  toggleReducer,
-  isSignedInReducer,
-  authenModalReducer,
-} from './reducers/reducers'
+import { toggleReducer, authenModalReducer } from './reducers/reducers'
 import Context from './utils/Context'
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
 import LogInModal from './components/Modals/LogInModal'
@@ -16,26 +12,9 @@ import MainPage from './components/Body/MainPage'
 import ProfilePage from './components/Body/ProfilePage'
 import DropDownMenu from './components/Modals/DropDownMenu'
 import CreatePost from './components/Modals/CreatePost'
-import { auth, db, Storage, storage } from './firebaseConfig'
-import { getUnixTime } from 'date-fns'
+import { auth, db, Storage } from './firebaseConfig'
 import { onAuthStateChanged } from '@firebase/auth'
-import {
-  collection,
-  doc,
-  DocumentData,
-  getDoc,
-  getDocs,
-  onSnapshot,
-  orderBy,
-  query,
-  where,
-} from '@firebase/firestore'
-import {
-  deleteObject,
-  getDownloadURL,
-  ref,
-  uploadBytes,
-} from '@firebase/storage'
+import { doc, getDoc } from '@firebase/firestore'
 
 const App: React.FC<any> = () => {
   const [isUserSignedIn, setIsUserSignedIn] = useState<boolean>(false)
@@ -55,7 +34,6 @@ const App: React.FC<any> = () => {
           // get current user specific info
           const currentUserInfo = userSnap.data()
           setCurrentUserInfo(currentUserInfo)
-
           // set theme
           currentUserInfo?.is_dark_theme
             ? dispatchToggle({ type: 'DARK_THEME' })
@@ -69,29 +47,13 @@ const App: React.FC<any> = () => {
     })
   }, [])
 
-  const [CUCoverImgURL, setCoverImageURL] = useState<any>(null)
   const [CUAvatarURL, setAvatarURL] = useState<any>(null)
 
-  const updatePhoto = (e: any) => {
-    const file = e.target.files[0]
-    if (file) {
-      const isAvatar = e.target.id === 'avatar'
-      const uid = currentUserInfo?.uid
-      const fileName = isAvatar ? 'avatar' : 'cover_image'
-      const fileRef = ref(storage, `users/${uid}/${fileName}`)
-      deleteObject(fileRef).catch(e => console.log(e))
-      uploadBytes(fileRef, file).then(() =>
-        getDownloadURL(fileRef).then(url =>
-          isAvatar ? setAvatarURL(url) : setCoverImageURL(url)
-        )
-      )
-    }
-  }
   useEffect(() => {
     if (currentUserInfo) {
       ;(async () => {
         const uid = currentUserInfo?.uid
-        Storage.setPhotosURL(uid, setAvatarURL, setCoverImageURL)
+        Storage.setPhotosURL(uid, setAvatarURL)
       })()
     }
   }, [currentUserInfo])
@@ -122,9 +84,8 @@ const App: React.FC<any> = () => {
         dispatchToggle,
         dimBgModal,
         dispatchDimBgModal,
-        updatePhoto,
-        CUCoverImgURL,
         CUAvatarURL,
+        setAvatarURL,
       }}
     >
       <Router>
@@ -140,7 +101,7 @@ const App: React.FC<any> = () => {
           <Navbar />
           <Switch>
             <Route exact path='/faekbook/' component={MainPage} />
-            <Route exact path='/faekbook/profile' component={ProfilePage} />
+            <Route exact path='/faekbook/:userID' component={ProfilePage} />
           </Switch>
           {/* modals */}
           <div className='dim-bg-modal'>{renderModal(dimBgModal.action)}</div>
@@ -176,7 +137,7 @@ const StyledDiv = styled('div')<{ authenType: string; toggleState: any }>`
     position: fixed;
     background: white;
     border-radius: 10px;
-    top: 15rem;
+    top: 12%;
     left: 50%;
     transform: translateX(-50%);
     z-index: 200;

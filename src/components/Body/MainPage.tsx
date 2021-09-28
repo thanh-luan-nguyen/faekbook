@@ -1,15 +1,7 @@
-import {
-  collection,
-  DocumentData,
-  onSnapshot,
-  orderBy,
-  query,
-} from '@firebase/firestore'
-import { async } from '@firebase/util'
-import { fromUnixTime } from 'date-fns'
+import { collection, orderBy, query } from '@firebase/firestore'
 import { useContext, useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { Authen, db, DB } from '../../firebaseConfig'
+import { db, DB } from '../../firebaseConfig'
 import Context from '../../utils/Context'
 import { themes } from '../../utils/themes'
 import Post from './Post'

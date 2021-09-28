@@ -11,14 +11,10 @@ import BlueBgLikeIcon from '../../utils/BlueBgLikeIcon'
 import { CommentType } from '../../types/interface'
 import { defaultAvatar } from '../../utils/defaults'
 import Comment from './Comment'
-import {
-  doc,
-  getDoc,
-  onSnapshot,
-  Timestamp,
-  updateDoc,
-} from '@firebase/firestore'
+import { doc, getDoc, Timestamp, updateDoc } from '@firebase/firestore'
 import { db, Storage } from '../../firebaseConfig'
+import { Link } from 'react-router-dom'
+import PostModal from '../Modals/PostModal'
 
 const Post: React.FC<{
   userID: string
@@ -29,33 +25,22 @@ const Post: React.FC<{
   likes: Array<string>
   comments: Array<CommentType>
   is_profile_page?: boolean
-}> = ({
-  full_name,
-  userID,
-  postID,
-  date,
-  content,
-  likes,
-  comments,
-  is_profile_page,
-}) => {
+}> = ({ full_name, userID, postID, date, content, likes, comments }) => {
   const { currentUserInfo, toggleState, isUserSignedIn, CUAvatarURL } =
     useContext(Context)
-  const [hasAtLeastOneLike, setHasAtLeastOneLike] = useState<boolean>(false)
-
   const [isLikedByCurrentUser, setIsLiked] = useState<boolean>(false)
-
-  const [postAvatar, setPostAvatar] = useState<any>(null)
+  const [postAvatarURL, setPostAvatar] = useState<any>(null)
   useEffect(() => {
     //* set post avatar */
-    Storage.setPhotosURL(userID, setPostAvatar)
+    ;(async () => {
+      Storage.setPhotosURL(userID, setPostAvatar)
+    })()
     //* set like effects */
     if (isUserSignedIn) {
       likes.includes(currentUserInfo?.uid)
         ? setIsLiked(true)
         : setIsLiked(false)
     } else setIsLiked(false)
-    likes.length >= 1 ? setHasAtLeastOneLike(true) : setHasAtLeastOneLike(false)
   }, [likes, isUserSignedIn])
 
   const toggleLikeThisPost = () => {
@@ -99,35 +84,55 @@ const Post: React.FC<{
     />
   ))
 
+  const [isShowingModal, setModalVisibility] = useState<boolean>(false)
+
   return (
     <StyledSection
       theme={toggleState.isDarkTheme ? themes.dark : themes.light}
       isDarkTheme={toggleState.isDarkTheme ? 1 : 0}
       isLikedByCurrentUser={isLikedByCurrentUser ? 1 : 0}
+      hasZeroComments={comments.length === 0 ? 1 : 0}
       isUserSignedIn={isUserSignedIn ? 1 : 0}
     >
       <div id='user-info'>
-        <img
-          src={is_profile_page ? CUAvatarURL : postAvatar || defaultAvatar}
-          alt='avatar'
-        />
+        <Link to={`/faekbook/${userID}`}>
+          <img
+            src={
+              userID === currentUserInfo?.uid
+                ? CUAvatarURL || defaultAvatar
+                : postAvatarURL || defaultAvatar
+            }
+            alt='avatar'
+          />
+        </Link>
         <div className='info'>
-          <div className='name'>{full_name}</div>
-          <div className='time'>
-            {`${format(fromUnixTime(date.seconds), 'yyyy, MMM d')} at ${format(
-              fromUnixTime(date.seconds),
-              'h:mm a'
-            )}`}
+          <div className='name'>
+            <Link to={`/faekbook/${userID}`}>{full_name}</Link>
           </div>
+          {`${format(fromUnixTime(date.seconds), 'yyyy, MMM d')} at ${format(
+            fromUnixTime(date.seconds),
+            'h:mm a'
+          )}`}
         </div>
       </div>
       <main id='content'>{content}</main>
-      {hasAtLeastOneLike && (
-        <div id='likes'>
-          <BlueBgLikeIcon />
-          <span>{likes.length}</span>
+      <div id='num-likes-cmts'>
+        <div className='likes'>
+          {likes.length >= 1 && (
+            <>
+              <BlueBgLikeIcon />
+              <span>{likes.length}</span>
+            </>
+          )}
         </div>
-      )}
+        <div className='comments'>
+          {comments.length > 0 && (
+            <>
+              {comments.length} comment{comments.length > 1 && 's'}
+            </>
+          )}
+        </div>
+      </div>
 
       <div id='like-comment'>
         <div
@@ -160,6 +165,17 @@ const Post: React.FC<{
           ></input>
         </form>
       )}
+      {userID === currentUserInfo?.uid && (
+        <div
+          className='three-dots'
+          onClick={() => setModalVisibility(!isShowingModal)}
+        >
+          <BsThreeDots className='icon' />
+        </div>
+      )}
+      {isShowingModal && (
+        <PostModal setModalVisibility={setModalVisibility} postID={postID} />
+      )}
     </StyledSection>
   )
 }
@@ -167,8 +183,10 @@ const Post: React.FC<{
 const StyledSection = styled('section')<{
   isDarkTheme: number
   isLikedByCurrentUser: number
+  hasZeroComments: number
   isUserSignedIn: number
 }>`
+  position: relative;
   background-color: ${p => p.theme.main_bgclr};
   color: ${p => p.theme.font_lighter};
   width: 50rem;
@@ -177,6 +195,20 @@ const StyledSection = styled('section')<{
   border-radius: 1rem;
   margin-top: 2rem;
   padding-bottom: ${p => p.isUserSignedIn && '1.5rem'};
+  & > .three-dots {
+    position: absolute;
+    right: 1.75rem;
+    top: 1.5rem;
+    padding: 0.75rem;
+    border-radius: 50%;
+    &:hover {
+      background-color: ${p => p.theme.theme_toggler_bgclr};
+      cursor: pointer;
+    }
+    .icon {
+      font-size: 1.5rem;
+    }
+  }
   #user-info {
     width: 100%;
     display: flex;
@@ -195,11 +227,15 @@ const StyledSection = styled('section')<{
       justify-content: space-around;
       height: 3.5rem;
       .name {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: ${p => p.theme.font};
-      }
-      .time {
+        a {
+          text-decoration: none;
+          font-size: 1.5rem;
+          font-weight: 700;
+          color: ${p => p.theme.font};
+          &:hover {
+            text-decoration: underline;
+          }
+        }
       }
     }
   }
@@ -208,16 +244,24 @@ const StyledSection = styled('section')<{
     padding: 1.5rem 1.5rem 0;
     word-wrap: break-word;
   }
-  #likes {
+  #num-likes-cmts {
     padding: 1.5rem 1.5rem 0;
     display: flex;
-    align-items: center;
-    column-gap: 0.5rem;
-    img {
-      height: 1.75rem;
-      width: 1.75rem;
+    justify-content: space-between;
+    .likes {
+      display: flex;
+      align-items: center;
+      column-gap: 0.5rem;
+      img {
+        height: 1.75rem;
+        width: 1.75rem;
+      }
+      span {
+        font-size: 1.25rem;
+      }
     }
-    span {
+    .comments {
+      line-height: 1.75rem;
       font-size: 1.25rem;
     }
   }
@@ -258,9 +302,17 @@ const StyledSection = styled('section')<{
             : 'unset'};
       }
     }
-    .comments:hover {
-      cursor: pointer;
-      background-color: ${p => (p.isDarkTheme ? '#64646471' : '#ebebebae')};
+    .comments {
+      color: ${p => p.hasZeroComments && '#ebebebae'};
+      &:hover {
+        cursor: ${p => (p.hasZeroComments ? 'not-allowed' : 'pointer')};
+        background-color: ${p =>
+          p.hasZeroComments
+            ? 'unset'
+            : p.isDarkTheme
+            ? '#64646471'
+            : '#ebebebae'};
+      }
     }
   }
   #comments {

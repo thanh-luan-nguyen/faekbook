@@ -10,7 +10,7 @@ export default function WhatsOnYourMind() {
   return (
     <StyledSection theme={toggleState.isDarkTheme ? themes.dark : themes.light}>
       <img
-        src={isUserSignedIn ? (CUAvatarURL || defaultAvatar):undefined}
+        src={isUserSignedIn ? CUAvatarURL || defaultAvatar : undefined}
         alt='avatar'
       />
       <div onClick={() => dispatchDimBgModal({ type: 'CREATE_POST' })}>
