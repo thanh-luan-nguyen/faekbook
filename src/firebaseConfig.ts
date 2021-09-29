@@ -2,7 +2,6 @@ import { DocumentData, onSnapshot } from '@firebase/firestore'
 import { initializeApp } from 'firebase/app'
 import {
   doc,
-  getDoc,
   getFirestore,
   setDoc,
   updateDoc,
@@ -11,17 +10,14 @@ import {
   getAuth,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  onAuthStateChanged,
   signOut,
 } from 'firebase/auth'
 import {
   getStorage,
   ref,
-  uploadBytes,
   getDownloadURL,
-  uploadString,
 } from 'firebase/storage'
-import { PostType, User } from './types/interface'
+import { User } from './types/interface'
 
 const app = initializeApp({
   apiKey: 'AIzaSyAowcCuiyILtMdMP96n-RzUh2QVKvrN4OQ',
@@ -84,22 +80,6 @@ export class Authen {
         alert('Signout failed: ' + e)
       })
   }
-  // static getUserEmail() {
-  //   const user = auth.currentUser
-  //   if (user !== null) {
-  //     const email = user.email
-  //     return email
-  //   }
-  // }
-  // static handleSignInOutState(callback1: any, callback2 = () => {}) {
-  //   onAuthStateChanged(auth, user => {
-  //     if (user) {
-  //       callback1()
-  //     } else {
-  //       callback2()
-  //     }
-  //   })
-  // }
 }
 
 export class DB {

@@ -19,13 +19,16 @@ import { doc, getDoc } from '@firebase/firestore'
 const App: React.FC<any> = () => {
   const [isUserSignedIn, setIsUserSignedIn] = useState<boolean>(false)
   const [currentUserInfo, setCurrentUserInfo] = useState<any>(null)
+  const [CUAvatarURL, setAvatarURL] = useState<any>(null)
   const [toggleState, dispatchToggle] = useReducer(toggleReducer, {
     isDarkTheme: false,
     dropDownMenuIsVisible: false,
   })
+  const [dimBgModal, dispatchDimBgModal] = useReducer(authenModalReducer, {
+    action: 'close modals',
+  })
 
   useEffect(() => {
-    ;(async () => {})()
     onAuthStateChanged(auth, async user => {
       if (user) {
         // set sign-in state
@@ -45,11 +48,6 @@ const App: React.FC<any> = () => {
         dispatchToggle({ type: 'LIGHT_THEME' })
       }
     })
-  }, [])
-
-  const [CUAvatarURL, setAvatarURL] = useState<any>(null)
-
-  useEffect(() => {
     if (currentUserInfo) {
       ;(async () => {
         const uid = currentUserInfo?.uid
@@ -58,9 +56,6 @@ const App: React.FC<any> = () => {
     }
   }, [currentUserInfo])
 
-  const [dimBgModal, dispatchDimBgModal] = useReducer(authenModalReducer, {
-    action: 'close modals',
-  })
 
   const renderModal = (action: string) => {
     switch (action) {

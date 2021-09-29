@@ -27,9 +27,10 @@ const DropDownMenu: React.FC<any> = () => {
 
   const handleToggleTheme = () => {
     dispatchToggle({ type: 'TOGGLE_THEME' })
-    DB.updateUserInfo(currentUserInfo.uid, {
-      is_dark_theme: !toggleState.isDarkTheme,
-    })
+    isUserSignedIn &&
+      DB.updateUserInfo(currentUserInfo?.uid, {
+        is_dark_theme: !toggleState.isDarkTheme,
+      })
     dispatchToggle({ type: 'TOGGLE_DROP_DOWN_MENU' })
   }
 
