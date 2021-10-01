@@ -6,7 +6,7 @@ import { Authen } from '../../firebaseConfig'
 import globalValues from '../../styles/globalValues'
 import Context from '../../utils/Context'
 import { themes } from '../../utils/themes'
-import TurnOffModalButton from './TurnOffModalButton'
+import TurnOffModalButton from '../../utils/TurnOffModalButton'
 
 export default function SignUpModal() {
   const [firstName, setFirstName] = useState('')

@@ -1,15 +1,15 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 import { BsThreeDots } from 'react-icons/bs'
 import Context from '../../utils/Context'
 import { imageObjectSettings, themes } from '../../utils/themes'
 import { AiFillLike } from 'react-icons/ai'
-import { GoComment } from 'react-icons/go'
+import { FaComment, FaCommentSlash } from 'react-icons/fa'
 import globalValues from '../../styles/globalValues'
 import { format, fromUnixTime } from 'date-fns'
 import BlueBgLikeIcon from '../../utils/BlueBgLikeIcon'
-import { CommentType } from '../../types/interface'
-import { defaultAvatar } from '../../utils/defaults'
+import { CommentType } from '../../interface'
+import { defaultAvatar } from '../../utils/defaultPhotos'
 import Comment from './Comment'
 import { doc, getDoc, Timestamp, updateDoc } from '@firebase/firestore'
 import { db, Storage } from '../../firebaseConfig'
@@ -28,20 +28,24 @@ const Post: React.FC<{
 }> = ({ full_name, userID, postID, date, content, likes, comments }) => {
   const { currentUserInfo, toggleState, isUserSignedIn, CUAvatarURL } =
     useContext(Context)
-  const [isLikedByCurrentUser, setIsLiked] = useState<boolean>(false)
+  const [isLikedByCurrentUser, setIsLiked] = useState<boolean>()
   const [postAvatarURL, setPostAvatar] = useState<any>(null)
+  const [isShowingComments, setIsShowingComments] = useState<boolean>()
+  const [commentContent, setCommentContent] = useState('')
+  const [isShowingModal, setIsShowingModal] = useState<boolean>(false)
+  const threeDotsNode = useRef(null)
+
   useEffect(() => {
     //* set post avatar */
-    ;(async () => {
-      Storage.setPhotosURL(userID, setPostAvatar)
-    })()
+    Storage.updatePhotoURL(userID, setPostAvatar)
     //* set like effects */
     if (isUserSignedIn) {
       likes.includes(currentUserInfo?.uid)
         ? setIsLiked(true)
         : setIsLiked(false)
     } else setIsLiked(false)
-  }, [likes, isUserSignedIn])
+    console.log('post renders')
+  }, [likes, isUserSignedIn, userID, currentUserInfo])
 
   const toggleLikeThisPost = () => {
     const userID = currentUserInfo?.uid
@@ -54,8 +58,6 @@ const Post: React.FC<{
     })
   }
 
-  const [isShowingComments, setIsShowingComments] = useState(false)
-  const [commentContent, setCommentContent] = useState('')
   const postComment = (e: any) => {
     e.preventDefault()
     if (commentContent !== '') {
@@ -77,14 +79,13 @@ const Post: React.FC<{
   }
   const renderComments = comments.map(cmt => (
     <Comment
+      key={cmt.date.toString()}
       commenterUID={cmt.commenterUID}
       content={cmt.content}
       date={cmt.date}
       likes={cmt.likes}
     />
   ))
-
-  const [isShowingModal, setModalVisibility] = useState<boolean>(false)
 
   return (
     <StyledSection
@@ -93,6 +94,7 @@ const Post: React.FC<{
       isLikedByCurrentUser={isLikedByCurrentUser ? 1 : 0}
       hasZeroComments={comments.length === 0 ? 1 : 0}
       isUserSignedIn={isUserSignedIn ? 1 : 0}
+      isShowingComments={isShowingComments ? 1 : 0}
     >
       <div id='user-info'>
         <Link to={`/faekbook/${userID}`}>
@@ -115,6 +117,14 @@ const Post: React.FC<{
           )}`}
         </div>
       </div>
+      {isShowingModal && (
+        <PostModal
+          postID={postID}
+          isShowingModal={isShowingModal}
+          setIsShowingModal={setIsShowingModal}
+          postContent={content}
+        />
+      )}
       <main id='content'>{content}</main>
       <div id='num-likes-cmts'>
         <div className='likes'>
@@ -145,11 +155,15 @@ const Post: React.FC<{
         <div
           className='comments'
           onClick={() => {
-            setIsShowingComments(!isShowingComments)
+            comments.length > 0 && setIsShowingComments(!isShowingComments)
           }}
         >
-          <GoComment className='icon' />
-          <span>View Comments</span>
+          {isShowingComments ? (
+            <FaCommentSlash className='icon' />
+          ) : (
+            <FaComment className='icon' />
+          )}
+          <span>{isShowingComments ? 'Hide' : 'Show'} Comments</span>
         </div>
       </div>
       {isShowingComments && <div id='comments'>{renderComments}</div>}
@@ -167,14 +181,12 @@ const Post: React.FC<{
       )}
       {userID === currentUserInfo?.uid && (
         <div
+          ref={threeDotsNode}
           className='three-dots'
-          onClick={() => setModalVisibility(!isShowingModal)}
+          onClick={() => setIsShowingModal(!isShowingModal)}
         >
           <BsThreeDots className='icon' />
         </div>
-      )}
-      {isShowingModal && (
-        <PostModal setModalVisibility={setModalVisibility} postID={postID} />
       )}
     </StyledSection>
   )
@@ -185,16 +197,18 @@ const StyledSection = styled('section')<{
   isLikedByCurrentUser: number
   hasZeroComments: number
   isUserSignedIn: number
+  isShowingComments: number
 }>`
   position: relative;
   background-color: ${p => p.theme.main_bgclr};
   color: ${p => p.theme.font_lighter};
-  width: 50rem;
+  width: 60rem;
   max-width: 100%;
   margin-inline: auto;
   border-radius: 1rem;
   margin-top: 2rem;
-  padding-bottom: ${p => p.isUserSignedIn && '1.5rem'};
+  padding-bottom: ${p =>
+    p.isUserSignedIn ? '1.5rem' : p.isShowingComments ? '1.5rem' : '0'};
   & > .three-dots {
     position: absolute;
     right: 1.75rem;
@@ -267,7 +281,7 @@ const StyledSection = styled('section')<{
   }
   #like-comment {
     border-block: ${p => (p.isDarkTheme ? '#2f3031' : '#dddfe2')} 1px solid;
-    border-bottom: ${p => p.isUserSignedIn || 'none'};
+    border-bottom: ${p => p.isUserSignedIn || p.isShowingComments || 'none'};
     margin-top: 1.5rem;
     padding: 0.5rem 1.5rem;
     display: flex;
@@ -290,8 +304,14 @@ const StyledSection = styled('section')<{
       }
     }
     .like {
-      color: ${p => p.isLikedByCurrentUser && '#036ee2'};
-      color: ${p => p.isUserSignedIn || '#ebebebae'};
+      color: ${p =>
+        p.isUserSignedIn
+          ? p.isLikedByCurrentUser
+            ? '#036ee2'
+            : 'unset'
+          : p.isDarkTheme
+          ? '#525252ac'
+          : '#ebebebae'};
       &:hover {
         cursor: ${p => (p.isUserSignedIn ? 'pointer' : 'not-allowed')};
         background-color: ${p =>
@@ -303,7 +323,12 @@ const StyledSection = styled('section')<{
       }
     }
     .comments {
-      color: ${p => p.hasZeroComments && '#ebebebae'};
+      color: ${p =>
+        p.hasZeroComments
+          ? p.isDarkTheme
+            ? '#525252ac'
+            : '#ebebebae'
+          : 'unset'};
       &:hover {
         cursor: ${p => (p.hasZeroComments ? 'not-allowed' : 'pointer')};
         background-color: ${p =>

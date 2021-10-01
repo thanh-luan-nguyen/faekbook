@@ -1,23 +1,14 @@
 import { DocumentData, onSnapshot } from '@firebase/firestore'
 import { initializeApp } from 'firebase/app'
-import {
-  doc,
-  getFirestore,
-  setDoc,
-  updateDoc,
-} from 'firebase/firestore'
+import { doc, getFirestore, setDoc, updateDoc } from 'firebase/firestore'
 import {
   getAuth,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
 } from 'firebase/auth'
-import {
-  getStorage,
-  ref,
-  getDownloadURL,
-} from 'firebase/storage'
-import { User } from './types/interface'
+import { getStorage, ref, getDownloadURL } from 'firebase/storage'
+import { User } from './interface'
 
 const app = initializeApp({
   apiKey: 'AIzaSyAowcCuiyILtMdMP96n-RzUh2QVKvrN4OQ',
@@ -108,7 +99,11 @@ export class DB {
 }
 
 export class Storage {
-  static setPhotosURL(uid: string, setAvatarURL: any, setCoverImageURL?: any) {
+  static updatePhotoURL(
+    uid: string,
+    setAvatarURL: any,
+    setCoverImageURL?: any
+  ) {
     const avatarRef = ref(storage, `users/${uid}/avatar`)
     const coverImageRef = ref(storage, `users/${uid}/cover_image`)
     getDownloadURL(avatarRef)

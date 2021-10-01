@@ -1,8 +1,7 @@
 import styled, { css } from 'styled-components'
-// import Body from './components/Body/Body'
 import Navbar from './components/Navbar'
 import { useEffect, useReducer, useState } from 'react'
-import { toggleReducer, authenModalReducer } from './reducers/reducers'
+import { toggleReducer, authenModalReducer } from './reducers'
 import Context from './utils/Context'
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
 import LogInModal from './components/Modals/LogInModal'
@@ -15,11 +14,12 @@ import CreatePost from './components/Modals/CreatePost'
 import { auth, db, Storage } from './firebaseConfig'
 import { onAuthStateChanged } from '@firebase/auth'
 import { doc, getDoc } from '@firebase/firestore'
+import EditPostModal from './components/Modals/EditPostModal'
 
 const App: React.FC<any> = () => {
-  const [isUserSignedIn, setIsUserSignedIn] = useState<boolean>(false)
+  const [isUserSignedIn, setIsUserSignedIn] = useState<boolean>()
   const [currentUserInfo, setCurrentUserInfo] = useState<any>(null)
-  const [CUAvatarURL, setAvatarURL] = useState<any>(null)
+  const [CUAvatarURL, setCUAvatarURL] = useState<any>(null)
   const [toggleState, dispatchToggle] = useReducer(toggleReducer, {
     isDarkTheme: false,
     dropDownMenuIsVisible: false,
@@ -27,6 +27,7 @@ const App: React.FC<any> = () => {
   const [dimBgModal, dispatchDimBgModal] = useReducer(authenModalReducer, {
     action: 'close modals',
   })
+  const [editedPostContent,setEdittedPostContent]=useState<string>('')
 
   useEffect(() => {
     onAuthStateChanged(auth, async user => {
@@ -48,23 +49,24 @@ const App: React.FC<any> = () => {
         dispatchToggle({ type: 'LIGHT_THEME' })
       }
     })
+  }, [])
+  useEffect(() => {
     if (currentUserInfo) {
-      ;(async () => {
-        const uid = currentUserInfo?.uid
-        Storage.setPhotosURL(uid, setAvatarURL)
-      })()
+      const uid = currentUserInfo?.uid
+      Storage.updatePhotoURL(uid, setCUAvatarURL)
     }
   }, [currentUserInfo])
 
-
-  const renderModal = (action: string) => {
-    switch (action) {
+  const renderModal = (dimBgModal: any) => {
+    switch (dimBgModal.action) {
       case 'show login modal':
         return <LogInModal />
       case 'show signup modal':
         return <SignUpModal />
       case 'show create-post modal':
         return <CreatePost />
+      case 'show edit-post':
+        return <EditPostModal postContent={editedPostContent}/>
       case 'close modals':
         return
     }
@@ -80,7 +82,8 @@ const App: React.FC<any> = () => {
         dimBgModal,
         dispatchDimBgModal,
         CUAvatarURL,
-        setAvatarURL,
+        setCUAvatarURL,
+        setEdittedPostContent,
       }}
     >
       <Router>
@@ -88,10 +91,12 @@ const App: React.FC<any> = () => {
           theme={toggleState.isDarkTheme === true ? themes.dark : themes.light}
           authenType={dimBgModal.action}
           toggleState={toggleState}
-          onClick={() =>
+          onClick={() => {
             toggleState.dropDownMenuIsVisible &&
-            dispatchToggle({ type: 'TOGGLE_DROP_DOWN_MENU' })
-          }
+              dispatchToggle({ type: 'TOGGLE_DROP_DOWN_MENU' })
+            toggleState.postModalIsVisible &&
+              dispatchToggle({ type: 'TOGGLE_POST_MODAL' })
+          }}
         >
           <Navbar />
           <Switch>
@@ -99,7 +104,7 @@ const App: React.FC<any> = () => {
             <Route exact path='/faekbook/:userID' component={ProfilePage} />
           </Switch>
           {/* modals */}
-          <div className='dim-bg-modal'>{renderModal(dimBgModal.action)}</div>
+          <div className='dim-bg-modal'>{renderModal(dimBgModal)}</div>
           {toggleState.dropDownMenuIsVisible && <DropDownMenu />}
         </StyledDiv>
       </Router>

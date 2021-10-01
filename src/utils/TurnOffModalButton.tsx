@@ -1,7 +1,7 @@
 import { useContext } from 'react'
 import styled from 'styled-components'
-import Context from '../../utils/Context'
-import { themes } from '../../utils/themes'
+import Context from './Context'
+import { themes } from './themes'
 
 export default function TurnOffModalButton() {
   const { toggleState, dispatchDimBgModal } = useContext(Context)

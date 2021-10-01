@@ -1,4 +1,4 @@
-import { useContext } from 'react'
+import { useContext, useEffect, useRef } from 'react'
 import Context from '../../utils/Context'
 import styled from 'styled-components'
 import globalValues from '../../styles/globalValues'
@@ -8,21 +8,40 @@ import { FiEdit } from 'react-icons/fi'
 import { deleteDoc, doc } from '@firebase/firestore'
 import { db, DB } from '../../firebaseConfig'
 
-const PostModal: React.FC<{ setModalVisibility: any; postID: string }> = ({
-  setModalVisibility,
-  postID,
-}) => {
-  const { toggleState } = useContext(Context)
+const PostModal: React.FC<{
+  postID: string
+  setIsShowingModal: any
+  isShowingModal: boolean
+  postContent: string
+}> = ({ postID, setIsShowingModal, isShowingModal, postContent }) => {
+  const { toggleState, dispatchDimBgModal, setEdittedPostContent } =
+    useContext(Context)
+  const modalNode = useRef(null)
 
+  useEffect(() => {
+    document.addEventListener('click', handleClick)
+    return () => {
+      document.removeEventListener('click', handleClick)
+    }
+  }, [])
+  const handleClick = (e: any) => {
+    e.target === modalNode.current || setIsShowingModal(!isShowingModal)
+  }
   return (
     <StyledDiv
+      ref={modalNode}
       theme={toggleState.isDarkTheme ? themes.dark : themes.light}
-      onClick={e => e.stopPropagation()}
     >
       <div
         className='icon'
-        onClick={() => {
-          setModalVisibility(false)
+        onClick={e => {
+          e.stopPropagation()
+          setIsShowingModal(false)
+          if (postContent) {
+            setEdittedPostContent(postContent)
+            console.log(postContent)
+            dispatchDimBgModal({ type: 'EDIT_POST' })
+          }
         }}
       >
         <div className='icon-wrapper'>
@@ -33,8 +52,9 @@ const PostModal: React.FC<{ setModalVisibility: any; postID: string }> = ({
 
       <div
         className='icon'
-        onClick={() => {
-          setModalVisibility(false)
+        onClick={e => {
+          e.stopPropagation()
+          setIsShowingModal(false)
           deleteDoc(doc(db, 'posts', postID))
         }}
       >

@@ -2,7 +2,7 @@ import { useContext } from 'react'
 import styled from 'styled-components'
 import Context from '../../utils/Context'
 import { imageObjectSettings, themes } from '../../utils/themes'
-import { defaultAvatar } from '../../utils/defaults'
+import { defaultAvatar } from '../../utils/defaultPhotos'
 
 export default function WhatsOnYourMind() {
   const { toggleState, dispatchDimBgModal, isUserSignedIn, CUAvatarURL } =
@@ -22,7 +22,7 @@ export default function WhatsOnYourMind() {
 
 const StyledSection = styled.section`
   background-color: ${p => p.theme.main_bgclr};
-  width: 50rem;
+  width: 60rem;
   max-width: 100%;
   padding: 1.5rem;
   display: flex;

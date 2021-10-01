@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import globalValues from '../../styles/globalValues'
 import Context from '../../utils/Context'
@@ -9,10 +9,12 @@ import { db } from '../../firebaseConfig'
 import { addDoc, collection, Timestamp } from '@firebase/firestore'
 import { defaultAvatar } from '../../utils/defaultPhotos'
 
-export default function CreatePost() {
+const EditPostModal: React.FC<{ postContent: string }> = ({ postContent }) => {
   const [content, setContent] = useState<string>('')
   const { currentUserInfo, toggleState, dispatchDimBgModal, CUAvatarURL } =
     useContext(Context)
+
+  useEffect(() => setContent(postContent), [])
 
   const addPost = () => {
     const post: PostType = {
@@ -23,9 +25,7 @@ export default function CreatePost() {
       likes: [],
       comments: [],
     }
-
     addDoc(collection(db, 'posts'), post)
-
     dispatchDimBgModal({ type: 'NONE' })
   }
 
@@ -38,7 +38,7 @@ export default function CreatePost() {
     >
       <TurnOffModalButton />
       <div id='top'>
-        <div>Create Post</div>
+        <div>Edit Post</div>
       </div>
       <div className='divider'></div>
       <div id='middle'>
@@ -51,7 +51,14 @@ export default function CreatePost() {
       <textarea
         placeholder="What's on your mind?"
         onChange={e => setContent(e.target.value)}
+        value={content}
         autoFocus
+        onFocus={e =>
+          e.currentTarget.setSelectionRange(
+            e.currentTarget.value.length,
+            e.currentTarget.value.length
+          )
+        }
       />
       <div className='post-button'>
         <button disabled={content.length === 0} onClick={addPost}>
@@ -155,3 +162,4 @@ const StyledDiv = styled('div')<{
     width: 100%;
   }
 `
+export default EditPostModal

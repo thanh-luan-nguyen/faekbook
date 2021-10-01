@@ -35,35 +35,11 @@ export const authenModalReducer = (
       return { action: 'show signup modal' }
     case 'CREATE_POST':
       return { action: 'show create-post modal' }
+    case 'EDIT_POST':
+      return { action: 'show edit-post' }
     case 'NONE':
       return { action: 'close modals' }
     default:
       return state
   }
 }
-
-// export const currentUserEmailReducer = (state: string | null, action: any) => {
-//   switch (action.type) {
-//     case 'SET_CURRENT_USER_EMAIL':
-//       return action.payload
-//     case 'LOG_OUT':
-//       return null
-//     default:
-//       return state
-//   }
-// }
-
-// export const userReducer = (state: any, action: any) => {
-//   switch (action.type) {
-//     case 'ADD_POST':
-//       const newPost: Post = {
-//         date: new Date(),
-//         content: action.payload,
-//         likes: 0,
-//         comments: [],
-//       }
-//       const updatedPosts = { ...state.posts, newPost }
-//       DB.setUser('thanhluannguyenxyz@gmail.com', updatedPosts)
-//       return { ...state, posts: updatedPosts }
-//   }
-// }

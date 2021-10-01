@@ -8,7 +8,7 @@ import { Link } from 'react-router-dom'
 import { imageObjectSettings, themes } from '../../utils/themes'
 import { Authen, DB } from '../../firebaseConfig'
 import { useHistory } from 'react-router'
-import { defaultAvatar } from '../../utils/defaults'
+import { defaultAvatar } from '../../utils/defaultPhotos'
 
 const DropDownMenu: React.FC<any> = () => {
   const {
@@ -34,7 +34,12 @@ const DropDownMenu: React.FC<any> = () => {
     dispatchToggle({ type: 'TOGGLE_DROP_DOWN_MENU' })
   }
 
-  const renderAvatar = <img src={CUAvatarURL || defaultAvatar} alt='avatar' />
+  const renderAvatar = (
+    <img
+      src={isUserSignedIn ? CUAvatarURL || defaultAvatar : defaultAvatar}
+      alt='avatar'
+    />
+  )
 
   return (
     <StyledDiv
@@ -43,7 +48,7 @@ const DropDownMenu: React.FC<any> = () => {
       onClick={e => e.stopPropagation()}
     >
       <Link
-        to='/faekbook/profile'
+        to={`/faekbook/${currentUserInfo?.uid}`}
         onClick={() =>
           isUserSignedIn && dispatchToggle({ type: 'TOGGLE_DROP_DOWN_MENU' })
         }

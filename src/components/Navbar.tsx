@@ -7,9 +7,7 @@ import React, { useContext } from 'react'
 // import DropDownMenu from './Modals/DropDownMenu'
 import { imageObjectSettings, themes } from '../utils/themes'
 import { Link } from 'react-router-dom'
-import { Authen } from '../firebaseConfig'
-import { useEffect } from 'react'
-import { defaultAvatar } from '../utils/defaults'
+import { defaultAvatar } from '../utils/defaultPhotos'
 
 const Navbar: React.FC<any> = () => {
   const {

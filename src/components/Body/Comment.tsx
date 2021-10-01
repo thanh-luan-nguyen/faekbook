@@ -2,8 +2,8 @@ import { BsThreeDots } from 'react-icons/bs'
 import styled from 'styled-components'
 import { useContext, useEffect, useState } from 'react'
 import Context from '../../utils/Context'
-import { themes } from '../../utils/themes'
-import { defaultAvatar } from '../../utils/defaults'
+import { imageObjectSettings, themes } from '../../utils/themes'
+import { defaultAvatar } from '../../utils/defaultPhotos'
 import { doc, getDoc, Timestamp } from '@firebase/firestore'
 import { format } from 'date-fns'
 import fromUnixTime from 'date-fns/fromUnixTime'
@@ -15,11 +15,11 @@ const Comment: React.FC<{
   likes: Array<string>
   date: Timestamp
 }> = ({ commenterUID, content, date, likes }) => {
-  const { toggleState } = useContext(Context)
+  const { toggleState, currentUserInfo } = useContext(Context)
   const [commentAvatar, setCommentAvatar] = useState<any>(null)
   const [userInfo, setUserInfo] = useState<any>(null)
   useEffect(() => {
-    Storage.setPhotosURL(commenterUID, setCommentAvatar)
+    Storage.updatePhotoURL(commenterUID, setCommentAvatar)
     getDoc(doc(db, 'users', commenterUID)).then(userSnap => {
       const userInfo = userSnap.data()
       setUserInfo(userInfo)
@@ -42,11 +42,13 @@ const Comment: React.FC<{
           </div>
         </div>
         <div className='like'>
-          Like{' '}
-          {`${format(fromUnixTime(date.seconds), 'yyyy, MMM d')} at ${format(
-            fromUnixTime(date.seconds),
-            'h:mm a'
-          )}`}
+          Like
+          <span>
+            {`${format(fromUnixTime(date.seconds), 'yyyy, MMM d')} at ${format(
+              fromUnixTime(date.seconds),
+              'h:mm a'
+            )}`}
+          </span>
         </div>
       </div>
     </StyledDiv>
@@ -64,12 +66,13 @@ const StyledDiv = styled('div')`
   img {
     height: 3.5rem;
     width: 3.5rem;
+    ${imageObjectSettings};
   }
   .middle {
     .top {
       display: flex;
       .bubble {
-        padding: 1rem;
+        padding: 1rem 1rem 0.5rem;
         border-radius: 1rem;
         background: ${p => p.theme.whats_on_ur_mind_bgclr};
         font-size: 1.15rem;
@@ -99,6 +102,11 @@ const StyledDiv = styled('div')`
     .like {
       padding: 0.5rem 0 0 1rem;
       font-weight: 600;
+      span {
+        margin-left: 0.75rem;
+        font-weight: 500;
+        font-size: 0.85rem;
+      }
     }
   }
 `

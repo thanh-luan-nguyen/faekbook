@@ -1,11 +1,11 @@
 import React, { useContext, useEffect, useState } from 'react'
-import { defaultAvatar, defaultCoverImage } from '../../utils/defaults'
+import { defaultAvatar, defaultCoverImage } from '../../utils/defaultPhotos'
 import styled from 'styled-components'
 import Context from '../../utils/Context'
 import { imageObjectSettings, themes } from '../../utils/themes'
 import { AiOutlineCamera, AiFillCamera } from 'react-icons/ai'
 import ColorThief from 'colorthief'
-import useWindowSize, { Size } from '../../hooks/useWindowSize'
+import useWindowSize, { Size } from '../../utils/useWindowSize'
 import WhatsOnYourMind from './WhatsOnYourMind'
 import { DB, db, Storage, storage } from '../../firebaseConfig'
 import Post from './Post'
@@ -31,22 +31,28 @@ const ProfilePage: React.FC<any> = () => {
     isUserSignedIn,
     currentUserInfo,
     CUAvatarURL,
-    setAvatarURL,
+    setCUAvatarURL,
   } = useContext(Context)
   const { userID }: { userID: string } = useParams()
-
-  const [editCoverPhotoHidden, setEditCoverPhotoHidden] = useState(false)
-
   const [userInfo, setUserInfo] = useState<any>(null)
+  const [userCoverImgURL, setCoverImageURL] = useState<any>(null)
+  const [userAvatarURL, setUserAvatarURL] = useState<any>(null)
+  const [userPosts, setUserPosts] = useState<any>(null)
+  const [editCoverPhotoHidden, setEditCoverPhotoHidden] = useState(false)
+  const [bgGradient, setBgGradient] = useState<string>('')
+
   useEffect(() => {
     getDoc(doc(db, 'users', userID)).then(userSnap => {
       const userInfo = userSnap.data()
       setUserInfo(userInfo)
     })
-  }, [])
+    Storage.updatePhotoURL(userID, setUserAvatarURL, setCoverImageURL)
+    // * SET USER PHOTO/
+    const fileRef = ref(storage, `users/${userID}/avatar`)
+    getDownloadURL(fileRef).then(url => setUserAvatarURL(url))
+    // * SET USER PHOTO END/
+  }, [userID])
 
-  const [userCoverImgURL, setCoverImageURL] = useState<any>(null)
-  const [userAvatarURL, setUserAvatarURL] = useState<any>(null)
   const updatePhoto = (e: any) => {
     const file = e.target.files[0]
     if (file) {
@@ -58,30 +64,15 @@ const ProfilePage: React.FC<any> = () => {
         getDownloadURL(fileRef).then(url =>
           isAvatar
             ? userID === currentUserInfo?.uid
-              ? setAvatarURL(url)
+              ? setCUAvatarURL(url)
               : setUserAvatarURL(url)
             : setCoverImageURL(url)
         )
       )
     }
   }
-  useEffect(() => {
-    ;(async () => {
-      Storage.setPhotosURL(userID, setAvatarURL, setCoverImageURL)
-    })()
-  }, [userID])
 
-  //* width size query for the edit cover photo button */
-  const size: Size = useWindowSize()
-  useEffect(() => {
-    const { width } = size
-    if (width !== undefined && width <= 900) {
-      setEditCoverPhotoHidden(true)
-    } else setEditCoverPhotoHidden(false)
-  }, [size])
-
-  //* render posts */
-  const [userPosts, setUserPosts] = useState<any>(null)
+  //*! RENDER POSTS START */
   useEffect(() => {
     const postsRef = collection(db, 'posts')
     const q = query(
@@ -108,9 +99,18 @@ const ProfilePage: React.FC<any> = () => {
       is_profile_page={true}
     />
   ))
+  //*! RENDER POSTS END */
 
+  //*! EFFECTS START */
+  //* width size query for the edit cover photo button */
+  const size: Size = useWindowSize()
+  useEffect(() => {
+    const { width } = size
+    if (width !== undefined && width <= 900) {
+      setEditCoverPhotoHidden(true)
+    } else setEditCoverPhotoHidden(false)
+  }, [size])
   //* get dorminant color of cover photo */
-  const [bgGradient, setBgGradient] = useState<string>('')
   useEffect(() => {
     const colorThief = new ColorThief()
     const img: any = document.querySelector('#get-dominant-clr')
@@ -134,6 +134,7 @@ const ProfilePage: React.FC<any> = () => {
       id='get-dominant-clr'
     />
   )
+  //*! EFFECTS END */
 
   return (
     <StyledDiv
@@ -214,11 +215,11 @@ const StyledDiv = styled('div')<{
     background: linear-gradient(
       180deg,
       rgba(${p => p.bgGradient}) 0%,
-      ${p => p.theme.main_bgclr} 50%
+      ${p => p.theme.main_bgclr} 60%
     );
     #cover-image {
       position: relative;
-      width: 65rem;
+      width: 90rem;
       max-width: 100%;
       aspect-ratio: 5/2;
       margin-inline: auto;
@@ -231,11 +232,11 @@ const StyledDiv = styled('div')<{
       }
       .avatar {
         position: absolute;
-        bottom: -2rem;
+        bottom: -4rem;
         left: 50%;
         transform: translateX(-50%);
-        width: 13rem;
-        height: 13rem;
+        width: 15rem;
+        height: 15rem;
         padding: 0.5rem;
         background-color: ${p => p.theme.main_bgclr};
         border-radius: 50%;
@@ -288,7 +289,7 @@ const StyledDiv = styled('div')<{
       }
     }
     #intro {
-      padding: 3rem 2rem 2rem;
+      padding: 5rem 2rem 2rem;
       text-align: center;
       .name {
         font-size: 2.75rem;

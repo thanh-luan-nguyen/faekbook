@@ -20,7 +20,7 @@ const MainPage: React.FC<any> = () => {
     return () => {
       unsub()
     }
-  }, [isUserSignedIn])
+  }, [])
 
   const renderPosts = allPosts?.map((p: any) => (
     <Post
