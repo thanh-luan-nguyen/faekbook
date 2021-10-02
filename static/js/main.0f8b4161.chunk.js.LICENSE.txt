@@ -1,7 +1,0 @@
-//*! EFFECTS END */
-
-//*! EFFECTS START */
-
-//*! RENDER POSTS END */
-
-//*! RENDER POSTS START */

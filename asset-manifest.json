@@ -1,21 +1,21 @@
 {
   "files": {
     "main.css": "/faekbook/static/css/main.28cf8577.chunk.css",
-    "main.js": "/faekbook/static/js/main.0f8b4161.chunk.js",
-    "main.js.map": "/faekbook/static/js/main.0f8b4161.chunk.js.map",
+    "main.js": "/faekbook/static/js/main.d7675b59.chunk.js",
+    "main.js.map": "/faekbook/static/js/main.d7675b59.chunk.js.map",
     "runtime-main.js": "/faekbook/static/js/runtime-main.5c881d7b.js",
     "runtime-main.js.map": "/faekbook/static/js/runtime-main.5c881d7b.js.map",
-    "static/js/2.4d3e2586.chunk.js": "/faekbook/static/js/2.4d3e2586.chunk.js",
-    "static/js/2.4d3e2586.chunk.js.map": "/faekbook/static/js/2.4d3e2586.chunk.js.map",
+    "static/js/2.3dd52d7d.chunk.js": "/faekbook/static/js/2.3dd52d7d.chunk.js",
+    "static/js/2.3dd52d7d.chunk.js.map": "/faekbook/static/js/2.3dd52d7d.chunk.js.map",
     "index.html": "/faekbook/index.html",
     "static/css/main.28cf8577.chunk.css.map": "/faekbook/static/css/main.28cf8577.chunk.css.map",
-    "static/js/2.4d3e2586.chunk.js.LICENSE.txt": "/faekbook/static/js/2.4d3e2586.chunk.js.LICENSE.txt",
-    "static/js/main.0f8b4161.chunk.js.LICENSE.txt": "/faekbook/static/js/main.0f8b4161.chunk.js.LICENSE.txt"
+    "static/js/2.3dd52d7d.chunk.js.LICENSE.txt": "/faekbook/static/js/2.3dd52d7d.chunk.js.LICENSE.txt",
+    "static/js/main.d7675b59.chunk.js.LICENSE.txt": "/faekbook/static/js/main.d7675b59.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
     "static/js/runtime-main.5c881d7b.js",
-    "static/js/2.4d3e2586.chunk.js",
+    "static/js/2.3dd52d7d.chunk.js",
     "static/css/main.28cf8577.chunk.css",
-    "static/js/main.0f8b4161.chunk.js"
+    "static/js/main.d7675b59.chunk.js"
   ]
 }
