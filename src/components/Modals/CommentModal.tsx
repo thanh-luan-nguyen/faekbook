@@ -8,11 +8,11 @@ import { FiEdit } from 'react-icons/fi'
 import { deleteDoc, doc } from '@firebase/firestore'
 import { db } from '../../firebaseConfig'
 
-const PostModal: React.FC<{
-  postID: string
+const CommentModal: React.FC<{
+  commentID: string
   setIsShowingModal: any
   isShowingModal: boolean
-}> = ({ postID, setIsShowingModal, isShowingModal }) => {
+}> = ({ commentID, setIsShowingModal, isShowingModal }) => {
   const { toggleState, dispatchDimBgModal, setCBEPostId } = useContext(Context)
   const modalNode = useRef(null)
 
@@ -35,8 +35,8 @@ const PostModal: React.FC<{
         onClick={e => {
           e.stopPropagation()
           setIsShowingModal(false)
-          if (postID) {
-            setCBEPostId(postID)
+          if (commentID) {
+            setCBEPostId(commentID)
             dispatchDimBgModal({ type: 'EDIT_POST' })
           }
         }}
@@ -44,7 +44,7 @@ const PostModal: React.FC<{
         <div className='icon-wrapper'>
           <FiEdit />
         </div>
-        Edit Post
+        Edit
       </div>
 
       <div
@@ -52,13 +52,13 @@ const PostModal: React.FC<{
         onClick={e => {
           e.stopPropagation()
           setIsShowingModal(false)
-          deleteDoc(doc(db, 'posts', postID))
+          deleteDoc(doc(db, 'comments', commentID))
         }}
       >
         <div className='icon-wrapper'>
           <RiDeleteBin6Line />
         </div>
-        Delete Post
+        Delete
       </div>
     </StyledDiv>
   )
@@ -66,15 +66,15 @@ const PostModal: React.FC<{
 
 const StyledDiv = styled('div')`
   position: absolute;
-  right: 1rem;
+  right: -2rem;
   top: 5rem;
-  width: 20rem;
+  width: 10rem;
   padding: 0.5rem;
   z-index: 100;
   border-radius: ${globalValues.dropdown_menu_bdr_rds};
   background: ${p => p.theme.main_bgclr};
   box-shadow: ${p => p.theme.bxShdw};
-  /* profile, edit and delete */
+  font-size: 1rem;
   .icon {
     display: flex;
     cursor: pointer;
@@ -88,16 +88,16 @@ const StyledDiv = styled('div')`
       background-color: ${p => p.theme.hover};
     }
     .icon-wrapper {
-      height: ${globalValues.navbar_elements_height};
-      width: ${globalValues.navbar_elements_height};
+      height: 2.5rem;
+      width: 2.5rem;
       border-radius: 50%;
       background: ${p => p.theme.theme_toggler_bgclr};
       fill: ${p => p.theme.icon_color};
-      font-size: 1.75rem;
+      font-size: 1.25rem;
       display: grid;
       place-items: center;
     }
   }
 `
 
-export default PostModal
+export default CommentModal

@@ -27,7 +27,8 @@ const App: React.FC<any> = () => {
   const [dimBgModal, dispatchDimBgModal] = useReducer(authenModalReducer, {
     action: 'close modals',
   })
-  const [editedPostContent,setEdittedPostContent]=useState<string>('')
+  //? CBE: Currently Being Editted /
+  const [CBEPostID, setCBEPostId] = useState<string>('')
 
   useEffect(() => {
     onAuthStateChanged(auth, async user => {
@@ -66,7 +67,7 @@ const App: React.FC<any> = () => {
       case 'show create-post modal':
         return <CreatePost />
       case 'show edit-post':
-        return <EditPostModal postContent={editedPostContent}/>
+        return <EditPostModal CBEPostID={CBEPostID} />
       case 'close modals':
         return
     }
@@ -83,7 +84,7 @@ const App: React.FC<any> = () => {
         dispatchDimBgModal,
         CUAvatarURL,
         setCUAvatarURL,
-        setEdittedPostContent,
+        setCBEPostId,
       }}
     >
       <Router>

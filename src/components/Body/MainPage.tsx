@@ -24,14 +24,13 @@ const MainPage: React.FC<any> = () => {
 
   const renderPosts = allPosts?.map((p: any) => (
     <Post
-      key={p.postID}
-      postID={p.postID}
+      key={p.id}
+      postID={p.id}
       userID={p.userID}
       full_name={p.fullname}
       date={p.date}
       content={p.content}
       likes={p.likes}
-      comments={p.comments}
     />
   ))
   return (

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 import globalValues from '../../styles/globalValues'
 import Context from '../../utils/Context'
@@ -6,35 +6,48 @@ import TurnOffModalButton from '../../utils/TurnOffModalButton'
 import { imageObjectSettings, themes } from '../../utils/themes'
 import { PostType } from '../../interface'
 import { db } from '../../firebaseConfig'
-import { addDoc, collection, Timestamp } from '@firebase/firestore'
+import {
+  addDoc,
+  collection,
+  doc,
+  getDoc,
+  Timestamp,
+  updateDoc,
+} from '@firebase/firestore'
 import { defaultAvatar } from '../../utils/defaultPhotos'
 
-const EditPostModal: React.FC<{ postContent: string }> = ({ postContent }) => {
+export default function EditPostModal({ CBEPostID }: { CBEPostID: string }) {
   const [content, setContent] = useState<string>('')
+  const beforeEdittedContent = useRef<string>()
+  const [isLoaded, setIsLoaded] = useState<boolean>(false)
   const { currentUserInfo, toggleState, dispatchDimBgModal, CUAvatarURL } =
     useContext(Context)
 
-  useEffect(() => setContent(postContent), [])
-
-  const addPost = () => {
-    const post: PostType = {
-      userID: currentUserInfo.uid,
-      fullname: currentUserInfo.first_name + ' ' + currentUserInfo.last_name,
-      date: Timestamp.fromDate(new Date()),
-      content,
-      likes: [],
-      comments: [],
+  useEffect(() => {
+    getDoc(doc(db, 'posts', CBEPostID)).then(post => {
+      const content = post.data()?.content
+      beforeEdittedContent.current = content
+      setContent(content)
+      setIsLoaded(true)
+    })
+    return () => {
+      beforeEdittedContent.current = ''
+      setContent('')
+      setIsLoaded(false)
     }
-    addDoc(collection(db, 'posts'), post)
+  }, [CBEPostID])
+
+  const updatePost = () => {
+    updateDoc(doc(db, 'posts', CBEPostID), { content: content })
     dispatchDimBgModal({ type: 'NONE' })
   }
 
-  return (
+  return isLoaded ? (
     <StyledDiv
       theme={toggleState.isDarkTheme ? themes.dark : themes.light}
       isDarkTheme={toggleState.isDarkTheme ? 1 : 0}
-      textSmallSize={content.length > 40 ? 1 : 0}
-      postButtonActivated={content.length > 0 ? 1 : 0}
+      textSmallSize={content?.length > 40 ? 1 : 0}
+      postButtonActivated={content !== beforeEdittedContent.current ? 1 : 0}
     >
       <TurnOffModalButton />
       <div id='top'>
@@ -49,7 +62,6 @@ const EditPostModal: React.FC<{ postContent: string }> = ({ postContent }) => {
         </div>
       </div>
       <textarea
-        placeholder="What's on your mind?"
         onChange={e => setContent(e.target.value)}
         value={content}
         autoFocus
@@ -61,12 +73,15 @@ const EditPostModal: React.FC<{ postContent: string }> = ({ postContent }) => {
         }
       />
       <div className='post-button'>
-        <button disabled={content.length === 0} onClick={addPost}>
-          Post
+        <button
+          disabled={content === beforeEdittedContent.current}
+          onClick={updatePost}
+        >
+          Update Post
         </button>
       </div>
     </StyledDiv>
-  )
+  ) : null
 }
 
 const StyledDiv = styled('div')<{
@@ -162,4 +177,3 @@ const StyledDiv = styled('div')<{
     width: 100%;
   }
 `
-export default EditPostModal

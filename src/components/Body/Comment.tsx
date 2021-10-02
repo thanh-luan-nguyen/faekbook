@@ -7,26 +7,41 @@ import { defaultAvatar } from '../../utils/defaultPhotos'
 import { doc, getDoc, Timestamp } from '@firebase/firestore'
 import { format } from 'date-fns'
 import fromUnixTime from 'date-fns/fromUnixTime'
-import { db, Storage } from '../../firebaseConfig'
+import { DB, db, Storage } from '../../firebaseConfig'
+import BlueBgLikeIcon from '../../utils/BlueBgLikeIcon'
+import CommentModal from '../Modals/CommentModal'
 
 const Comment: React.FC<{
   commenterUID: string
   content: string
   likes: Array<string>
   date: Timestamp
-}> = ({ commenterUID, content, date, likes }) => {
-  const { toggleState, currentUserInfo } = useContext(Context)
+  commentID: string
+}> = ({ commenterUID, content, date, likes, commentID }) => {
+  const { toggleState, currentUserInfo, isUserSignedIn } = useContext(Context)
   const [commentAvatar, setCommentAvatar] = useState<any>(null)
   const [userInfo, setUserInfo] = useState<any>(null)
+  const [isShowingModal, setIsShowingModal] = useState<boolean>(false)
+  const [isLikedByCU, setIsLiked] = useState<boolean>(false)
   useEffect(() => {
     Storage.updatePhotoURL(commenterUID, setCommentAvatar)
     getDoc(doc(db, 'users', commenterUID)).then(userSnap => {
       const userInfo = userSnap.data()
       setUserInfo(userInfo)
     })
-  }, [])
+  }, [commenterUID])
+
+  useEffect(() => {
+    likes.includes(currentUserInfo?.uid) ? setIsLiked(true) : setIsLiked(false)
+    console.log('comment.tsx')
+  }, [currentUserInfo?.uid, likes])
+
   return (
-    <StyledDiv theme={toggleState.isDarkTheme ? themes.dark : themes.light}>
+    <StyledDiv
+      theme={toggleState.isDarkTheme ? themes.dark : themes.light}
+      isLikedByCU={isLikedByCU ? 1 : 0}
+      hasLikes={likes.length > 0 ? 1 : 0}
+    >
       <img src={commentAvatar || defaultAvatar} alt='comment_avatar' />
 
       <div className='middle'>
@@ -36,30 +51,56 @@ const Comment: React.FC<{
               {userInfo?.first_name} {userInfo?.last_name}
             </div>
             <div className='content'>{content}</div>
+            {likes.length >= 1 && (
+              <div className='like-icon'>
+                <BlueBgLikeIcon />
+                <span>{likes.length}</span>
+              </div>
+            )}
           </div>
-          <div className='three-dots'>
-            <BsThreeDots className='icon' />
-          </div>
+          {commenterUID === currentUserInfo?.uid && (
+            <div className='three-dots'>
+              <div
+                className='icon'
+                onClick={() => setIsShowingModal(!isShowingModal)}
+              >
+                <BsThreeDots />
+              </div>
+              {isShowingModal && (
+                <CommentModal
+                  commentID={commentID}
+                  setIsShowingModal={setIsShowingModal}
+                  isShowingModal={isShowingModal}
+                />
+              )}
+            </div>
+          )}
         </div>
         <div className='like'>
-          Like
-          <span>
-            {`${format(fromUnixTime(date.seconds), 'yyyy, MMM d')} at ${format(
-              fromUnixTime(date.seconds),
-              'h:mm a'
-            )}`}
-          </span>
+          {isUserSignedIn && (
+            <span
+              onClick={() =>
+                DB.like(currentUserInfo?.uid, commentID, 'comments')
+              }
+            >
+              Like
+            </span>
+          )}
+          {`${format(fromUnixTime(date.seconds), 'yyyy, MMM d')} at ${format(
+            fromUnixTime(date.seconds),
+            'h:mm a'
+          )}`}
         </div>
       </div>
     </StyledDiv>
   )
 }
 
-const StyledDiv = styled('div')`
+const StyledDiv = styled('div')<{ isLikedByCU: number; hasLikes: number }>`
   display: flex;
   column-gap: 1rem;
   &:hover {
-    & > .middle > .top > .three-dots > .icon {
+    & > .middle > .top > .three-dots > .icon > svg {
       display: block;
     }
   }
@@ -73,11 +114,11 @@ const StyledDiv = styled('div')`
       display: flex;
       .bubble {
         padding: 1rem 1rem 0.5rem;
-        border-radius: 1rem;
+        border-radius: 20px;
         background: ${p => p.theme.whats_on_ur_mind_bgclr};
         font-size: 1.15rem;
         color: ${p => p.theme.font};
-        max-width: 95%;
+        position: relative;
         .username {
           font-weight: 500;
           padding-bottom: 0.25rem;
@@ -85,27 +126,61 @@ const StyledDiv = styled('div')`
         .content {
           line-height: 1.4;
         }
+        .like-icon {
+          border-radius: 10px;
+          padding: 0.25rem;
+          background: ${p => p.theme.like_icon_bgclr};
+          box-shadow: rgba(0, 0, 0, 0.3) -1px 1px 3px;
+          position: absolute;
+          right: -1.75rem;
+          bottom: 0.25rem;
+          display: flex;
+          align-items: center;
+          font-size: 0.9rem;
+          img {
+            margin-right: 0.25rem;
+            height: 1.25rem;
+            width: 1.25rem;
+          }
+        }
       }
       .three-dots {
+        position: relative;
         display: grid;
         place-items: center;
-        width: 1rem;
+        border-radius: 50%;
+        width: ${p => (p.hasLikes ? '5rem' : '2rem')};
         margin-left: 1rem;
-        .icon {
-          display: none;
+        font-size: 1.25rem;
+        & > .icon {
+          display: grid;
+          place-items: center;
+          border-radius: 50%;
+          height: 2.5rem;
+          width: 2.5rem;
           &:hover {
             cursor: pointer;
+            background-color: ${p => p.theme.theme_toggler_bgclr};
+          }
+          svg {
+            display: none;
           }
         }
       }
     }
     .like {
-      padding: 0.5rem 0 0 1rem;
-      font-weight: 600;
+      padding-top: 0.5rem;
+      margin-left: 0.75rem;
+      font-weight: 500;
+      font-size: 0.85rem;
       span {
-        margin-left: 0.75rem;
-        font-weight: 500;
-        font-size: 0.85rem;
+        color: ${p => p.isLikedByCU && '#036ee2'};
+        font-weight: 600;
+        font-size: 1rem;
+        padding-right: 1rem;
+        &:hover {
+          cursor: pointer;
+        }
       }
     }
   }

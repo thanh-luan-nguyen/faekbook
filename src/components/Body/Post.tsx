@@ -11,10 +11,22 @@ import BlueBgLikeIcon from '../../utils/BlueBgLikeIcon'
 import { CommentType } from '../../interface'
 import { defaultAvatar } from '../../utils/defaultPhotos'
 import Comment from './Comment'
-import { doc, getDoc, Timestamp, updateDoc } from '@firebase/firestore'
-import { db, Storage } from '../../firebaseConfig'
+import {
+  addDoc,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  orderBy,
+  query,
+  Timestamp,
+  updateDoc,
+  where,
+} from '@firebase/firestore'
+import { DB, db, Storage } from '../../firebaseConfig'
 import { Link } from 'react-router-dom'
 import PostModal from '../Modals/PostModal'
+import { DocumentData } from 'firebase/firestore'
 
 const Post: React.FC<{
   userID: string
@@ -23,64 +35,65 @@ const Post: React.FC<{
   date: Timestamp
   content: string
   likes: Array<string>
-  comments: Array<CommentType>
   is_profile_page?: boolean
-}> = ({ full_name, userID, postID, date, content, likes, comments }) => {
+}> = ({ full_name, userID, postID, date, content, likes }) => {
   const { currentUserInfo, toggleState, isUserSignedIn, CUAvatarURL } =
     useContext(Context)
   const [isLikedByCurrentUser, setIsLiked] = useState<boolean>()
   const [postAvatarURL, setPostAvatar] = useState<any>(null)
   const [isShowingComments, setIsShowingComments] = useState<boolean>()
-  const [commentContent, setCommentContent] = useState('')
-  const [isShowingModal, setIsShowingModal] = useState<boolean>(false)
+  const [commentInput, setCommentInput] = useState('')
+  const [comments, setComments] = useState<any>()
+  const [isShowingModal, setIsShowingModal] = useState<boolean>()
   const threeDotsNode = useRef(null)
 
   useEffect(() => {
     //* set post avatar */
     Storage.updatePhotoURL(userID, setPostAvatar)
+    console.log('post renders')
+  }, [userID])
+
+  useEffect(() => {
     //* set like effects */
     if (isUserSignedIn) {
       likes.includes(currentUserInfo?.uid)
         ? setIsLiked(true)
         : setIsLiked(false)
     } else setIsLiked(false)
-    console.log('post renders')
-  }, [likes, isUserSignedIn, userID, currentUserInfo])
+  }, [currentUserInfo?.uid, isUserSignedIn, likes])
 
-  const toggleLikeThisPost = () => {
-    const userID = currentUserInfo?.uid
-    getDoc(doc(db, 'posts', postID)).then(p => {
-      const likes = p.data()?.likes
-      likes.includes(userID)
-        ? likes.splice(likes.indexOf(userID), 1)
-        : likes.push(userID)
-      updateDoc(doc(db, 'posts', postID), { likes: likes })
-    })
-  }
+  useEffect(() => {
+    //* set comments
+    const postsRef = collection(db, 'comments')
+    const q = query(
+      postsRef,
+      where('postID', '==', postID),
+      orderBy('date', 'desc')
+    )
+    const unsub = DB.setSnapshotListener(q, setComments)
+    return () => {
+      unsub()
+    }
+  }, [postID])
 
   const postComment = (e: any) => {
     e.preventDefault()
-    if (commentContent !== '') {
-      const userID = currentUserInfo?.uid
-      getDoc(doc(db, 'posts', postID)).then(p => {
-        const comments = p.data()?.comments
-        const newComment: CommentType = {
-          commenterUID: userID,
-          date: Timestamp.fromDate(new Date()),
-          content: commentContent,
-          likes: [],
-        }
-        updateDoc(doc(db, 'posts', postID), {
-          comments: [...comments, newComment],
-        })
-        setCommentContent('')
-      })
+    const newComment: CommentType = {
+      postID: postID,
+      commenterID: currentUserInfo?.uid,
+      date: Timestamp.fromDate(new Date()),
+      content: commentInput,
+      likes: [],
     }
+    addDoc(collection(db, 'comments'), newComment)
+    setIsShowingComments(true)
+    setCommentInput('')
   }
-  const renderComments = comments.map(cmt => (
+  const renderComments = comments?.map((cmt: any) => (
     <Comment
-      key={cmt.date.toString()}
-      commenterUID={cmt.commenterUID}
+      key={cmt.id}
+      commentID={cmt.id}
+      commenterUID={cmt.commenterID}
       content={cmt.content}
       date={cmt.date}
       likes={cmt.likes}
@@ -92,7 +105,7 @@ const Post: React.FC<{
       theme={toggleState.isDarkTheme ? themes.dark : themes.light}
       isDarkTheme={toggleState.isDarkTheme ? 1 : 0}
       isLikedByCurrentUser={isLikedByCurrentUser ? 1 : 0}
-      hasZeroComments={comments.length === 0 ? 1 : 0}
+      hasComments={comments?.length > 0 ? 1 : 0}
       isUserSignedIn={isUserSignedIn ? 1 : 0}
       isShowingComments={isShowingComments ? 1 : 0}
     >
@@ -122,7 +135,6 @@ const Post: React.FC<{
           postID={postID}
           isShowingModal={isShowingModal}
           setIsShowingModal={setIsShowingModal}
-          postContent={content}
         />
       )}
       <main id='content'>{content}</main>
@@ -136,27 +148,32 @@ const Post: React.FC<{
           )}
         </div>
         <div className='comments'>
-          {comments.length > 0 && (
+          {comments?.length > 0 && (
             <>
-              {comments.length} comment{comments.length > 1 && 's'}
+              {comments?.length} comment{comments?.length > 1 && 's'}
             </>
           )}
         </div>
       </div>
-
       <div id='like-comment'>
         <div
           className='like'
-          onClick={() => isUserSignedIn && toggleLikeThisPost()}
+          onClick={() =>
+            isUserSignedIn && DB.like(currentUserInfo?.uid, postID, 'posts')
+          }
         >
           <AiFillLike className='icon' />
           <span>Like</span>
         </div>
         <div
           className='comments'
-          onClick={() => {
-            comments.length > 0 && setIsShowingComments(!isShowingComments)
-          }}
+          onClick={() =>
+            comments?.length > 0
+              ? setIsShowingComments(!isShowingComments)
+              : isUserSignedIn
+              ? setIsShowingComments(!isShowingComments)
+              : undefined
+          }
         >
           {isShowingComments ? (
             <FaCommentSlash className='icon' />
@@ -166,18 +183,22 @@ const Post: React.FC<{
           <span>{isShowingComments ? 'Hide' : 'Show'} Comments</span>
         </div>
       </div>
-      {isShowingComments && <div id='comments'>{renderComments}</div>}
-      {isUserSignedIn && (
-        <form className='comment-input' onSubmit={postComment}>
-          <img src={CUAvatarURL || defaultAvatar} alt='avatar' />
-          <input
-            value={commentContent}
-            placeholder='Write a comment...'
-            onChange={e => {
-              setCommentContent(e.target.value)
-            }}
-          ></input>
-        </form>
+      {isShowingComments && (
+        <>
+          <div id='comments'>{renderComments}</div>
+          {isUserSignedIn && (
+            <form className='comment-input' onSubmit={postComment}>
+              <img src={CUAvatarURL || defaultAvatar} alt='avatar' />
+              <input
+                value={commentInput}
+                placeholder='Write a comment...'
+                onChange={e => {
+                  setCommentInput(e.target.value)
+                }}
+              ></input>
+            </form>
+          )}
+        </>
       )}
       {userID === currentUserInfo?.uid && (
         <div
@@ -195,7 +216,7 @@ const Post: React.FC<{
 const StyledSection = styled('section')<{
   isDarkTheme: number
   isLikedByCurrentUser: number
-  hasZeroComments: number
+  hasComments: number
   isUserSignedIn: number
   isShowingComments: number
 }>`
@@ -207,8 +228,7 @@ const StyledSection = styled('section')<{
   margin-inline: auto;
   border-radius: 1rem;
   margin-top: 2rem;
-  padding-bottom: ${p =>
-    p.isUserSignedIn ? '1.5rem' : p.isShowingComments ? '1.5rem' : '0'};
+  padding-bottom: ${p => (p.isShowingComments ? '1.5rem' : '0')};
   & > .three-dots {
     position: absolute;
     right: 1.75rem;
@@ -275,13 +295,13 @@ const StyledSection = styled('section')<{
       }
     }
     .comments {
-      line-height: 1.75rem;
+      line-height: 1.8rem;
       font-size: 1.25rem;
     }
   }
   #like-comment {
     border-block: ${p => (p.isDarkTheme ? '#2f3031' : '#dddfe2')} 1px solid;
-    border-bottom: ${p => p.isUserSignedIn || p.isShowingComments || 'none'};
+    border-bottom: ${p => p.isShowingComments || 'none'};
     margin-top: 1.5rem;
     padding: 0.5rem 1.5rem;
     display: flex;
@@ -324,24 +344,35 @@ const StyledSection = styled('section')<{
     }
     .comments {
       color: ${p =>
-        p.hasZeroComments
-          ? p.isDarkTheme
-            ? '#525252ac'
-            : '#ebebebae'
-          : 'unset'};
+        p.hasComments
+          ? 'unset'
+          : p.isUserSignedIn
+          ? 'unset'
+          : p.isDarkTheme
+          ? '#525252ac'
+          : '#ebebebae'};
       &:hover {
-        cursor: ${p => (p.hasZeroComments ? 'not-allowed' : 'pointer')};
+        cursor: ${p =>
+          p.isUserSignedIn
+            ? 'pointer'
+            : p.hasComments
+            ? 'pointer'
+            : 'not-allowed'};
         background-color: ${p =>
-          p.hasZeroComments
-            ? 'unset'
-            : p.isDarkTheme
-            ? '#64646471'
-            : '#ebebebae'};
+          p.isUserSignedIn
+            ? p.isDarkTheme
+              ? '#64646471'
+              : '#ebebebae'
+            : p.hasComments
+            ? p.isDarkTheme
+              ? '#64646471'
+              : '#ebebebae'
+            : 'unset'};
       }
     }
   }
   #comments {
-    padding: 1.5rem 1.5rem 0;
+    padding: 1rem 1.5rem 0;
     margin-bottom: -0.75rem;
     display: flex;
     flex-flow: column;
@@ -360,12 +391,12 @@ const StyledSection = styled('section')<{
       ${imageObjectSettings}
     }
     input {
-      height: 3.5rem;
+      font-family: inherit;
       color: ${p => p.theme.font};
       border: none;
       outline: none;
       flex-grow: 1;
-      padding-left: 1.25rem;
+      padding: 1rem 1.5rem;
       font-size: 1.5rem;
       border-radius: 2rem;
       background: ${p => p.theme.whats_on_ur_mind_bgclr};

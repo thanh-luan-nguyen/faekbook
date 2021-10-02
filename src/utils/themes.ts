@@ -22,7 +22,7 @@ export const themes = {
 
     // body
     body: '#f0f2f5',
-
+    like_icon_bgclr: '#fff',
     avatar_pic_cam_icon_bgclr: '#e4e6eb',
 
     whats_on_ur_mind_bgclr: '#F0F2F5',
@@ -47,10 +47,10 @@ export const themes = {
     theme_toggler_icon_active: '#2D86FF',
     // body
     body: '#18191a',
-
+    like_icon_bgclr: '#3a3b3c',
     avatar_pic_cam_icon_bgclr: '#3a3b3c',
 
-    whats_on_ur_mind_bgclr: '#3A3B3C',
+    whats_on_ur_mind_bgclr: '#3a3b3c',
   },
 }
 

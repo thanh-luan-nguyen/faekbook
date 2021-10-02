@@ -1,12 +1,8 @@
-import coverPhoto from '../utils/images/cover_photo.jpg'
-import LongAvatar from '../utils/images/Long.jpg'
-import LongCoverPhoto from '../utils/images/Long_cover_photo.jpg'
-import HiepAvatar from '../utils/images/Hiep.jpg'
-import HiepCoverPhoto from '../utils/images/Hiep_cover_photo.jpg'
 import { Timestamp } from '@firebase/firestore'
 
 export interface CommentType {
-  commenterUID: string
+  postID: string
+  commenterID: string
   date: Timestamp
   content: string
   likes: Array<string>

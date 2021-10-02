@@ -1,4 +1,4 @@
-import { DocumentData, onSnapshot } from '@firebase/firestore'
+import { DocumentData, getDoc, onSnapshot } from '@firebase/firestore'
 import { initializeApp } from 'firebase/app'
 import { doc, getFirestore, setDoc, updateDoc } from 'firebase/firestore'
 import {
@@ -80,22 +80,22 @@ export class DB {
   static updateUserInfo(uid: string, payload: any) {
     updateDoc(doc(db, 'users', uid), payload)
   }
-  static setSnapshotListener(q: any, setCUPosts: any) {
-    return onSnapshot(q, (posts: any) => {
-      const postsSnapShot: DocumentData[] = []
-      posts.forEach((p: any) =>
-        postsSnapShot.push({ ...p.data(), postID: p.id })
-      )
-      setCUPosts(postsSnapShot)
+  static setSnapshotListener(q: any, setStateCallback: any) {
+    return onSnapshot(q, (docs: any) => {
+      const docsArray: DocumentData[] = []
+      docs.forEach((p: any) => docsArray.push({ ...p.data(), id: p.id }))
+      setStateCallback(docsArray)
     })
   }
-  // static async getUser(uid: string) {
-  //   const userSnap = await getDoc(doc(db, 'users', uid))
-  //   return userSnap.data()
-  // }
-  // static setPost(unixSecond: number, post: Post) {
-  //   setDoc(doc(db, 'posts', unixSecond.toString()), post, { merge: false })
-  // }
+  static like(liker: string, liked: string, collection: string) {
+    getDoc(doc(db, collection, liked)).then(p => {
+      const likes = p.data()?.likes
+      likes.includes(liker)
+        ? likes.splice(likes.indexOf(liker), 1)
+        : likes.push(liker)
+      updateDoc(doc(db, collection, liked), { likes: likes })
+    })
+  }
 }
 
 export class Storage {
