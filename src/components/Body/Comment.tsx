@@ -10,6 +10,7 @@ import fromUnixTime from 'date-fns/fromUnixTime'
 import { DB, db, Storage } from '../../firebaseConfig'
 import BlueBgLikeIcon from '../../utils/BlueBgLikeIcon'
 import CommentModal from '../Modals/CommentModal'
+import WriteAComment from './WriteAComment'
 
 const Comment: React.FC<{
   commenterUID: string
@@ -23,6 +24,8 @@ const Comment: React.FC<{
   const [userInfo, setUserInfo] = useState<any>(null)
   const [isShowingModal, setIsShowingModal] = useState<boolean>(false)
   const [isLikedByCU, setIsLiked] = useState<boolean>(false)
+  const [isEditting, setIsEditting] = useState<boolean>(false)
+  const [edittingContent, setEdittingContent] = useState<string>('')
   useEffect(() => {
     Storage.updatePhotoURL(commenterUID, setCommentAvatar)
     getDoc(doc(db, 'users', commenterUID)).then(userSnap => {
@@ -43,55 +46,63 @@ const Comment: React.FC<{
       hasLikes={likes.length > 0 ? 1 : 0}
     >
       <img src={commentAvatar || defaultAvatar} alt='comment_avatar' />
-
-      <div className='middle'>
-        <div className='top'>
-          <div className='bubble'>
-            <div className='username'>
-              {userInfo?.first_name} {userInfo?.last_name}
+      {isEditting ? (
+        <WriteAComment commentID={commentID} setIsEditting={ setIsEditting} content={ content}/>
+      ) : (
+        <div className='middle'>
+          <div className='top'>
+            <div className='bubble'>
+              <div className='username'>
+                {userInfo?.first_name} {userInfo?.last_name}
+              </div>
+              <div className='content'>{content}</div>
+              {likes.length >= 1 && (
+                <div className='like-icon'>
+                  <BlueBgLikeIcon />
+                  <span>{likes.length}</span>
+                </div>
+              )}
             </div>
-            <div className='content'>{content}</div>
-            {likes.length >= 1 && (
-              <div className='like-icon'>
-                <BlueBgLikeIcon />
-                <span>{likes.length}</span>
+            {commenterUID === currentUserInfo?.uid && (
+              <div className='three-dots'>
+                <div
+                  className='icon'
+                  onClick={() => setIsShowingModal(!isShowingModal)}
+                >
+                  <BsThreeDots />
+                </div>
+                {isShowingModal && (
+                  <CommentModal
+                    commentID={commentID}
+                    setIsEditting={setIsEditting}
+                    setIsShowingModal={setIsShowingModal}
+                  />
+                )}
               </div>
             )}
           </div>
-          {commenterUID === currentUserInfo?.uid && (
-            <div className='three-dots'>
-              <div
-                className='icon'
-                onClick={() => setIsShowingModal(!isShowingModal)}
+          <div className='like'>
+            {isUserSignedIn && (
+              <span
+                onClick={() =>
+                  DB.like(currentUserInfo?.uid, commentID, 'comments')
+                }
               >
-                <BsThreeDots />
-              </div>
-              {isShowingModal && (
-                <CommentModal
-                  commentID={commentID}
-                  setIsShowingModal={setIsShowingModal}
-                  isShowingModal={isShowingModal}
-                />
-              )}
-            </div>
-          )}
+                Like
+              </span>
+            )}
+            {`${format(fromUnixTime(date.seconds), 'yyyy, MMM d')} at ${format(
+              fromUnixTime(date.seconds),
+              'h:mm a'
+            )}`}
+          </div>
         </div>
-        <div className='like'>
-          {isUserSignedIn && (
-            <span
-              onClick={() =>
-                DB.like(currentUserInfo?.uid, commentID, 'comments')
-              }
-            >
-              Like
-            </span>
-          )}
-          {`${format(fromUnixTime(date.seconds), 'yyyy, MMM d')} at ${format(
-            fromUnixTime(date.seconds),
-            'h:mm a'
-          )}`}
+      )}
+      {isEditting && (
+        <div className='cancel' onClick={() => setIsEditting(!isEditting)}>
+          Cancel
         </div>
-      </div>
+      )}
     </StyledDiv>
   )
 }
@@ -99,6 +110,7 @@ const Comment: React.FC<{
 const StyledDiv = styled('div')<{ isLikedByCU: number; hasLikes: number }>`
   display: flex;
   column-gap: 1rem;
+  align-items: center;
   &:hover {
     & > .middle > .top > .three-dots > .icon > svg {
       display: block;
@@ -119,6 +131,7 @@ const StyledDiv = styled('div')<{ isLikedByCU: number; hasLikes: number }>`
         font-size: 1.15rem;
         color: ${p => p.theme.font};
         position: relative;
+        min-width: 13.5rem;
         .username {
           font-weight: 500;
           padding-bottom: 0.25rem;
@@ -182,6 +195,13 @@ const StyledDiv = styled('div')<{ isLikedByCU: number; hasLikes: number }>`
           cursor: pointer;
         }
       }
+    }
+  }
+  .cancel {
+    color: #036ee2;
+    &:hover {
+      cursor: pointer;
+      text-decoration: underline;
     }
   }
 `

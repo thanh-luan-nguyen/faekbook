@@ -78,16 +78,17 @@ const Post: React.FC<{
 
   const postComment = (e: any) => {
     e.preventDefault()
-    const newComment: CommentType = {
-      postID: postID,
-      commenterID: currentUserInfo?.uid,
-      date: Timestamp.fromDate(new Date()),
-      content: commentInput,
-      likes: [],
+    if (commentInput.length > 0) {
+      const newComment: CommentType = {
+        postID: postID,
+        commenterID: currentUserInfo?.uid,
+        date: Timestamp.fromDate(new Date()),
+        content: commentInput,
+        likes: [],
+      }
+      addDoc(collection(db, 'comments'), newComment)
+      setCommentInput('')
     }
-    addDoc(collection(db, 'comments'), newComment)
-    setIsShowingComments(true)
-    setCommentInput('')
   }
   const renderComments = comments?.map((cmt: any) => (
     <Comment

@@ -10,10 +10,10 @@ import { db } from '../../firebaseConfig'
 
 const CommentModal: React.FC<{
   commentID: string
+  setIsEditting: any
   setIsShowingModal: any
-  isShowingModal: boolean
-}> = ({ commentID, setIsShowingModal, isShowingModal }) => {
-  const { toggleState, dispatchDimBgModal, setCBEPostId } = useContext(Context)
+}> = ({ commentID, setIsEditting, setIsShowingModal }) => {
+  const { toggleState } = useContext(Context)
   const modalNode = useRef(null)
 
   useEffect(() => {
@@ -23,7 +23,7 @@ const CommentModal: React.FC<{
     }
   }, [])
   const handleClick = (e: any) => {
-    e.target === modalNode.current || setIsShowingModal(!isShowingModal)
+    e.target === modalNode.current || setIsShowingModal(false)
   }
   return (
     <StyledDiv
@@ -34,11 +34,8 @@ const CommentModal: React.FC<{
         className='icon'
         onClick={e => {
           e.stopPropagation()
+          setIsEditting(true)
           setIsShowingModal(false)
-          if (commentID) {
-            setCBEPostId(commentID)
-            dispatchDimBgModal({ type: 'EDIT_POST' })
-          }
         }}
       >
         <div className='icon-wrapper'>
@@ -51,7 +48,7 @@ const CommentModal: React.FC<{
         className='icon'
         onClick={e => {
           e.stopPropagation()
-          setIsShowingModal(false)
+          setIsEditting(false)
           deleteDoc(doc(db, 'comments', commentID))
         }}
       >

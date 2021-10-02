@@ -47,7 +47,9 @@ export default function EditPostModal({ CBEPostID }: { CBEPostID: string }) {
       theme={toggleState.isDarkTheme ? themes.dark : themes.light}
       isDarkTheme={toggleState.isDarkTheme ? 1 : 0}
       textSmallSize={content?.length > 40 ? 1 : 0}
-      postButtonActivated={content !== beforeEdittedContent.current ? 1 : 0}
+      postButtonActivated={
+        content !== beforeEdittedContent.current && content.length !== 0 ? 1 : 0
+      }
     >
       <TurnOffModalButton />
       <div id='top'>
@@ -62,6 +64,7 @@ export default function EditPostModal({ CBEPostID }: { CBEPostID: string }) {
         </div>
       </div>
       <textarea
+        placeholder="What's on your mind?"
         onChange={e => setContent(e.target.value)}
         value={content}
         autoFocus
@@ -74,7 +77,9 @@ export default function EditPostModal({ CBEPostID }: { CBEPostID: string }) {
       />
       <div className='post-button'>
         <button
-          disabled={content === beforeEdittedContent.current}
+          disabled={
+            content === beforeEdittedContent.current && content.length === 0
+          }
           onClick={updatePost}
         >
           Update Post
