@@ -90,7 +90,7 @@ const StyledNav = styled('nav')<{ menuVisibility: number }>`
   align-items: center;
   justify-content: space-between;
   padding-inline: 1rem;
-  z-index: 100;
+  z-index: 200;
   .left {
     display: flex;
     align-items: center;
@@ -102,7 +102,7 @@ const StyledNav = styled('nav')<{ menuVisibility: number }>`
       .fb-icon,
       .faekbook {
         color: ${p => p.theme.font};
-        &:hover {
+        :hover {
           cursor: pointer;
         }
       }
@@ -129,7 +129,7 @@ const StyledNav = styled('nav')<{ menuVisibility: number }>`
         p.menuVisibility
           ? p.theme.theme_toggler_icon_active
           : p.theme.icon_color};
-      &:hover {
+      :hover {
         cursor: pointer;
         filter: brightness(${p => (p.theme.type === 'light' ? '0.9' : '1.3')});
       }
@@ -143,7 +143,7 @@ const StyledNav = styled('nav')<{ menuVisibility: number }>`
       font-weight: 700;
       font-size: 1.25rem;
       color: ${p => p.theme.font};
-      &:hover {
+      :hover {
         cursor: pointer;
         background: ${p =>
           p.menuVisibility

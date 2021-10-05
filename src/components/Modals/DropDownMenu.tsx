@@ -115,7 +115,7 @@ const StyledDiv = styled('div')<{ isUserSignedIn: number }>`
     border-radius: ${globalValues.dropdown_menu_bdr_rds};
     padding: 0.5rem;
     column-gap: 1rem;
-    &:hover {
+    :hover {
       background-color: ${p => p.theme.hover};
     }
   }

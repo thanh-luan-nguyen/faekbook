@@ -11,7 +11,7 @@ import { db } from '../../firebaseConfig'
 const CommentModal: React.FC<{
   commentID: string
   setIsEditting: any
-  setIsShowingModal: any
+  setIsShowingModal?: any
 }> = ({ commentID, setIsEditting, setIsShowingModal }) => {
   const { toggleState } = useContext(Context)
   const modalNode = useRef(null)
@@ -81,7 +81,7 @@ const StyledDiv = styled('div')`
     align-items: center;
     color: ${p => p.theme.font};
     font-weight: 700;
-    &:hover {
+    :hover {
       background-color: ${p => p.theme.hover};
     }
     .icon-wrapper {

@@ -15,7 +15,7 @@ const globalValues = {
     color: white;
     background-color: #42b72a;
     width: 100%;
-    &:hover {
+    :hover {
       cursor: pointer;
     }
   `,
@@ -26,7 +26,7 @@ const globalValues = {
     width: 100%;
     font-size: inherit;
     padding: 1.25rem 1.75rem;
-    &::placeholder {
+    ::placeholder {
       color: #90949c;
       font-weight: 100;
     }

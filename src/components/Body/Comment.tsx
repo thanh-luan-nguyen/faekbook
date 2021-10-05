@@ -11,6 +11,8 @@ import { DB, db, Storage } from '../../firebaseConfig'
 import BlueBgLikeIcon from '../../utils/BlueBgLikeIcon'
 import CommentModal from '../Modals/CommentModal'
 import WriteAComment from './WriteAComment'
+import { Link } from 'react-router-dom'
+import ViewLikes from '../Modals/ViewLikes'
 
 const Comment: React.FC<{
   commenterUID: string
@@ -23,9 +25,11 @@ const Comment: React.FC<{
   const [commentAvatar, setCommentAvatar] = useState<any>(null)
   const [userInfo, setUserInfo] = useState<any>(null)
   const [isShowingModal, setIsShowingModal] = useState<boolean>(false)
+  const [isShowingViewLikes, setIsShowingViewLikes] = useState<boolean>(false)
   const [isLikedByCU, setIsLiked] = useState<boolean>(false)
   const [isEditting, setIsEditting] = useState<boolean>(false)
-  const [edittingContent, setEdittingContent] = useState<string>('')
+
+  // ! set photo URL/
   useEffect(() => {
     Storage.updatePhotoURL(commenterUID, setCommentAvatar)
     getDoc(doc(db, 'users', commenterUID)).then(userSnap => {
@@ -33,11 +37,16 @@ const Comment: React.FC<{
       setUserInfo(userInfo)
     })
   }, [commenterUID])
+  // ! set photo URL END/
 
+  // !  setIsLiked /
   useEffect(() => {
-    likes.includes(currentUserInfo?.uid) ? setIsLiked(true) : setIsLiked(false)
-    console.log('comment.tsx')
+    const likesUserIDs = likes.map((like: any) => like.userID)
+    likesUserIDs.includes(currentUserInfo?.uid)
+      ? setIsLiked(true)
+      : setIsLiked(false)
   }, [currentUserInfo?.uid, likes])
+  // !  setIsLiked END /
 
   return (
     <StyledDiv
@@ -45,21 +54,39 @@ const Comment: React.FC<{
       isLikedByCU={isLikedByCU ? 1 : 0}
       hasLikes={likes.length > 0 ? 1 : 0}
     >
-      <img src={commentAvatar || defaultAvatar} alt='comment_avatar' />
+      <Link to={`/faekbook/${commenterUID}`}>
+        <img src={commentAvatar || defaultAvatar} alt='comment_avatar' />
+      </Link>
       {isEditting ? (
-        <WriteAComment commentID={commentID} setIsEditting={ setIsEditting} content={ content}/>
+        <WriteAComment
+          commentID={commentID}
+          setIsEditting={setIsEditting}
+          content={content}
+        />
       ) : (
         <div className='middle'>
           <div className='top'>
             <div className='bubble'>
-              <div className='username'>
-                {userInfo?.first_name} {userInfo?.last_name}
-              </div>
+              <Link to={`/faekbook/${commenterUID}`}>
+                <div className='username'>
+                  {userInfo?.first_name} {userInfo?.last_name}
+                </div>
+              </Link>
               <div className='content'>{content}</div>
               {likes.length >= 1 && (
-                <div className='like-icon'>
+                <div
+                  className='like-icon'
+                  onClick={() => setIsShowingViewLikes(true)}
+                >
                   <BlueBgLikeIcon />
                   <span>{likes.length}</span>
+                  {isShowingViewLikes && (
+                    <ViewLikes
+                      likes={likes}
+                      setIsShowingViewLikes={setIsShowingViewLikes}
+                      isComment={true}
+                    />
+                  )}
                 </div>
               )}
             </div>
@@ -111,7 +138,7 @@ const StyledDiv = styled('div')<{ isLikedByCU: number; hasLikes: number }>`
   display: flex;
   column-gap: 1rem;
   align-items: center;
-  &:hover {
+  :hover {
     & > .middle > .top > .three-dots > .icon > svg {
       display: block;
     }
@@ -120,6 +147,9 @@ const StyledDiv = styled('div')<{ isLikedByCU: number; hasLikes: number }>`
     height: 3.5rem;
     width: 3.5rem;
     ${imageObjectSettings};
+    :hover {
+      cursor: pointer;
+    }
   }
   .middle {
     .top {
@@ -132,9 +162,17 @@ const StyledDiv = styled('div')<{ isLikedByCU: number; hasLikes: number }>`
         color: ${p => p.theme.font};
         position: relative;
         min-width: 13.5rem;
-        .username {
-          font-weight: 500;
-          padding-bottom: 0.25rem;
+        a {
+          color: inherit;
+          text-decoration: none;
+          .username {
+            font-weight: 500;
+            padding-bottom: 0.25rem;
+            :hover {
+              text-decoration: underline;
+              cursor: pointer;
+            }
+          }
         }
         .content {
           line-height: 1.4;
@@ -150,6 +188,9 @@ const StyledDiv = styled('div')<{ isLikedByCU: number; hasLikes: number }>`
           display: flex;
           align-items: center;
           font-size: 0.9rem;
+          :hover {
+            cursor: pointer;
+          }
           img {
             margin-right: 0.25rem;
             height: 1.25rem;
@@ -171,7 +212,7 @@ const StyledDiv = styled('div')<{ isLikedByCU: number; hasLikes: number }>`
           border-radius: 50%;
           height: 2.5rem;
           width: 2.5rem;
-          &:hover {
+          :hover {
             cursor: pointer;
             background-color: ${p => p.theme.theme_toggler_bgclr};
           }
@@ -191,7 +232,7 @@ const StyledDiv = styled('div')<{ isLikedByCU: number; hasLikes: number }>`
         font-weight: 600;
         font-size: 1rem;
         padding-right: 1rem;
-        &:hover {
+        :hover {
           cursor: pointer;
         }
       }
@@ -199,7 +240,7 @@ const StyledDiv = styled('div')<{ isLikedByCU: number; hasLikes: number }>`
   }
   .cancel {
     color: #036ee2;
-    &:hover {
+    :hover {
       cursor: pointer;
       text-decoration: underline;
     }

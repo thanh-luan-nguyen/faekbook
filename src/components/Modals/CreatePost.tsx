@@ -113,15 +113,16 @@ const StyledDiv = styled('div')<{
     resize: none;
     color: ${p => p.theme.font};
     overflow-y: auto;
-    &::-webkit-scrollbar {
+    white-space: pre-wrap;
+    ::-webkit-scrollbar {
       width: 0.75rem;
       border-radius: 3px;
       background-color: rgba(195, 195, 195, 0.3);
     }
-    &::-webkit-scrollbar-thumb {
+    ::-webkit-scrollbar-thumb {
       border-radius: 3px;
       background: rgba(114, 114, 114, 0.5);
-      &:hover {
+      :hover {
         cursor: pointer;
       }
     }
@@ -142,7 +143,7 @@ const StyledDiv = styled('div')<{
           : p.isDarkTheme
           ? '#505151'
           : '#e4e6eb'};
-      &:hover {
+      :hover {
         cursor: ${p => (p.postButtonActivated ? 'pointer' : 'not-allowed')};
       }
     }

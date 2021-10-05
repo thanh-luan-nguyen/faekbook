@@ -44,7 +44,6 @@ export class Authen {
           short_bio: 'my bio',
           is_dark_theme: false,
         }
-
         DB.setUser(uid, newUser)
         Authen.signIn(email, password, callback)
       })
@@ -88,11 +87,23 @@ export class DB {
     })
   }
   static like(liker: string, liked: string, collection: string) {
-    getDoc(doc(db, collection, liked)).then(p => {
+    getDoc(doc(db, collection, liked)).then(async p => {
       const likes = p.data()?.likes
-      likes.includes(liker)
-        ? likes.splice(likes.indexOf(liker), 1)
-        : likes.push(liker)
+      const likesUserIDs = likes.map((like: any) => like.userID)
+
+      const avatarURL = await getDownloadURL(
+        ref(storage, `users/${liker}/avatar`)
+      )
+      const userSnapshot = await getDoc(doc(db, 'users', liker))
+      const user = userSnapshot?.data()
+
+      likesUserIDs.includes(liker)
+        ? likes.splice(likesUserIDs.indexOf(liker), 1)
+        : likes.push({
+            userID: liker,
+            full_name: `${user?.first_name} ${user?.last_name}`,
+            avatarURL: avatarURL,
+          })
       updateDoc(doc(db, collection, liked), { likes: likes })
     })
   }

@@ -23,7 +23,7 @@ const StyledSpan = styled.span`
   font-size: 3.5rem;
   transform: rotate(45deg);
   color: ${p => p.theme.font};
-  &:hover {
+  :hover {
     cursor: pointer;
   }
 `

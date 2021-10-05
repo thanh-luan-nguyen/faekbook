@@ -14,19 +14,15 @@ import Comment from './Comment'
 import {
   addDoc,
   collection,
-  doc,
-  getDoc,
-  getDocs,
   orderBy,
   query,
   Timestamp,
-  updateDoc,
   where,
 } from '@firebase/firestore'
 import { DB, db, Storage } from '../../firebaseConfig'
 import { Link } from 'react-router-dom'
 import PostModal from '../Modals/PostModal'
-import { DocumentData } from 'firebase/firestore'
+import ViewLikes from '../Modals/ViewLikes'
 
 const Post: React.FC<{
   userID: string
@@ -46,17 +42,18 @@ const Post: React.FC<{
   const [comments, setComments] = useState<any>()
   const [isShowingModal, setIsShowingModal] = useState<boolean>()
   const threeDotsNode = useRef(null)
+  const [isShowingViewLikes, setIsShowingViewLikes] = useState<boolean>(false)
 
   useEffect(() => {
     //* set post avatar */
     Storage.updatePhotoURL(userID, setPostAvatar)
-    console.log('post renders')
   }, [userID])
 
   useEffect(() => {
     //* set like effects */
     if (isUserSignedIn) {
-      likes.includes(currentUserInfo?.uid)
+      const likesUserIDs = likes.map((like: any) => like.userID)
+      likesUserIDs.includes(currentUserInfo?.uid)
         ? setIsLiked(true)
         : setIsLiked(false)
     } else setIsLiked(false)
@@ -65,11 +62,7 @@ const Post: React.FC<{
   useEffect(() => {
     //* set comments
     const postsRef = collection(db, 'comments')
-    const q = query(
-      postsRef,
-      where('postID', '==', postID),
-      orderBy('date', 'desc')
-    )
+    const q = query(postsRef, where('postID', '==', postID), orderBy('date'))
     const unsub = DB.setSnapshotListener(q, setComments)
     return () => {
       unsub()
@@ -138,13 +131,33 @@ const Post: React.FC<{
           setIsShowingModal={setIsShowingModal}
         />
       )}
+      {userID === currentUserInfo?.uid && (
+        <div
+          ref={threeDotsNode}
+          className='three-dots'
+          onClick={() => setIsShowingModal(!isShowingModal)}
+        >
+          <BsThreeDots className='icon' />
+        </div>
+      )}
       <main id='content'>{content}</main>
       <div id='num-likes-cmts'>
         <div className='likes'>
           {likes.length >= 1 && (
             <>
-              <BlueBgLikeIcon />
-              <span>{likes.length}</span>
+              <BlueBgLikeIcon setIsShowingViewLikes={setIsShowingViewLikes} />
+              <span
+                className='length'
+                onClick={() => setIsShowingViewLikes(true)}
+              >
+                {likes.length}
+              </span>
+              {isShowingViewLikes && (
+                <ViewLikes
+                  setIsShowingViewLikes={setIsShowingViewLikes}
+                  likes={likes}
+                />
+              )}
             </>
           )}
         </div>
@@ -201,15 +214,6 @@ const Post: React.FC<{
           )}
         </>
       )}
-      {userID === currentUserInfo?.uid && (
-        <div
-          ref={threeDotsNode}
-          className='three-dots'
-          onClick={() => setIsShowingModal(!isShowingModal)}
-        >
-          <BsThreeDots className='icon' />
-        </div>
-      )}
     </StyledSection>
   )
 }
@@ -223,8 +227,8 @@ const StyledSection = styled('section')<{
 }>`
   position: relative;
   background-color: ${p => p.theme.main_bgclr};
-  color: ${p => p.theme.font_lighter};
-  width: 60rem;
+  color: ${p => p.theme.font};
+  width: 50rem;
   max-width: 100%;
   margin-inline: auto;
   border-radius: 1rem;
@@ -236,7 +240,7 @@ const StyledSection = styled('section')<{
     top: 1.5rem;
     padding: 0.75rem;
     border-radius: 50%;
-    &:hover {
+    :hover {
       background-color: ${p => p.theme.theme_toggler_bgclr};
       cursor: pointer;
     }
@@ -267,7 +271,7 @@ const StyledSection = styled('section')<{
           font-size: 1.5rem;
           font-weight: 700;
           color: ${p => p.theme.font};
-          &:hover {
+          :hover {
             text-decoration: underline;
           }
         }
@@ -278,21 +282,31 @@ const StyledSection = styled('section')<{
     font-size: 1.5rem;
     padding: 1.5rem 1.5rem 0;
     word-wrap: break-word;
+    white-space: pre-wrap;
+    line-height: 1.25;
   }
   #num-likes-cmts {
     padding: 1.5rem 1.5rem 0;
     display: flex;
     justify-content: space-between;
     .likes {
+      position: relative;
       display: flex;
       align-items: center;
       column-gap: 0.5rem;
       img {
         height: 1.75rem;
         width: 1.75rem;
+        :hover {
+          cursor: pointer;
+        }
       }
-      span {
+      .length {
         font-size: 1.25rem;
+        :hover {
+          cursor: pointer;
+          text-decoration: underline;
+        }
       }
     }
     .comments {
@@ -333,7 +347,7 @@ const StyledSection = styled('section')<{
           : p.isDarkTheme
           ? '#525252ac'
           : '#ebebebae'};
-      &:hover {
+      :hover {
         cursor: ${p => (p.isUserSignedIn ? 'pointer' : 'not-allowed')};
         background-color: ${p =>
           p.isUserSignedIn
@@ -352,7 +366,7 @@ const StyledSection = styled('section')<{
           : p.isDarkTheme
           ? '#525252ac'
           : '#ebebebae'};
-      &:hover {
+      :hover {
         cursor: ${p =>
           p.isUserSignedIn
             ? 'pointer'
@@ -403,11 +417,11 @@ const StyledSection = styled('section')<{
       background: ${p => p.theme.whats_on_ur_mind_bgclr};
       display: flex;
       align-items: center;
-      &:hover {
+      :hover {
         cursor: text;
         filter: brightness(${p => (p.isDarkTheme ? '1.1' : '0.95')});
       }
-      &::placeholder {
+      ::placeholder {
         color: ${p => p.theme.font_lighter};
       }
     }

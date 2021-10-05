@@ -11,9 +11,16 @@ import MainPage from './components/Body/MainPage'
 import ProfilePage from './components/Body/ProfilePage'
 import DropDownMenu from './components/Modals/DropDownMenu'
 import CreatePost from './components/Modals/CreatePost'
-import { auth, db, Storage } from './firebaseConfig'
+import { auth, DB, db, Storage } from './firebaseConfig'
 import { onAuthStateChanged } from '@firebase/auth'
-import { doc, getDoc } from '@firebase/firestore'
+import {
+  collection,
+  doc,
+  getDoc,
+  onSnapshot,
+  query,
+  where,
+} from '@firebase/firestore'
 import EditPostModal from './components/Modals/EditPostModal'
 
 const App: React.FC<any> = () => {
@@ -127,7 +134,8 @@ const StyledDiv = styled('div')<{ authenType: string; toggleState: any }>`
   position: relative;
   background: ${p => p.theme.body};
   min-height: 100vh;
-  &::after {
+
+  ::after {
     ${p =>
       (p.authenType !== 'close modals' || p.toggleState.createPostIsVisible) &&
       Screen}

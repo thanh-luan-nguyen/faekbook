@@ -58,11 +58,11 @@ const StyledInput = styled('input')<{ isDarkTheme: number }>`
   background: ${p => p.theme.whats_on_ur_mind_bgclr};
   display: flex;
   align-items: center;
-  &:hover {
+  :hover {
     cursor: text;
     filter: brightness(${p => (p.isDarkTheme ? '1.1' : '0.95')});
   }
-  &::placeholder {
+  ::placeholder {
     color: ${p => p.theme.font_lighter};
   }
 `

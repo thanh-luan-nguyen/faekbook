@@ -22,7 +22,7 @@ export default function WhatsOnYourMind() {
 
 const StyledSection = styled.section`
   background-color: ${p => p.theme.main_bgclr};
-  width: 60rem;
+  width: 50rem;
   max-width: 100%;
   padding: 1.5rem;
   display: flex;
@@ -47,7 +47,7 @@ const StyledSection = styled.section`
     background: ${p => p.theme.whats_on_ur_mind_bgclr};
     display: flex;
     align-items: center;
-    &:hover {
+    :hover {
       cursor: pointer;
       filter: brightness(${p => (p.theme.type === 'dark' ? '1.1' : '0.95')});
     }
