@@ -6,7 +6,6 @@ export const themes = {
 
     bxShdw:
       'rgba(50, 50, 93, 0.25) 0 0 5px -1px, rgba(0, 0, 0, 0.3) 0 0 3px -1px',
-   
 
     main_bgclr: '#fff',
     nav_btm_brdr_clr: '#fff',
@@ -33,7 +32,7 @@ export const themes = {
 
     bxShdw:
       'rgba(255, 255, 255) 0 0 5px -1px, rgba(255, 255, 255) 0 0 3px -1px',
-    
+
     main_bgclr: '#242526',
     nav_btm_brdr_clr: '#393a3b',
     // fb_icon: '#fff',
@@ -59,4 +58,18 @@ export const imageObjectSettings = css`
   aspect-ratio: 1/1;
   object-fit: cover;
   object-position: 50% 20%;
+`
+
+export const customizedScrollBar = css`
+  ::-webkit-scrollbar {
+    width: 0.3rem;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: ${p => p.theme.font_lighter};
+    border-radius: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    border-radius: 10px;
+    margin-block: 0.5rem;
+  }
 `

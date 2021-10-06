@@ -2,7 +2,11 @@ import { useContext, useEffect, useRef, useState } from 'react'
 import Context from '../../utils/Context'
 import styled from 'styled-components'
 import globalValues from '../../styles/globalValues'
-import { imageObjectSettings, themes } from '../../utils/themes'
+import {
+  customizedScrollBar,
+  imageObjectSettings,
+  themes,
+} from '../../utils/themes'
 import { Link } from 'react-router-dom'
 import BlueBgLikeIcon from '../../utils/BlueBgLikeIcon'
 
@@ -64,17 +68,7 @@ const StyledDiv = styled('div')<{ isComment: number }>`
   box-shadow: ${p => p.theme.bxShdw};
   font-size: ${p => (p.isComment ? '1rem' : '1.25rem')};
   overflow: auto;
-  ::-webkit-scrollbar {
-    width: 0.3rem;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: ${p => p.theme.font_lighter};
-    border-radius: 10px;
-  }
-  ::-webkit-scrollbar-track {
-    border-radius: 10px;
-    margin-block: 0.5rem;
-  }
+  ${customizedScrollBar}
   #user {
     a {
       text-decoration: none;

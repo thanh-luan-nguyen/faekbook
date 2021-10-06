@@ -52,6 +52,7 @@ const PostModal: React.FC<{
         onClick={e => {
           e.stopPropagation()
           setIsShowingModal(false)
+          
           deleteDoc(doc(db, 'posts', postID))
         }}
       >

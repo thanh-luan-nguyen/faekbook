@@ -23,6 +23,7 @@ import { DB, db, Storage } from '../../firebaseConfig'
 import { Link } from 'react-router-dom'
 import PostModal from '../Modals/PostModal'
 import ViewLikes from '../Modals/ViewLikes'
+import ColorThief from 'colorthief'
 
 const Post: React.FC<{
   userID: string
@@ -31,8 +32,9 @@ const Post: React.FC<{
   date: Timestamp
   content: string
   likes: Array<string>
+  photo: string
   is_profile_page?: boolean
-}> = ({ full_name, userID, postID, date, content, likes }) => {
+}> = ({ full_name, userID, postID, date, content, likes, photo }) => {
   const { currentUserInfo, toggleState, isUserSignedIn, CUAvatarURL } =
     useContext(Context)
   const [isLikedByCurrentUser, setIsLiked] = useState<boolean>()
@@ -94,14 +96,41 @@ const Post: React.FC<{
     />
   ))
 
+  const imgRef = useRef<HTMLImageElement | null>(null)
+  const [bgGradient, setBgGradient] = useState<string>('')
+  useEffect(() => {
+    if (photo) {
+      const colorThief = new ColorThief()
+      if (imgRef.current) {
+        imgRef.current.onload = () => {
+          const color = colorThief.getColor(imgRef.current).toString()
+          setBgGradient(`rgba(${color})`)
+        }
+      }
+    }
+  }, [])
+  const googleProxyURL =
+    'https://images1-focus-opensocial.googleusercontent.com/gadgets/proxy?container=focus&refresh=2592000&url='
+  const renderPhoto = (
+    <img
+      src={googleProxyURL + encodeURIComponent(photo)}
+      alt='post photo'
+      className='post-photo'
+      ref={imgRef}
+      crossOrigin='anonymous'
+    />
+  )
+
   return (
     <StyledSection
       theme={toggleState.isDarkTheme ? themes.dark : themes.light}
       isDarkTheme={toggleState.isDarkTheme ? 1 : 0}
       isLikedByCurrentUser={isLikedByCurrentUser ? 1 : 0}
       hasComments={comments?.length > 0 ? 1 : 0}
+      hasLikes={likes?.length > 0 ? 1 : 0}
       isUserSignedIn={isUserSignedIn ? 1 : 0}
       isShowingComments={isShowingComments ? 1 : 0}
+      bgGradient={bgGradient}
     >
       <div id='user-info'>
         <Link to={`/faekbook/${userID}`}>
@@ -124,6 +153,7 @@ const Post: React.FC<{
           )}`}
         </div>
       </div>
+
       {isShowingModal && (
         <PostModal
           postID={postID}
@@ -131,6 +161,7 @@ const Post: React.FC<{
           setIsShowingModal={setIsShowingModal}
         />
       )}
+
       {userID === currentUserInfo?.uid && (
         <div
           ref={threeDotsNode}
@@ -140,14 +171,18 @@ const Post: React.FC<{
           <BsThreeDots className='icon' />
         </div>
       )}
+
       <main id='content'>{content}</main>
+
+      {photo && <div id='post-photo'>{renderPhoto}</div>}
+
       <div id='num-likes-cmts'>
         <div className='likes'>
           {likes.length >= 1 && (
             <>
               <BlueBgLikeIcon setIsShowingViewLikes={setIsShowingViewLikes} />
               <span
-                className='length'
+                className='number-of-likes'
                 onClick={() => setIsShowingViewLikes(true)}
               >
                 {likes.length}
@@ -169,6 +204,7 @@ const Post: React.FC<{
           )}
         </div>
       </div>
+
       <div id='like-comment'>
         <div
           className='like'
@@ -197,6 +233,7 @@ const Post: React.FC<{
           <span>{isShowingComments ? 'Hide' : 'Show'} Comments</span>
         </div>
       </div>
+
       {isShowingComments && (
         <>
           <div id='comments'>{renderComments}</div>
@@ -222,8 +259,10 @@ const StyledSection = styled('section')<{
   isDarkTheme: number
   isLikedByCurrentUser: number
   hasComments: number
+  hasLikes: number
   isUserSignedIn: number
   isShowingComments: number
+  bgGradient: string
 }>`
   position: relative;
   background-color: ${p => p.theme.main_bgclr};
@@ -280,13 +319,26 @@ const StyledSection = styled('section')<{
   }
   #content {
     font-size: 1.5rem;
-    padding: 1.5rem 1.5rem 0;
+    padding: 1.5rem 1.5rem;
     word-wrap: break-word;
     white-space: pre-wrap;
     line-height: 1.25;
   }
+  #post-photo {
+    text-align: center;
+    width: 100%;
+    line-height: 0;
+    background-color: ${p => p.bgGradient};
+    .post-photo {
+      border-radius: initial;
+      /* width: 100%; */
+      max-height: 70rem;
+      max-width: 100%;
+    }
+  }
   #num-likes-cmts {
-    padding: 1.5rem 1.5rem 0;
+    padding-inline: 1.5rem;
+    padding-block: ${p => (p.hasLikes || p.hasComments ? '1.25rem' : '0')};
     display: flex;
     justify-content: space-between;
     .likes {
@@ -301,7 +353,7 @@ const StyledSection = styled('section')<{
           cursor: pointer;
         }
       }
-      .length {
+      .number-of-likes {
         font-size: 1.25rem;
         :hover {
           cursor: pointer;
@@ -315,9 +367,8 @@ const StyledSection = styled('section')<{
     }
   }
   #like-comment {
-    border-block: ${p => (p.isDarkTheme ? '#2f3031' : '#dddfe2')} 1px solid;
+    border-block: ${p => (p.isDarkTheme ? '#474747' : '#dddfe2')} 1px solid;
     border-bottom: ${p => p.isShowingComments || 'none'};
-    margin-top: 1.5rem;
     padding: 0.5rem 1.5rem;
     display: flex;
     justify-content: space-between;

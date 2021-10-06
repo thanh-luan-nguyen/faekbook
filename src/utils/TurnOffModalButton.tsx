@@ -22,6 +22,7 @@ const StyledSpan = styled.span`
   right: 1.75rem;
   font-size: 3.5rem;
   transform: rotate(45deg);
+  font-weight: initial;
   color: ${p => p.theme.font};
   :hover {
     cursor: pointer;

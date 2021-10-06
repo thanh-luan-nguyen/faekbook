@@ -103,6 +103,7 @@ const ProfilePage: React.FC<any> = () => {
       date={p.date}
       content={p.content}
       likes={p.likes}
+      photo={p.photo}
       is_profile_page={true}
     />
   ))
@@ -131,7 +132,7 @@ const ProfilePage: React.FC<any> = () => {
   //? proxy server produces a more liberal CORS policy */
   const userCover = googleProxyURL + encodeURIComponent(userCoverImgURL)
   const defaultCover = googleProxyURL + encodeURIComponent(defaultCoverImage)
-  const renderColorThief = (
+  const renderCoverPhoto = (
     <img
       src={userCoverImgURL ? userCover : defaultCover}
       crossOrigin='anonymous'
@@ -144,8 +145,8 @@ const ProfilePage: React.FC<any> = () => {
     const file = e.target.files[0]
     if (file) {
       const isAvatar = e.target.id === 'avatar'
-      const fileName = isAvatar ? 'avatar' : 'cover_image'
-      const fileRef = ref(storage, `users/${userID}/${fileName}`)
+      const folderName = isAvatar ? 'avatar' : 'cover_image'
+      const fileRef = ref(storage, `users/${userID}/${folderName}`)
       deleteObject(fileRef).catch(e => console.log(e))
       uploadBytes(fileRef, file).then(() =>
         getDownloadURL(fileRef).then(url =>
@@ -160,12 +161,9 @@ const ProfilePage: React.FC<any> = () => {
   }
 
   useEffect(() => {
-    // const q = query(collection(db, 'users'), where('uid', '==', userID))
-    // const unsub = onSnapshot(q, (user: any) => setBio(user.short_bio))
     getDoc(doc(db, 'users', userID)).then((user: any) =>
       setBio(user.data().short_bio)
     )
-    // return () => unsub()
   }, [])
 
   const updateBio = (e: any) => {
@@ -187,7 +185,7 @@ const ProfilePage: React.FC<any> = () => {
     >
       <header>
         <div id='cover-image'>
-          {renderColorThief}
+          {renderCoverPhoto}
           <div className='avatar'>
             <img
               src={

@@ -42,6 +42,7 @@ const MainPage: React.FC<any> = () => {
       date={p.date}
       content={p.content}
       likes={p.likes}
+      photo={p.photo}
     />
   ))
   //! RENDER POSTS END*/
