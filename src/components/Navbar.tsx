@@ -1,11 +1,11 @@
 import styled, { keyframes } from 'styled-components'
-import globalValues from '../styles/globalValues'
+import globalValues, { imageObjectSettings } from '../styles/globalValues'
 import { FaFacebook } from 'react-icons/fa'
 import { MdArrowDropDown } from 'react-icons/md'
 import Context from '../utils/Context'
 import React, { useContext } from 'react'
 // import DropDownMenu from './Modals/DropDownMenu'
-import { imageObjectSettings, themes } from '../utils/themes'
+import {  themes } from '../utils/themes'
 import { Link } from 'react-router-dom'
 import { defaultAvatar } from '../utils/defaultPhotos'
 

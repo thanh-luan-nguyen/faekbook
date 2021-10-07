@@ -14,7 +14,7 @@ export interface PostType {
   date: Timestamp
   content: string
   likes: Array<string>
-  photo: string
+  photo: { url: string; id: string }
   comments: Array<CommentType>
 }
 

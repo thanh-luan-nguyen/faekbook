@@ -1,11 +1,11 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 import { BsThreeDots } from 'react-icons/bs'
 import Context from '../../utils/Context'
-import { imageObjectSettings, themes } from '../../utils/themes'
+import { themes } from '../../utils/themes'
 import { AiFillLike } from 'react-icons/ai'
 import { FaComment, FaCommentSlash } from 'react-icons/fa'
-import globalValues from '../../styles/globalValues'
+import globalValues, { imageObjectSettings } from '../../styles/globalValues'
 import { format, fromUnixTime } from 'date-fns'
 import BlueBgLikeIcon from '../../utils/BlueBgLikeIcon'
 import { CommentType } from '../../interface'
@@ -21,7 +21,7 @@ import {
 } from '@firebase/firestore'
 import { DB, db, Storage } from '../../firebaseConfig'
 import { Link } from 'react-router-dom'
-import PostModal from '../Modals/PostModal'
+import PostModal from '../Modals/PostDropDownModal'
 import ViewLikes from '../Modals/ViewLikes'
 import ColorThief from 'colorthief'
 
@@ -32,7 +32,7 @@ const Post: React.FC<{
   date: Timestamp
   content: string
   likes: Array<string>
-  photo: string
+  photo: { url: string; id: string }
   is_profile_page?: boolean
 }> = ({ full_name, userID, postID, date, content, likes, photo }) => {
   const { currentUserInfo, toggleState, isUserSignedIn, CUAvatarURL } =
@@ -98,8 +98,9 @@ const Post: React.FC<{
 
   const imgRef = useRef<HTMLImageElement | null>(null)
   const [bgGradient, setBgGradient] = useState<string>('')
+  const [imgHeight, setImgHeight] = useState<number>(0)
   useEffect(() => {
-    if (photo) {
+    if (photo.url) {
       const colorThief = new ColorThief()
       if (imgRef.current) {
         imgRef.current.onload = () => {
@@ -113,7 +114,7 @@ const Post: React.FC<{
     'https://images1-focus-opensocial.googleusercontent.com/gadgets/proxy?container=focus&refresh=2592000&url='
   const renderPhoto = (
     <img
-      src={googleProxyURL + encodeURIComponent(photo)}
+      src={googleProxyURL + encodeURIComponent(photo.url)}
       alt='post photo'
       className='post-photo'
       ref={imgRef}
@@ -131,6 +132,13 @@ const Post: React.FC<{
       isUserSignedIn={isUserSignedIn ? 1 : 0}
       isShowingComments={isShowingComments ? 1 : 0}
       bgGradient={bgGradient}
+      isImgTooHigh={
+        imgRef.current &&
+        imgRef.current.clientHeight >=
+          60 * parseFloat(getComputedStyle(document.documentElement).fontSize)
+          ? 1
+          : 0
+      }
     >
       <div id='user-info'>
         <Link to={`/faekbook/${userID}`}>
@@ -159,6 +167,7 @@ const Post: React.FC<{
           postID={postID}
           isShowingModal={isShowingModal}
           setIsShowingModal={setIsShowingModal}
+          photoID={photo.id}
         />
       )}
 
@@ -174,7 +183,7 @@ const Post: React.FC<{
 
       <main id='content'>{content}</main>
 
-      {photo && <div id='post-photo'>{renderPhoto}</div>}
+      {photo.url && <div id='post-photo'>{renderPhoto}</div>}
 
       <div id='num-likes-cmts'>
         <div className='likes'>
@@ -263,6 +272,7 @@ const StyledSection = styled('section')<{
   isUserSignedIn: number
   isShowingComments: number
   bgGradient: string
+  isImgTooHigh: number
 }>`
   position: relative;
   background-color: ${p => p.theme.main_bgclr};
@@ -326,14 +336,19 @@ const StyledSection = styled('section')<{
   }
   #post-photo {
     text-align: center;
-    width: 100%;
     line-height: 0;
     background-color: ${p => p.bgGradient};
     .post-photo {
       border-radius: initial;
-      /* width: 100%; */
-      max-height: 70rem;
-      max-width: 100%;
+      max-height: 60rem;
+      ${p =>
+        p.isImgTooHigh
+          ? css`
+              max-width: 100%;
+            `
+          : css`
+              width: 100%;
+            `}
     }
   }
   #num-likes-cmts {

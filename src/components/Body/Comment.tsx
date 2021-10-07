@@ -2,7 +2,7 @@ import { BsThreeDots } from 'react-icons/bs'
 import styled from 'styled-components'
 import { useContext, useEffect, useState } from 'react'
 import Context from '../../utils/Context'
-import { imageObjectSettings, themes } from '../../utils/themes'
+import { themes } from '../../utils/themes'
 import { defaultAvatar } from '../../utils/defaultPhotos'
 import { doc, getDoc, Timestamp } from '@firebase/firestore'
 import { format } from 'date-fns'
@@ -13,6 +13,7 @@ import CommentModal from '../Modals/CommentModal'
 import WriteAComment from './WriteAComment'
 import { Link } from 'react-router-dom'
 import ViewLikes from '../Modals/ViewLikes'
+import { imageObjectSettings } from '../../styles/globalValues'
 
 const Comment: React.FC<{
   commenterUID: string

@@ -1,4 +1,5 @@
-import styled, { css } from 'styled-components'
+import { css } from 'styled-components'
+import globalValues from '../styles/globalValues'
 
 export const themes = {
   light: {
@@ -54,22 +55,3 @@ export const themes = {
   },
 }
 
-export const imageObjectSettings = css`
-  aspect-ratio: 1/1;
-  object-fit: cover;
-  object-position: 50% 20%;
-`
-
-export const customizedScrollBar = css`
-  ::-webkit-scrollbar {
-    width: 0.3rem;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: ${p => p.theme.font_lighter};
-    border-radius: 10px;
-  }
-  ::-webkit-scrollbar-track {
-    border-radius: 10px;
-    margin-block: 0.5rem;
-  }
-`

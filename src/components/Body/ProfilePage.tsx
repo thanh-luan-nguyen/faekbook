@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useRef, useState } from 'react'
 import { defaultAvatar, defaultCoverImage } from '../../utils/defaultPhotos'
 import styled from 'styled-components'
 import Context from '../../utils/Context'
-import { imageObjectSettings, themes } from '../../utils/themes'
+import { themes } from '../../utils/themes'
 import { AiOutlineCamera, AiFillCamera } from 'react-icons/ai'
 import ColorThief from 'colorthief'
 import useWindowSize, { Size } from '../../utils/useWindowSize'
@@ -31,6 +31,7 @@ import { useParams } from 'react-router'
 import ShowMoreButton from '../../utils/ShowMoreButton'
 import CommentModal from '../Modals/CommentModal'
 import WriteAComment from './WriteAComment'
+import { imageObjectSettings } from '../../styles/globalValues'
 
 const ProfilePage: React.FC<any> = () => {
   const {

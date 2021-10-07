@@ -6,14 +6,16 @@ import { themes } from '../../utils/themes'
 import { RiDeleteBin6Line } from 'react-icons/ri'
 import { FiEdit } from 'react-icons/fi'
 import { deleteDoc, doc } from '@firebase/firestore'
-import { db } from '../../firebaseConfig'
+import { db, storage } from '../../firebaseConfig'
+import { deleteObject, ref } from '@firebase/storage'
 
-const PostModal: React.FC<{
+const PostDropDownModal: React.FC<{
   postID: string
   setIsShowingModal: any
   isShowingModal: boolean
-}> = ({ postID, setIsShowingModal, isShowingModal }) => {
-  const { toggleState, dispatchDimBgModal, setCBEPostId } = useContext(Context)
+  photoID: string
+}> = ({ postID, setIsShowingModal, isShowingModal, photoID }) => {
+  const { toggleState, dispatchDimBgModal, setCBEPost } = useContext(Context)
   const modalNode = useRef(null)
 
   useEffect(() => {
@@ -36,7 +38,7 @@ const PostModal: React.FC<{
           e.stopPropagation()
           setIsShowingModal(false)
           if (postID) {
-            setCBEPostId(postID)
+            setCBEPost({ id: postID, photoID: photoID })
             dispatchDimBgModal({ type: 'EDIT_POST' })
           }
         }}
@@ -52,8 +54,8 @@ const PostModal: React.FC<{
         onClick={e => {
           e.stopPropagation()
           setIsShowingModal(false)
-          
           deleteDoc(doc(db, 'posts', postID))
+          photoID && deleteObject(ref(storage, `post_photos/${photoID}`))
         }}
       >
         <div className='icon-wrapper'>
@@ -101,4 +103,4 @@ const StyledDiv = styled('div')`
   }
 `
 
-export default PostModal
+export default PostDropDownModal

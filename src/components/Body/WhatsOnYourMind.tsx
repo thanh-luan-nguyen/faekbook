@@ -1,8 +1,9 @@
 import { useContext } from 'react'
 import styled from 'styled-components'
 import Context from '../../utils/Context'
-import { imageObjectSettings, themes } from '../../utils/themes'
+import { themes } from '../../utils/themes'
 import { defaultAvatar } from '../../utils/defaultPhotos'
+import { imageObjectSettings } from '../../styles/globalValues'
 
 export default function WhatsOnYourMind() {
   const { toggleState, dispatchDimBgModal, isUserSignedIn, CUAvatarURL } =

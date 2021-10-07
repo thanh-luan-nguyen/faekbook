@@ -10,7 +10,6 @@ import { themes } from './utils/themes'
 import MainPage from './components/Body/MainPage'
 import ProfilePage from './components/Body/ProfilePage'
 import DropDownMenu from './components/Modals/DropDownMenu'
-import CreatePost from './components/Modals/CreatePost'
 import { auth, DB, db, Storage } from './firebaseConfig'
 import { onAuthStateChanged } from '@firebase/auth'
 import {
@@ -21,7 +20,7 @@ import {
   query,
   where,
 } from '@firebase/firestore'
-import EditPostModal from './components/Modals/EditPostModal'
+import AddEditPostModal from './components/Modals/AddEditPostModal'
 
 const App: React.FC<any> = () => {
   const [isUserSignedIn, setIsUserSignedIn] = useState<boolean>()
@@ -35,7 +34,7 @@ const App: React.FC<any> = () => {
     action: 'close modals',
   })
   //? CBE: Currently Being Editted /
-  const [CBEPostID, setCBEPostId] = useState<string>('')
+  const [CBEPost, setCBEPost] = useState<{id:string, photoID: string}>()
 
   useEffect(() => {
     onAuthStateChanged(auth, async user => {
@@ -72,9 +71,9 @@ const App: React.FC<any> = () => {
       case 'show signup modal':
         return <SignUpModal />
       case 'show create-post modal':
-        return <CreatePost />
+        return <AddEditPostModal />
       case 'show edit-post':
-        return <EditPostModal CBEPostID={CBEPostID} />
+        return <AddEditPostModal CBEPost={CBEPost} />
       case 'close modals':
         return
     }
@@ -91,7 +90,7 @@ const App: React.FC<any> = () => {
         dispatchDimBgModal,
         CUAvatarURL,
         setCUAvatarURL,
-        setCBEPostId,
+        setCBEPost,
       }}
     >
       <Router>

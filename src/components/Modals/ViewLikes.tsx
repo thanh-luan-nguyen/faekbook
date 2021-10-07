@@ -1,11 +1,9 @@
 import { useContext, useEffect, useRef, useState } from 'react'
 import Context from '../../utils/Context'
 import styled from 'styled-components'
-import globalValues from '../../styles/globalValues'
+import globalValues, { customizedScrollBar, imageObjectSettings } from '../../styles/globalValues'
 import {
-  customizedScrollBar,
-  imageObjectSettings,
-  themes,
+  themes
 } from '../../utils/themes'
 import { Link } from 'react-router-dom'
 import BlueBgLikeIcon from '../../utils/BlueBgLikeIcon'

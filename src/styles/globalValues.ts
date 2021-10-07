@@ -33,4 +33,32 @@ const globalValues = {
   `,
 }
 
+export const imageObjectSettings = css`
+  aspect-ratio: 1/1;
+  object-fit: cover;
+  object-position: 50% 20%;
+`
+
+export const customizedScrollBar = css`
+  ::-webkit-scrollbar {
+    width: 0.3rem;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: ${p => p.theme.font_lighter};
+    border-radius: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    border-radius: 10px;
+    margin-block: 0.5rem;
+  }
+`
+
+export const CreatePost_EditPostCSS = (
+  isDarkTheme: number,
+  textSmallSize: number,
+  postButtonActivated: number
+) => css`
+`
+
+
 export default globalValues
