@@ -98,7 +98,6 @@ const Post: React.FC<{
 
   const imgRef = useRef<HTMLImageElement | null>(null)
   const [bgGradient, setBgGradient] = useState<string>('')
-  const [imgHeight, setImgHeight] = useState<number>(0)
   useEffect(() => {
     if (photo.url) {
       const colorThief = new ColorThief()
