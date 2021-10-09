@@ -35,7 +35,6 @@ export class Authen {
   ) {
     return createUserWithEmailAndPassword(auth, email, password)
       .then(userCredential => {
-        console.log('SignUp: ', userCredential)
         const uid = userCredential.user.uid
         const newUser: User = {
           uid: uid,
@@ -46,6 +45,7 @@ export class Authen {
         }
         DB.setUser(uid, newUser)
         Authen.signIn(email, password, callback)
+        console.log('Signed up successfully: ', userCredential)
       })
       .catch(err => {
         alert(`Sign up Error: ${err.code}. ${err.message}`)
@@ -64,7 +64,7 @@ export class Authen {
   static signOut() {
     signOut(auth)
       .then(() => {
-        console.log('signed out successfully')
+        console.log('Signed out successfully')
       })
       .catch(e => {
         alert('Signout failed: ' + e)
@@ -121,7 +121,10 @@ export class Storage {
       .then(url => {
         setAvatarURL(url)
       })
-      .catch(e => console.log(e))
+      .catch(e => {
+        console.log(e)
+        setAvatarURL(null)
+      })
     setCoverImageURL &&
       getDownloadURL(coverImageRef)
         .then(url => setCoverImageURL(url))

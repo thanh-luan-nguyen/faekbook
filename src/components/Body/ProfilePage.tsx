@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useRef, useState } from 'react'
 import { defaultAvatar, defaultCoverImage } from '../../utils/defaultPhotos'
 import styled from 'styled-components'
 import Context from '../../utils/Context'
-import { themes } from '../../utils/themes'
+import { themes } from '../../styles/themes'
 import { AiOutlineCamera, AiFillCamera } from 'react-icons/ai'
 import ColorThief from 'colorthief'
 import useWindowSize, { Size } from '../../utils/useWindowSize'
@@ -76,7 +76,9 @@ const ProfilePage: React.FC<any> = () => {
     Storage.updatePhotoURL(userID, setUserAvatarURL, setCoverImageURL)
     // * SET USER PHOTO/
     const fileRef = ref(storage, `users/${userID}/avatar`)
-    getDownloadURL(fileRef).then(url => setUserAvatarURL(url))
+    getDownloadURL(fileRef)
+      .then(url => setUserAvatarURL(url))
+      .catch(e => console.log(e))
     // * SET USER PHOTO END/
   }, [userID])
 

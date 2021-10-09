@@ -4,7 +4,8 @@ import styled from 'styled-components'
 import { db, DB } from '../../firebaseConfig'
 import Context from '../../utils/Context'
 import ShowMoreButton from '../../utils/ShowMoreButton'
-import { themes } from '../../utils/themes'
+import { themes } from '../../styles/themes'
+import AllUsers from './AllUsers'
 import Post from './Post'
 import WhatsOnYourMind from './WhatsOnYourMind'
 
@@ -28,7 +29,7 @@ const MainPage: React.FC<any> = () => {
     const postsRef = collection(db, 'posts')
     const q = query(postsRef, orderBy('date', 'desc'), limit(postsNumLimit))
     const unsub = DB.setSnapshotListener(q, setAllPosts)
-    console.log('main page renders')
+    console.log('MainPage renders')
     return () => {
       unsub()
     }
@@ -50,6 +51,7 @@ const MainPage: React.FC<any> = () => {
   return (
     <StyledDiv theme={toggleState.isDarkTheme ? themes.dark : themes.light}>
       {isUserSignedIn && <WhatsOnYourMind />}
+      <AllUsers />
       {renderPosts}
       {hasShownAllPosts || (
         <ShowMoreButton

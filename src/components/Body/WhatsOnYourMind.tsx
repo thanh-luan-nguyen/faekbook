@@ -1,7 +1,7 @@
 import { useContext } from 'react'
 import styled from 'styled-components'
 import Context from '../../utils/Context'
-import { themes } from '../../utils/themes'
+import { themes } from '../../styles/themes'
 import { defaultAvatar } from '../../utils/defaultPhotos'
 import { imageObjectSettings } from '../../styles/globalValues'
 

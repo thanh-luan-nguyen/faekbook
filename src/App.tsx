@@ -6,20 +6,13 @@ import Context from './utils/Context'
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
 import LogInModal from './components/Modals/LogInModal'
 import SignUpModal from './components/Modals/SignUpModal'
-import { themes } from './utils/themes'
+import { themes } from './styles/themes'
 import MainPage from './components/Body/MainPage'
 import ProfilePage from './components/Body/ProfilePage'
 import DropDownMenu from './components/Modals/DropDownMenu'
-import { auth, DB, db, Storage } from './firebaseConfig'
+import { auth, db, Storage } from './firebaseConfig'
 import { onAuthStateChanged } from '@firebase/auth'
-import {
-  collection,
-  doc,
-  getDoc,
-  onSnapshot,
-  query,
-  where,
-} from '@firebase/firestore'
+import { doc, getDoc } from '@firebase/firestore'
 import AddEditPostModal from './components/Modals/AddEditPostModal'
 
 const App: React.FC<any> = () => {
@@ -34,18 +27,17 @@ const App: React.FC<any> = () => {
     action: 'close modals',
   })
   //? CBE: Currently Being Editted /
-  const [CBEPost, setCBEPost] = useState<{id:string, photoID: string}>()
+  const [CBEPost, setCBEPost] = useState<{ id: string; photoID: string }>()
 
   useEffect(() => {
     onAuthStateChanged(auth, async user => {
       if (user) {
-        // set sign-in state
         setIsUserSignedIn(true)
         getDoc(doc(db, 'users', user.uid)).then(userSnap => {
-          // get current user specific info
+          //* get current user specific info
           const currentUserInfo = userSnap.data()
           setCurrentUserInfo(currentUserInfo)
-          // set theme
+          //* todo set theme
           currentUserInfo?.is_dark_theme
             ? dispatchToggle({ type: 'DARK_THEME' })
             : dispatchToggle({ type: 'LIGHT_THEME' })
@@ -53,16 +45,19 @@ const App: React.FC<any> = () => {
       } else {
         setIsUserSignedIn(false)
         setCurrentUserInfo(null)
+        setCUAvatarURL(null)
         dispatchToggle({ type: 'LIGHT_THEME' })
       }
     })
+    console.log('auth change render app')
   }, [])
   useEffect(() => {
     if (currentUserInfo) {
       const uid = currentUserInfo?.uid
       Storage.updatePhotoURL(uid, setCUAvatarURL)
     }
-  }, [currentUserInfo])
+    console.log('render app')
+  }, [currentUserInfo, isUserSignedIn])
 
   const renderModal = (dimBgModal: any) => {
     switch (dimBgModal.action) {

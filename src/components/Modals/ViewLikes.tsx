@@ -4,7 +4,7 @@ import styled from 'styled-components'
 import globalValues, { customizedScrollBar, imageObjectSettings } from '../../styles/globalValues'
 import {
   themes
-} from '../../utils/themes'
+} from '../../styles/themes'
 import { Link } from 'react-router-dom'
 import BlueBgLikeIcon from '../../utils/BlueBgLikeIcon'
 

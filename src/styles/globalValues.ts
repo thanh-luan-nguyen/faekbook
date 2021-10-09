@@ -42,9 +42,10 @@ export const imageObjectSettings = css`
 export const customizedScrollBar = css`
   ::-webkit-scrollbar {
     width: 0.3rem;
+    height: 0.5rem;
   }
   ::-webkit-scrollbar-thumb {
-    background: ${p => p.theme.font_lighter};
+    background: ${p => p.theme.font_lighter_1};
     border-radius: 10px;
   }
   ::-webkit-scrollbar-track {
@@ -52,13 +53,5 @@ export const customizedScrollBar = css`
     margin-block: 0.5rem;
   }
 `
-
-export const CreatePost_EditPostCSS = (
-  isDarkTheme: number,
-  textSmallSize: number,
-  postButtonActivated: number
-) => css`
-`
-
 
 export default globalValues

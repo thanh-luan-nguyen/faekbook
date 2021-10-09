@@ -5,7 +5,7 @@ import styled from 'styled-components'
 import { Authen } from '../../firebaseConfig'
 import globalValues from '../../styles/globalValues'
 import Context from '../../utils/Context'
-import { themes } from '../../utils/themes'
+import { themes } from '../../styles/themes'
 import TurnOffModalButton from '../../utils/TurnOffModalButton'
 
 export default function SignUpModal() {
@@ -14,15 +14,7 @@ export default function SignUpModal() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
-  // const history = useHistory()
-  // const returnToHomepage = () => {
-  //   history.push('/faekbook/')
-  // }
-  const {
-    toggleState,
-    dispatchDimBgModal,
-    // setCurrentUserInfoState,
-  } = useContext(Context)
+  const { toggleState, dispatchDimBgModal } = useContext(Context)
   const handleSignUp = () => {
     Authen.signUp(email, password, firstName, lastName, () =>
       dispatchDimBgModal({ type: 'NONE' })

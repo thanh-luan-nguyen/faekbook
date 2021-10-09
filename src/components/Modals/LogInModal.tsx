@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import { Authen } from '../../firebaseConfig'
 import globalValues from '../../styles/globalValues'
 import Context from '../../utils/Context'
-import { themes } from '../../utils/themes'
+import { themes } from '../../styles/themes'
 import TurnOffModalButton from '../../utils/TurnOffModalButton'
 
 export default function LogInModal() {

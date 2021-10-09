@@ -1,5 +1,5 @@
 import { css } from 'styled-components'
-import globalValues from '../styles/globalValues'
+import globalValues from './globalValues'
 
 export const themes = {
   light: {
@@ -13,6 +13,7 @@ export const themes = {
     // fb_icon: '#000',
     font: '#050505',
     font_lighter: '#65676b',
+    font_lighter_1: '#65676b80',
     // menu
     divider_clr: '#ced0d4',
     hover: '#d4d4d434',
@@ -27,6 +28,9 @@ export const themes = {
     avatar_pic_cam_icon_bgclr: '#e4e6eb',
 
     whats_on_ur_mind_bgclr: '#F0F2F5',
+
+    tooltip_bgclr: '#4e5052',
+    tooltip_fontclr: '#b0b3b8',
   },
   dark: {
     type: 'dark',
@@ -39,6 +43,7 @@ export const themes = {
     // fb_icon: '#fff',
     font: '#e4e6eb',
     font_lighter: '#b0b3b8',
+    font_lighter_1: '#b0b3b880',
     // menu
     divider_clr: '#3e4042',
     hover: '#ffffff45',
@@ -52,6 +57,8 @@ export const themes = {
     avatar_pic_cam_icon_bgclr: '#3a3b3c',
 
     whats_on_ur_mind_bgclr: '#3a3b3c',
+
+    tooltip_bgclr: '#e6e8ed',
+    tooltip_fontclr: '#65676b',
   },
 }
-

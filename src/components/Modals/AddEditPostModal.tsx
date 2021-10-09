@@ -1,13 +1,12 @@
 import { useContext, useEffect, useRef, useState } from 'react'
 import styled, { css } from 'styled-components'
 import globalValues, {
-  CreatePost_EditPostCSS,
   customizedScrollBar,
   imageObjectSettings,
 } from '../../styles/globalValues'
 import Context from '../../utils/Context'
 import TurnOffModalButton from '../../utils/TurnOffModalButton'
-import { themes } from '../../utils/themes'
+import { themes } from '../../styles/themes'
 import { db, storage } from '../../firebaseConfig'
 import {
   addDoc,

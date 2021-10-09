@@ -1,7 +1,7 @@
 import React, { useContext } from 'react'
 import styled from 'styled-components'
 import Context from './Context'
-import { themes } from './themes'
+import { themes } from '../styles/themes'
 
 const ShowMoreButton: React.FC<{ addMorePosts: any }> = ({ addMorePosts }) => {
   const { toggleState } = useContext(Context)
