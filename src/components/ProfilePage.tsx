@@ -1,13 +1,13 @@
-import React, { useContext, useEffect, useRef, useState } from 'react'
-import { defaultAvatar, defaultCoverImage } from '../../utils/defaultPhotos'
+import React, { useContext, useEffect, useState } from 'react'
+import { defaultAvatar, defaultCoverImage } from '../utils/defaultPhotos'
 import styled from 'styled-components'
-import Context from '../../utils/Context'
-import { themes } from '../../styles/themes'
+import Context from '../utils/Context'
+import { themes } from '../styles/themes'
 import { AiOutlineCamera, AiFillCamera } from 'react-icons/ai'
 import ColorThief from 'colorthief'
-import useWindowSize, { Size } from '../../utils/useWindowSize'
+import useWindowSize, { Size } from '../utils/useWindowSize'
 import WhatsOnYourMind from './WhatsOnYourMind'
-import { DB, db, Storage, storage } from '../../firebaseConfig'
+import { DB, db, Storage, storage } from '../firebaseConfig'
 import Post from './Post'
 import { AiOutlineEdit } from 'react-icons/ai'
 import {
@@ -16,7 +16,6 @@ import {
   getDoc,
   getDocs,
   limit,
-  onSnapshot,
   orderBy,
   query,
   where,
@@ -28,10 +27,8 @@ import {
   uploadBytes,
 } from '@firebase/storage'
 import { useParams } from 'react-router'
-import ShowMoreButton from '../../utils/ShowMoreButton'
-import CommentModal from '../Modals/CommentModal'
-import WriteAComment from './WriteAComment'
-import { imageObjectSettings } from '../../styles/globalValues'
+import ShowMoreButton from '../utils/ShowMoreButton'
+import { imageObjectSettings } from '../styles/globalValues'
 
 const ProfilePage: React.FC<any> = () => {
   const {
@@ -102,11 +99,12 @@ const ProfilePage: React.FC<any> = () => {
       key={p.id}
       postID={p.id}
       userID={p.userID}
-      full_name={p.fullname}
+      fullname={p.fullname}
       date={p.date}
       content={p.content}
       likes={p.likes}
       photo={p.photo}
+      comments={p.comments}
       is_profile_page={true}
     />
   ))
@@ -138,6 +136,7 @@ const ProfilePage: React.FC<any> = () => {
   const renderCoverPhoto = (
     <img
       src={userCoverImgURL ? userCover : defaultCover}
+      alt=''
       crossOrigin='anonymous'
       id='get-dominant-clr'
     />
@@ -167,7 +166,7 @@ const ProfilePage: React.FC<any> = () => {
     getDoc(doc(db, 'users', userID)).then((user: any) =>
       setBio(user.data().short_bio)
     )
-  }, [])
+  }, [userID])
 
   const updateBio = (e: any) => {
     if (e.keyCode === 13) {
@@ -176,7 +175,7 @@ const ProfilePage: React.FC<any> = () => {
       })
       setBio(isEdittingBioContent)
       setIsEdittingBio(false)
-    } else if (e.keyCode == 27) setIsEdittingBio(false)
+    } else if (e.keyCode === 27) setIsEdittingBio(false)
   }
 
   return (

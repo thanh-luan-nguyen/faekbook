@@ -1,27 +1,28 @@
 import { BsThreeDots } from 'react-icons/bs'
 import styled from 'styled-components'
 import { useContext, useEffect, useState } from 'react'
-import Context from '../../utils/Context'
-import { themes } from '../../styles/themes'
-import { defaultAvatar } from '../../utils/defaultPhotos'
+import Context from '../utils/Context'
+import { themes } from '../styles/themes'
+import { defaultAvatar } from '../utils/defaultPhotos'
 import { doc, getDoc, Timestamp } from '@firebase/firestore'
 import { format } from 'date-fns'
 import fromUnixTime from 'date-fns/fromUnixTime'
-import { DB, db, Storage } from '../../firebaseConfig'
-import BlueBgLikeIcon from '../../utils/BlueBgLikeIcon'
-import CommentModal from '../Modals/CommentModal'
+import { DB, db, Storage } from '../firebaseConfig'
+import BlueBgLikeIcon from '../utils/BlueBgLikeIcon'
+import CommentModal from './Modals/CommentModal'
 import WriteAComment from './WriteAComment'
 import { Link } from 'react-router-dom'
-import ViewLikes from '../Modals/ViewLikes'
-import { imageObjectSettings } from '../../styles/globalValues'
+import ViewLikes from './Modals/ViewLikes'
+import { imageObjectSettings } from '../styles/globalValues'
 
 const Comment: React.FC<{
   commenterUID: string
   content: string
+  postID: string
   likes: Array<string>
   date: Timestamp
   commentID: string
-}> = ({ commenterUID, content, date, likes, commentID }) => {
+}> = ({ commenterUID, content, date, likes, commentID, postID }) => {
   const { toggleState, currentUserInfo, isUserSignedIn } = useContext(Context)
   const [commentAvatar, setCommentAvatar] = useState<any>(null)
   const [userInfo, setUserInfo] = useState<any>(null)
@@ -102,6 +103,7 @@ const Comment: React.FC<{
                 {isShowingModal && (
                   <CommentModal
                     commentID={commentID}
+                    postID={postID}
                     setIsEditting={setIsEditting}
                     setIsShowingModal={setIsShowingModal}
                   />

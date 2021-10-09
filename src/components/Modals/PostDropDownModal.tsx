@@ -14,7 +14,8 @@ const PostDropDownModal: React.FC<{
   setIsShowingModal: any
   isShowingModal: boolean
   photoID: string
-}> = ({ postID, setIsShowingModal, isShowingModal, photoID }) => {
+  comments: Array<string>
+}> = ({ postID, setIsShowingModal, isShowingModal, photoID, comments }) => {
   const { toggleState, dispatchDimBgModal, setCBEPost } = useContext(Context)
   const modalNode = useRef(null)
 
@@ -27,37 +28,37 @@ const PostDropDownModal: React.FC<{
   const handleClick = (e: any) => {
     e.target === modalNode.current || setIsShowingModal(!isShowingModal)
   }
+
+  const handleEditPost = (e: any) => {
+    e.stopPropagation()
+    setIsShowingModal(false)
+    if (postID) {
+      setCBEPost({ id: postID, photoID: photoID })
+      dispatchDimBgModal({ type: 'EDIT_POST' })
+    }
+  }
+
+  const handleDeletePost = (e: any) => {
+    e.stopPropagation()
+    setIsShowingModal(false)
+    deleteDoc(doc(db, 'posts', postID))
+    comments.forEach(cmt => deleteDoc(doc(db, 'comments', cmt)))
+    photoID && deleteObject(ref(storage, `post_photos/${photoID}`))
+  }
+
   return (
     <StyledDiv
       ref={modalNode}
       theme={toggleState.isDarkTheme ? themes.dark : themes.light}
     >
-      <div
-        className='icon'
-        onClick={e => {
-          e.stopPropagation()
-          setIsShowingModal(false)
-          if (postID) {
-            setCBEPost({ id: postID, photoID: photoID })
-            dispatchDimBgModal({ type: 'EDIT_POST' })
-          }
-        }}
-      >
+      <div className='icon' onClick={handleEditPost}>
         <div className='icon-wrapper'>
           <FiEdit />
         </div>
         Edit Post
       </div>
 
-      <div
-        className='icon'
-        onClick={e => {
-          e.stopPropagation()
-          setIsShowingModal(false)
-          deleteDoc(doc(db, 'posts', postID))
-          photoID && deleteObject(ref(storage, `post_photos/${photoID}`))
-        }}
-      >
+      <div className='icon' onClick={handleDeletePost}>
         <div className='icon-wrapper'>
           <RiDeleteBin6Line />
         </div>

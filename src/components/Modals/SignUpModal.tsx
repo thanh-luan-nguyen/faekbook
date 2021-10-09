@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { useContext } from 'react'
-import { useHistory } from 'react-router'
 import styled from 'styled-components'
 import { Authen } from '../../firebaseConfig'
 import globalValues from '../../styles/globalValues'

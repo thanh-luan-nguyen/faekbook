@@ -1,11 +1,11 @@
 import { useContext, useEffect, useState } from 'react'
 import styled from 'styled-components'
-import Context from '../../utils/Context'
-import { themes } from '../../styles/themes'
-import { customizedScrollBar } from '../../styles/globalValues'
+import Context from '../utils/Context'
+import { themes } from '../styles/themes'
+import { customizedScrollBar } from '../styles/globalValues'
 import UserBubble from './UserBubble'
-import { collection, getDocs, query } from '@firebase/firestore'
-import { db, DB } from '../../firebaseConfig'
+import { collection, query } from '@firebase/firestore'
+import { db, DB } from '../firebaseConfig'
 
 export default function AllUsers() {
   const { toggleState, isUserSignedIn } = useContext(Context)

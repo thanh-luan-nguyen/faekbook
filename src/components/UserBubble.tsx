@@ -2,11 +2,11 @@ import { doc, getDoc } from '@firebase/firestore'
 import { useContext, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
-import { Storage, db } from '../../firebaseConfig'
-import { imageObjectSettings } from '../../styles/globalValues'
-import Context from '../../utils/Context'
-import { defaultAvatar } from '../../utils/defaultPhotos'
-import { themes } from '../../styles/themes'
+import { Storage, db } from '../firebaseConfig'
+import Context from '../utils/Context'
+import { defaultAvatar } from '../utils/defaultPhotos'
+import { themes } from '../styles/themes'
+import { imageObjectSettings } from '../styles/globalValues'
 
 const UserBubble: React.FC<{ userID: string }> = ({ userID }) => {
   const { toggleState } = useContext(Context)
@@ -18,7 +18,7 @@ const UserBubble: React.FC<{ userID: string }> = ({ userID }) => {
       const user = userSnap.data()
       setUserInfo(user)
     })
-  }, [])
+  }, [userID])
   return (
     <Link to={`/faekbook/${userID}`}>
       <StyledDiv theme={toggleState.isDarkTheme ? themes.dark : themes.light}>

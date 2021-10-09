@@ -1,47 +1,50 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import styled, { css } from 'styled-components'
 import { BsThreeDots } from 'react-icons/bs'
-import Context from '../../utils/Context'
-import { themes } from '../../styles/themes'
+import Context from '../utils/Context'
+import { themes } from '../styles/themes'
 import { AiFillLike } from 'react-icons/ai'
 import { FaComment, FaCommentSlash } from 'react-icons/fa'
-import globalValues, { imageObjectSettings } from '../../styles/globalValues'
+import globalValues, { imageObjectSettings } from '../styles/globalValues'
 import { format, fromUnixTime } from 'date-fns'
-import BlueBgLikeIcon from '../../utils/BlueBgLikeIcon'
-import { CommentType } from '../../interface'
-import { defaultAvatar } from '../../utils/defaultPhotos'
+import BlueBgLikeIcon from '../utils/BlueBgLikeIcon'
+import { CommentType, PostType } from '../types/types'
+import { defaultAvatar } from '../utils/defaultPhotos'
 import Comment from './Comment'
 import {
   addDoc,
   collection,
+  doc,
+  getDoc,
   orderBy,
   query,
   Timestamp,
+  updateDoc,
   where,
 } from '@firebase/firestore'
-import { DB, db, Storage } from '../../firebaseConfig'
+import { DB, db, Storage } from '../firebaseConfig'
 import { Link } from 'react-router-dom'
-import PostModal from '../Modals/PostDropDownModal'
-import ViewLikes from '../Modals/ViewLikes'
+import PostDropDownModal from './Modals/PostDropDownModal'
+import ViewLikes from './Modals/ViewLikes'
 import ColorThief from 'colorthief'
 
-const Post: React.FC<{
-  userID: string
-  postID: string
-  full_name: string
-  date: Timestamp
-  content: string
-  likes: Array<string>
-  photo: { url: string; id: string }
-  is_profile_page?: boolean
-}> = ({ full_name, userID, postID, date, content, likes, photo }) => {
+const Post: React.FC<PostType> = ({
+  fullname,
+  userID,
+  postID,
+  date,
+  content,
+  likes,
+  photo,
+  comments,
+}) => {
   const { currentUserInfo, toggleState, isUserSignedIn, CUAvatarURL } =
     useContext(Context)
   const [isLikedByCurrentUser, setIsLiked] = useState<boolean>()
   const [postAvatarURL, setPostAvatar] = useState<any>(null)
   const [isShowingComments, setIsShowingComments] = useState<boolean>()
   const [commentInput, setCommentInput] = useState('')
-  const [comments, setComments] = useState<any>()
+  const [postCmts, setPostCmts] = useState<any>()
   const [isShowingModal, setIsShowingModal] = useState<boolean>()
   const threeDotsNode = useRef(null)
   const [isShowingViewLikes, setIsShowingViewLikes] = useState<boolean>(false)
@@ -63,9 +66,9 @@ const Post: React.FC<{
 
   useEffect(() => {
     //* set comments
-    const postsRef = collection(db, 'comments')
-    const q = query(postsRef, where('postID', '==', postID), orderBy('date'))
-    const unsub = DB.setSnapshotListener(q, setComments)
+    const cmtsRef = collection(db, 'comments')
+    const q = query(cmtsRef, where('postID', '==', postID), orderBy('date'))
+    const unsub = DB.setSnapshotListener(q, setPostCmts)
     return () => {
       unsub()
     }
@@ -74,20 +77,30 @@ const Post: React.FC<{
   const postComment = (e: any) => {
     e.preventDefault()
     if (commentInput.length > 0) {
-      const newComment: CommentType = {
-        postID: postID,
-        commenterID: currentUserInfo?.uid,
-        date: Timestamp.fromDate(new Date()),
-        content: commentInput,
-        likes: [],
+      if (postID) {
+        const newComment: CommentType = {
+          postID: postID,
+          commenterID: currentUserInfo?.uid,
+          date: Timestamp.fromDate(new Date()),
+          content: commentInput,
+          likes: [],
+        }
+        addDoc(collection(db, 'comments'), newComment).then(cmt => {
+          getDoc(doc(db, 'posts', postID)).then(post => {
+            const comments = post.data()?.comments
+            updateDoc(doc(db, 'posts', postID), {
+              comments: [...comments, cmt.id],
+            })
+          })
+        })
       }
-      addDoc(collection(db, 'comments'), newComment)
       setCommentInput('')
     }
   }
-  const renderComments = comments?.map((cmt: any) => (
+  const renderComments = postCmts?.map((cmt: any) => (
     <Comment
       key={cmt.id}
+      postID={cmt.postID}
       commentID={cmt.id}
       commenterUID={cmt.commenterID}
       content={cmt.content}
@@ -108,13 +121,13 @@ const Post: React.FC<{
         }
       }
     }
-  }, [])
+  }, [photo.url])
   const googleProxyURL =
     'https://images1-focus-opensocial.googleusercontent.com/gadgets/proxy?container=focus&refresh=2592000&url='
   const renderPhoto = (
     <img
       src={googleProxyURL + encodeURIComponent(photo.url)}
-      alt='post photo'
+      alt='post-avatar'
       className='post-photo'
       ref={imgRef}
       crossOrigin='anonymous'
@@ -126,7 +139,7 @@ const Post: React.FC<{
       theme={toggleState.isDarkTheme ? themes.dark : themes.light}
       isDarkTheme={toggleState.isDarkTheme ? 1 : 0}
       isLikedByCurrentUser={isLikedByCurrentUser ? 1 : 0}
-      hasComments={comments?.length > 0 ? 1 : 0}
+      hasComments={postCmts?.length > 0 ? 1 : 0}
       hasLikes={likes?.length > 0 ? 1 : 0}
       isUserSignedIn={isUserSignedIn ? 1 : 0}
       isShowingComments={isShowingComments ? 1 : 0}
@@ -152,7 +165,7 @@ const Post: React.FC<{
         </Link>
         <div className='info'>
           <div className='name'>
-            <Link to={`/faekbook/${userID}`}>{full_name}</Link>
+            <Link to={`/faekbook/${userID}`}>{fullname}</Link>
           </div>
           {`${format(fromUnixTime(date.seconds), 'yyyy, MMM d')} at ${format(
             fromUnixTime(date.seconds),
@@ -161,12 +174,13 @@ const Post: React.FC<{
         </div>
       </div>
 
-      {isShowingModal && (
-        <PostModal
+      {isShowingModal && postID && (
+        <PostDropDownModal
           postID={postID}
           isShowingModal={isShowingModal}
           setIsShowingModal={setIsShowingModal}
           photoID={photo.id}
+          comments={comments}
         />
       )}
 
@@ -217,7 +231,9 @@ const Post: React.FC<{
         <div
           className='like'
           onClick={() =>
-            isUserSignedIn && DB.like(currentUserInfo?.uid, postID, 'posts')
+            isUserSignedIn &&
+            postID &&
+            DB.like(currentUserInfo?.uid, postID, 'posts')
           }
         >
           <AiFillLike className='icon' />

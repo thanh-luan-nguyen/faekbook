@@ -1,10 +1,11 @@
 import { useContext, useEffect, useRef, useState } from 'react'
 import Context from '../../utils/Context'
 import styled from 'styled-components'
-import globalValues, { customizedScrollBar, imageObjectSettings } from '../../styles/globalValues'
-import {
-  themes
-} from '../../styles/themes'
+import globalValues, {
+  customizedScrollBar,
+  imageObjectSettings,
+} from '../../styles/globalValues'
+import { themes } from '../../styles/themes'
 import { Link } from 'react-router-dom'
 import BlueBgLikeIcon from '../../utils/BlueBgLikeIcon'
 
@@ -56,7 +57,6 @@ const StyledDiv = styled('div')<{ isComment: number }>`
   display: flex;
   flex-flow: column;
   z-index: 100;
-  /* z-index: ${p => p.isComment && '100'}; */
   left: ${p => (p.isComment ? '3.5rem' : '4rem')};
   width: ${p => (p.isComment ? '18rem' : '25rem')};
   padding: 0.5rem;

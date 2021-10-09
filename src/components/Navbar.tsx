@@ -4,7 +4,6 @@ import { FaFacebook } from 'react-icons/fa'
 import { MdArrowDropDown } from 'react-icons/md'
 import Context from '../utils/Context'
 import React, { useContext } from 'react'
-// import DropDownMenu from './Modals/DropDownMenu'
 import { themes } from '../styles/themes'
 import { Link } from 'react-router-dom'
 import { defaultAvatar } from '../utils/defaultPhotos'
@@ -65,7 +64,6 @@ const Navbar: React.FC<any> = () => {
           <MdArrowDropDown />
         </div>
       </div>
-      {/* {menuVisibility && <DropDownMenu />} */}
     </StyledNav>
   )
 }

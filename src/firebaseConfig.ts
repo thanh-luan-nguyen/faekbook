@@ -1,4 +1,4 @@
-import { DocumentData, getDoc, onSnapshot } from '@firebase/firestore'
+import { getDoc, onSnapshot } from '@firebase/firestore'
 import { initializeApp } from 'firebase/app'
 import { doc, getFirestore, setDoc, updateDoc } from 'firebase/firestore'
 import {
@@ -8,7 +8,7 @@ import {
   signOut,
 } from 'firebase/auth'
 import { getStorage, ref, getDownloadURL } from 'firebase/storage'
-import { User } from './interface'
+import { PostType, User } from './types/types'
 
 const app = initializeApp({
   apiKey: 'AIzaSyAowcCuiyILtMdMP96n-RzUh2QVKvrN4OQ',
@@ -81,9 +81,9 @@ export class DB {
   }
   static setSnapshotListener(q: any, setStateCallback: any) {
     return onSnapshot(q, (docs: any) => {
-      const docsArray: DocumentData[] = []
-      docs.forEach((p: any) => docsArray.push({ ...p.data(), id: p.id }))
-      setStateCallback(docsArray)
+      const posts: Array<PostType> = []
+      docs.forEach((p: any) => posts.push({ ...p.data(), id: p.id }))
+      setStateCallback(posts)
     })
   }
   static like(liker: string, liked: string, collection: string) {

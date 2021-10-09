@@ -1,9 +1,9 @@
 import { doc, updateDoc } from '@firebase/firestore'
 import React, { useContext, useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { db } from '../../firebaseConfig'
-import Context from '../../utils/Context'
-import { themes } from '../../styles/themes'
+import { db } from '../firebaseConfig'
+import Context from '../utils/Context'
+import { themes } from '../styles/themes'
 
 const WriteAComment: React.FC<{
   commentID?: string

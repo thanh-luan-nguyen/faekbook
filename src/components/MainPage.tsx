@@ -1,10 +1,10 @@
 import { collection, getDocs, limit, orderBy, query } from '@firebase/firestore'
 import { useContext, useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { db, DB } from '../../firebaseConfig'
-import Context from '../../utils/Context'
-import ShowMoreButton from '../../utils/ShowMoreButton'
-import { themes } from '../../styles/themes'
+import { db, DB } from '../firebaseConfig'
+import Context from '../utils/Context'
+import ShowMoreButton from '../utils/ShowMoreButton'
+import { themes } from '../styles/themes'
 import AllUsers from './AllUsers'
 import Post from './Post'
 import WhatsOnYourMind from './WhatsOnYourMind'
@@ -39,11 +39,12 @@ const MainPage: React.FC<any> = () => {
       key={p.id}
       postID={p.id}
       userID={p.userID}
-      full_name={p.fullname}
+      fullname={p.fullname}
       date={p.date}
       content={p.content}
       likes={p.likes}
       photo={p.photo}
+      comments={p.comments}
     />
   ))
   //! RENDER POSTS END*/

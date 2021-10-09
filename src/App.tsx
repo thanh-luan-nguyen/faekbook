@@ -7,13 +7,13 @@ import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
 import LogInModal from './components/Modals/LogInModal'
 import SignUpModal from './components/Modals/SignUpModal'
 import { themes } from './styles/themes'
-import MainPage from './components/Body/MainPage'
-import ProfilePage from './components/Body/ProfilePage'
 import DropDownMenu from './components/Modals/DropDownMenu'
 import { auth, db, Storage } from './firebaseConfig'
 import { onAuthStateChanged } from '@firebase/auth'
-import { doc, getDoc } from '@firebase/firestore'
+import { collection, deleteDoc, doc, getDoc, where } from '@firebase/firestore'
 import AddEditPostModal from './components/Modals/AddEditPostModal'
+import MainPage from './components/MainPage'
+import ProfilePage from './components/ProfilePage'
 
 const App: React.FC<any> = () => {
   const [isUserSignedIn, setIsUserSignedIn] = useState<boolean>()
@@ -28,6 +28,13 @@ const App: React.FC<any> = () => {
   })
   //? CBE: Currently Being Editted /
   const [CBEPost, setCBEPost] = useState<{ id: string; photoID: string }>()
+
+  useEffect(() => {
+    const q =
+      (collection(db, 'comments'),
+      where('postID', '==', 'Qbm6Km4bcXEqO8vNhwmP'))
+    deleteDoc(doc(db, 'comments', 'A0F5WOfUvEXDquodTE1b'))
+  }, [])
 
   useEffect(() => {
     onAuthStateChanged(auth, async user => {

@@ -18,7 +18,6 @@ import {
 } from '@firebase/firestore'
 import { defaultAvatar } from '../../utils/defaultPhotos'
 import { IoClose, IoImages } from 'react-icons/io5'
-import { PostType } from '../../interface'
 import { v4 as uuid } from 'uuid'
 import {
   deleteObject,
@@ -26,6 +25,7 @@ import {
   ref,
   uploadBytes,
 } from '@firebase/storage'
+import { PostType } from '../../types/types'
 
 export default function AddEditPostModal({
   CBEPost,
@@ -91,8 +91,8 @@ export default function AddEditPostModal({
   // * ADD POST /
   const addPostToDB = (url = '', id = '') => {
     const post: PostType = {
-      userID: currentUserInfo.uid,
       fullname: currentUserInfo.first_name + ' ' + currentUserInfo.last_name,
+      userID: currentUserInfo.uid,
       date: Timestamp.fromDate(new Date()),
       content,
       photo: { url, id },

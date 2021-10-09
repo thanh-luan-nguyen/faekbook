@@ -1,9 +1,9 @@
 import { useContext } from 'react'
 import styled from 'styled-components'
-import Context from '../../utils/Context'
-import { themes } from '../../styles/themes'
-import { defaultAvatar } from '../../utils/defaultPhotos'
-import { imageObjectSettings } from '../../styles/globalValues'
+import Context from '../utils/Context'
+import { themes } from '../styles/themes'
+import { defaultAvatar } from '../utils/defaultPhotos'
+import { imageObjectSettings } from '../styles/globalValues'
 
 export default function WhatsOnYourMind() {
   const { toggleState, dispatchDimBgModal, isUserSignedIn, CUAvatarURL } =
@@ -36,7 +36,7 @@ const StyledSection = styled.section`
     height: 4rem;
     width: 4rem;
     background: ${p => p.theme.theme_toggler_bgclr};
-    ${imageObjectSettings}
+    ${imageObjectSettings};
   }
   div {
     color: ${p => p.theme.font_lighter};

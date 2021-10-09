@@ -1,6 +1,3 @@
-import { css } from 'styled-components'
-import globalValues from './globalValues'
-
 export const themes = {
   light: {
     type: 'light',

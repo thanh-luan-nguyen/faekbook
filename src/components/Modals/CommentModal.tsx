@@ -5,14 +5,15 @@ import globalValues from '../../styles/globalValues'
 import { themes } from '../../styles/themes'
 import { RiDeleteBin6Line } from 'react-icons/ri'
 import { FiEdit } from 'react-icons/fi'
-import { deleteDoc, doc } from '@firebase/firestore'
+import { deleteDoc, doc, getDoc, updateDoc } from '@firebase/firestore'
 import { db } from '../../firebaseConfig'
 
 const CommentModal: React.FC<{
   commentID: string
   setIsEditting: any
+  postID: string
   setIsShowingModal?: any
-}> = ({ commentID, setIsEditting, setIsShowingModal }) => {
+}> = ({ commentID, setIsEditting, setIsShowingModal, postID }) => {
   const { toggleState } = useContext(Context)
   const modalNode = useRef(null)
 
@@ -25,6 +26,18 @@ const CommentModal: React.FC<{
   const handleClick = (e: any) => {
     e.target === modalNode.current || setIsShowingModal(false)
   }
+  const handleDeleteCmt = (e: any) => {
+    e.stopPropagation()
+    setIsEditting(false)
+    deleteDoc(doc(db, 'comments', commentID))
+    getDoc(doc(db, 'posts', postID)).then(post => {
+      const comments = post.data()?.comments
+      updateDoc(doc(db, 'posts', postID), {
+        comments: comments.filter((cmt: string) => cmt !== commentID),
+      })
+    })
+  }
+
   return (
     <StyledDiv
       ref={modalNode}
@@ -44,14 +57,7 @@ const CommentModal: React.FC<{
         Edit
       </div>
 
-      <div
-        className='icon'
-        onClick={e => {
-          e.stopPropagation()
-          setIsEditting(false)
-          deleteDoc(doc(db, 'comments', commentID))
-        }}
-      >
+      <div className='icon' onClick={handleDeleteCmt}>
         <div className='icon-wrapper'>
           <RiDeleteBin6Line />
         </div>
