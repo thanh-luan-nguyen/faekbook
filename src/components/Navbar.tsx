@@ -5,7 +5,7 @@ import { MdArrowDropDown } from 'react-icons/md'
 import Context from '../utils/Context'
 import React, { useContext } from 'react'
 // import DropDownMenu from './Modals/DropDownMenu'
-import {  themes } from '../styles/themes'
+import { themes } from '../styles/themes'
 import { Link } from 'react-router-dom'
 import { defaultAvatar } from '../utils/defaultPhotos'
 
@@ -159,7 +159,7 @@ const StyledNav = styled('nav')<{ menuVisibility: number }>`
         padding-right: 0.6rem;
         img {
           height: calc(${globalValues.navbar_elements_height} - 0.5rem);
-
+          width: calc(${globalValues.navbar_elements_height} - 0.5rem);
           background: ${p => p.theme.theme_toggler_bgclr};
           ${imageObjectSettings}
         }
