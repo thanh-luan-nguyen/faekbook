@@ -127,6 +127,7 @@ const StyledDiv = styled('div')<{ isUserSignedIn: number }>`
       opacity: ${p => (p.isUserSignedIn ? '100%' : '30%')};
       img {
         height: 5rem;
+        width: 5rem;
         background: ${p => p.theme.theme_toggler_bgclr};
         ${imageObjectSettings}
       }
