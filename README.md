@@ -1,4 +1,4 @@
-# 🌱 faekbook
+# 🌱 faekbook - a Facebook clone
 
 ### 🤩 This is my biggest project so far: a Facebook clone
 
