@@ -20,7 +20,6 @@ const GlobalStyle = createGlobalStyle`
     body {
       font-size: 1em;
       font-family: 'Roboto', sans-serif;
-      user-select: none;
     }
     img {
       border-radius: 50%;
