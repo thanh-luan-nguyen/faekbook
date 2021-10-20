@@ -26,10 +26,7 @@
 - Firestoreデータベース
 - Firebaseのストレージ
 
-👉 [Live Demo](https://thanh-luan-nguyen.github.io/faekbook/)
-
-⭐ **You can log in by using one of these ready-made pairs of emails and passwords**
-**以下のメールID・パスワードのペアのいずれかを使ってログインして体験してください！**
+### ⭐ 以下のメール・パスワードのペアのいずれかを使ってログインして体験してください！You can log in by using one of these ready-made pairs of email IDs and passwords
 
 Login Email | Password |
 | ----------- | ---------|
@@ -42,5 +39,7 @@ Login Email | Password |
 | tonystark@gmail.com  | tonytony  |
 |  hiep@gmail.com |  hiephiep  |
 | long@gmail.com  | longlong  |
+
+### 👉 [Live Demo](https://thanh-luan-nguyen.github.io/faekbook/)
 
 <img src="https://github.com/thanh-luan-nguyen/thanh-luan-nguyen/blob/main/project_preview_gifs/theOdinProject/faekbook.gif" width=1000/>
