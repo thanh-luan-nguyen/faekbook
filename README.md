@@ -28,4 +28,19 @@
 
 👉 [Live Demo](https://thanh-luan-nguyen.github.io/faekbook/)
 
+⭐ **You can log in by using one of these ready-made pairs of emails and passwords**
+**以下のメールID・パスワードのペアのいずれかを使ってログインして体験してください！**
+
+Login Email | Password |
+| ----------- | ---------|
+| peterquill@gmail.com  | peterquill |
+| buckybarnes@gmail.com  | buckybucky  |
+| stephenstrange@gmail.com  | stephenstephen  |
+|  brucebanner@gmail.com | brucebruce  |
+| thorodinson@gmail.com  | thorthor  |
+|  steverogers@gmail.com |  stevesteve |
+| tonystark@gmail.com  | tonytony  |
+|  hiep@gmail.com |  hiephiep  |
+| long@gmail.com  | longlong  |
+
 <img src="https://github.com/thanh-luan-nguyen/thanh-luan-nguyen/blob/main/project_preview_gifs/theOdinProject/faekbook.gif" width=1000/>
